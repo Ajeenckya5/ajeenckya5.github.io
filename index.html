@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ajeenckya Mahadik | ajeenckyam.com</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="icon" type="image/png" href="assets/profile.jpg" />
+    <meta name="description" content="Portfolio of Ajeenckya Mahadik (Aj) — AI/ML and optimization engineer. Projects in probabilistic forecasting, stochastic routing, and computer vision." />
+</head>
+<body>
+    <!-- Navigation -->
+    <header class="site-header">
+        <div class="logo">ajeenckyam<span class="accent">.com</span></div>
+        <nav class="nav">
+            <ul>
+                <li><a href="#hero">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#resume">Resume</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+            ☰
+        </button>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero">
+        <div class="hero-text">
+            <p class="hero-kicker">AI / ML • Optimization • Probabilistic Modeling</p>
+            <h1>Hi, I'm <span class="accent">Ajeenckya Mahadik</span> (Aj)</h1>
+            <p class="hero-subtitle">
+                I design AI and optimization systems — from probabilistic forecasting
+                and stochastic routing to deep learning for vision — and turn them into
+                clean, reproducible pipelines.
+            </p>
+            <div class="hero-actions">
+                <a href="#projects" class="btn primary">View Projects</a>
+                <a href="files/resume.pdf" class="btn ghost" target="_blank">Download Resume</a>
+            </div>
+            <div class="hero-links">
+                <a href="https://github.com/Ajeenckya5" target="_blank">GitHub</a>
+                <span>•</span>
+                <a href="https://www.linkedin.com/in/ajeenckya-mahadik" target="_blank">LinkedIn</a>
+            </div>
+        </div>
+        <div class="hero-image">
+            <div class="profile-frame">
+                <!-- Your photo goes here as assets/profile.jpg -->
+                <img src="assets/profile.jpg" alt="Portrait of Ajeenckya Mahadik" class="profile-pic" />
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="section">
+        <div class="section-header">
+            <h2>About</h2>
+            <p>Who I am and what I work on.</p>
+        </div>
+        <div class="about-grid">
+            <div>
+                <p>
+                    I'm a Masters student in Industrial &amp; Systems Engineering at the
+                    University of Wisconsin–Madison with a focus on AI/ML and optimization.
+                    I enjoy building systems that combine machine learning, probabilistic
+                    modeling, and mathematical optimization to solve real-world decision problems.
+                </p>
+                <p>
+                    My recent work spans probabilistic forecasting pipelines, stochastic
+                    routing with scenario-based rerouting, and deep learning for emotion
+                    recognition. I care about model calibration, interpretability, and
+                    engineering models so they can actually be deployed.
+                </p>
+            </div>
+            <div>
+                <h3>Skills</h3>
+                <ul class="pill-list">
+                    <li>Python</li>
+                    <li>PyTorch</li>
+                    <li>Transformers &amp; LLMs</li>
+                    <li>Bayesian ML</li>
+                    <li>Stochastic Optimization</li>
+                    <li>Mixed-Integer Programming</li>
+                    <li>Computer Vision</li>
+                    <li>Pandas / NumPy / SQL</li>
+                    <li>Gurobi</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="section section-alt">
+        <div class="section-header">
+            <h2>Projects</h2>
+            <p>Selected work in AI/ML, optimization, and analytics.</p>
+        </div>
+
+        <div class="projects-grid">
+            <!-- PROJECT: Probabilistic AI System -->
+            <article class="project-card">
+                <h3>Probabilistic AI System for Outcome Simulation</h3>
+                <p>
+                    Built a probabilistic forecasting pipeline that unifies LLM-derived
+                    event intelligence, weather signals, engineered features, and
+                    historical data. Upgraded the baseline neural network to a Bayesian
+                    architecture with Monte Carlo sampling, improving probability
+                    calibration and overall prediction accuracy.
+                </p>
+                <div class="project-tags">
+                    <span>Python</span>
+                    <span>PyTorch</span>
+                    <span>Bayesian Inference</span>
+                    <span>LLMs</span>
+                </div>
+                <div class="project-links">
+                    <a href="https://github.com/Ajeenckya5" target="_blank">GitHub (coming soon)</a>
+                </div>
+            </article>
+
+            <!-- PROJECT: Stochastic Routing Optimization -->
+            <article class="project-card">
+                <h3>Stochastic Routing Optimization for Bread Delivery</h3>
+                <p>
+                    Two-stage stochastic TSP with time windows and random arc weights
+                    for a bakery delivery system. The model plans a baseline route and
+                    then adapts to real-world disruptions such as traffic or road
+                    closures using scenario-based rerouting and penalty structures for
+                    early/late deliveries.
+                </p>
+                <div class="project-tags">
+                    <span>Gurobi</span>
+                    <span>Stochastic Programming</span>
+                    <span>Routing</span>
+                    <span>Python</span>
+                </div>
+                <div class="project-links">
+                    <a href="files/stochastic-routing-report.pdf" target="_blank">
+                        Project Report (PDF)
+                    </a>
+                </div>
+            </article>
+
+            <!-- PROJECT: Facial Expression Detection -->
+            <article class="project-card">
+                <h3>Facial Expression Detection with ResNet50–ViT Hybrid</h3>
+                <p>
+                    Designed a hybrid ResNet50 + Vision Transformer pipeline on a large
+                    facial expression dataset (&gt;300K images), using transfer learning
+                    and k-fold evaluation to robustly classify emotions from low-resolution
+                    grayscale inputs, outperforming CNN baselines.
+                </p>
+                <div class="project-tags">
+                    <span>Computer Vision</span>
+                    <span>PyTorch</span>
+                    <span>ResNet</span>
+                    <span>ViT</span>
+                </div>
+                <div class="project-links">
+                    <a href="https://github.com/Ajeenckya5" target="_blank">GitHub (coming soon)</a>
+                </div>
+            </article>
+
+            <!-- TEMPLATE: add more projects here if you want -->
+            <!--
+            <article class="project-card">
+                <h3>Project Title</h3>
+                <p>
+                    Short description of what the project does and what impact it had.
+                </p>
+                <div class="project-tags">
+                    <span>Tech 1</span>
+                    <span>Tech 2</span>
+                </div>
+                <div class="project-links">
+                    <a href="https://github.com/..." target="_blank">GitHub Repo</a>
+                    <a href="files/your-file.pdf" target="_blank">Report / Slides</a>
+                </div>
+            </article>
+            -->
+        </div>
+    </section>
+
+    <!-- Resume Section -->
+    <section id="resume" class="section">
+        <div class="section-header">
+            <h2>Resume</h2>
+            <p>Download my latest resume or view it in your browser.</p>
+        </div>
+        <div class="resume-block">
+            <p>
+                My resume covers my work in probabilistic AI systems, stochastic routing,
+                and deep learning, along with experience at FIAT India Automobiles and
+                Powertrac Tractors.
+            </p>
+            <a href="files/resume.pdf" class="btn primary" target="_blank">
+                Open Resume (PDF)
+            </a>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="section section-alt">
+        <div class="section-header">
+            <h2>Contact</h2>
+            <p>Best ways to reach me.</p>
+        </div>
+        <div class="contact-grid">
+            <div>
+                <h3>Email</h3>
+                <p>
+                    <a href="mailto:avmahadik@wisc.edu">avmahadik@wisc.edu</a>
+                </p>
+            </div>
+            <div>
+                <h3>GitHub</h3>
+                <p>
+                    <a href="https://github.com/Ajeenckya5" target="_blank">
+                        github.com/Ajeenckya5
+                    </a>
+                </p>
+            </div>
+            <div>
+                <h3>LinkedIn</h3>
+                <p>
+                    <a href="https://www.linkedin.com/in/ajeenckya-mahadik" target="_blank">
+                        linkedin.com/in/ajeenckya-mahadik
+                    </a>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <p>© <span id="year"></span> Ajeenckya Mahadik — ajeenckyam.com</p>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
+
