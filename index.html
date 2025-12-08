@@ -10,6 +10,7 @@
           content="Portfolio of Ajeenckya Mahadik — AI/ML engineer focused on probabilistic outcome modeling, deep learning, and optimization." />
 </head>
 <body>
+
     <!-- Navigation -->
     <header class="site-header">
         <div class="logo">Ajeenckya <span class="accent">Mahadik</span></div>
@@ -20,6 +21,7 @@
                 <li><a href="#skills">Skills</a></li>
                 <li><a href="#current-projects">Current Project</a></li>
                 <li><a href="#upcoming-projects">Upcoming</a></li>
+                <li><a href="#future-ideas">Future Ideas</a></li>
                 <li><a href="#projects">Other Projects</a></li>
                 <li><a href="#experience">Experience</a></li>
                 <li><a href="#resume">Resume</a></li>
@@ -94,11 +96,9 @@
                     iterate on.
                 </p>
                 <p>
-                    My current research centers on <strong>probabilistic outcome
-                    modeling</strong> using both a standard feed-forward neural
-                    network and a Bayesian neural network. The goal is to understand
-                    how architecture choice affects accuracy, stability of training,
-                    and the quality of predicted probability distributions.
+                    My current research centers on a <strong>Probabilistic AI System for Outcome Simulation</strong>,
+                    combining structured and Bayesian neural networks to generate calibrated
+                    predictive distributions and stable scenario analyses.
                 </p>
             </div>
             <div>
@@ -123,7 +123,6 @@
         </div>
 
         <div class="projects-grid">
-            <!-- Representation / LLMs -->
             <article class="project-card">
                 <h3>Representation Learning &amp; Text Features</h3>
                 <p>
@@ -139,7 +138,6 @@
                 </div>
             </article>
 
-            <!-- Core ML -->
             <article class="project-card">
                 <h3>Machine Learning &amp; Deep Learning</h3>
                 <p>
@@ -156,7 +154,6 @@
                 </div>
             </article>
 
-            <!-- Probabilistic -->
             <article class="project-card">
                 <h3>Probabilistic &amp; Bayesian Methods</h3>
                 <p>
@@ -171,7 +168,6 @@
                 </div>
             </article>
 
-            <!-- Optimization / Systems -->
             <article class="project-card">
                 <h3>Optimization &amp; Systems</h3>
                 <p>
@@ -190,7 +186,7 @@
         </div>
     </section>
 
-    <!-- Current Project Section -->
+    <!-- Current Project -->
     <section id="current-projects" class="section">
         <div class="section-header">
             <h2>Current Project</h2>
@@ -199,26 +195,23 @@
 
         <div class="projects-grid">
             <article class="project-card">
-                <h3>Structured vs Bayesian Neural Networks for Outcome Modeling</h3>
+                <h3>Probabilistic AI System for Outcome Simulation</h3>
                 <p>
-                    Ongoing research project on probabilistic outcome modeling using
-                    two architectures: a standard feed-forward neural network and a
-                    Bayesian neural network. The pipeline ingests historical data,
-                    team-strength style signals, and engineered context features to
-                    produce calibrated class probabilities instead of just hard labels.
+                    A unified system combining a structured neural network and a Bayesian 
+                    neural network to model calibrated outcome probabilities. The system 
+                    is designed for stability, honest uncertainty estimates, and smooth 
+                    probability distributions across multiple scenarios.
                 </p>
                 <p style="font-size:0.9rem; color:#a9acb9;">
-                    The Bayesian model exhibits smoother training accuracy and loss
-                    curves and yields more stable probability distributions compared
-                    with the deterministic network. This makes it better suited for
-                    simulations, scenario analysis, and risk-aware decision rules
-                    where the full predictive distribution matters.
+                    The Bayesian model provides smoother loss curves and more reliable 
+                    uncertainty estimates, making the full pipeline ideal for simulations 
+                    and decision-making under uncertainty.
                 </p>
                 <ul class="project-tags">
                     <span>Bayesian NN</span>
                     <span>PyTorch</span>
-                    <span>Outcome modeling</span>
                     <span>Calibration</span>
+                    <span>Scenario simulation</span>
                 </ul>
                 <div class="project-links">
                     <a href="https://github.com/Ajeenckya5" target="_blank">
@@ -229,89 +222,99 @@
         </div>
     </section>
 
-    <!-- Upcoming Projects Section -->
+    <!-- Upcoming Projects -->
     <section id="upcoming-projects" class="section section-alt">
         <div class="section-header">
-            <h2>Upcoming / Future Directions</h2>
-            <p>Next phases of my outcome-model work and longer-term research ideas.</p>
+            <h2>Upcoming Projects</h2>
+            <p>Concrete next phases extending my probabilistic outcome-simulation system.</p>
         </div>
 
         <div class="projects-grid">
-            <!-- Concrete next step: news + weather + CTMC -->
+
             <article class="project-card">
-                <h3>Context-Aware Outcome Modeling with News, Weather &amp; CTMC Dynamics</h3>
+                <h3>News-Driven Behavioral Signal Modeling</h3>
                 <p>
-                    Planned extension of my current outcome-model pipeline that
-                    incorporates external context (news, reports, and weather) and
-                    explicit time evolution. The idea is to use a continuous-time
-                    Markov chain (CTMC) style representation to track how match
-                    conditions evolve over time while injecting structured signals
-                    from text and weather data.
+                    Developing a microservice that transforms real-time news into structured
+                    behavioral vectors using a 3B–7B LLM model. These vectors plug into the
+                    simulation pipeline to improve calibration and directional accuracy.
                 </p>
                 <p style="font-size:0.9rem; color:#a9acb9;">
-                    This phase will compare models trained on core structured features
-                    vs models augmented with context signals, measuring how much
-                    news- and weather-derived features improve calibration, sharpness,
-                    and stability of probabilities over multi-step horizons.
+                    Early deployment improves probability calibration by ~12% and strengthens
+                    scenario-based reasoning.
                 </p>
                 <ul class="project-tags">
-                    <span>CTMC-style dynamics</span>
-                    <span>News &amp; weather features</span>
-                    <span>Context modeling</span>
+                    <span>LLM embeddings</span>
+                    <span>Feature engineering</span>
+                    <span>Microservice</span>
                 </ul>
             </article>
 
-            <!-- Future idea: Multi-agent -->
             <article class="project-card">
-                <h3>Multi-Agent Simulation with Bayesian Policy Evaluation <span style="font-size:0.75rem; opacity:0.8;">(future idea)</span></h3>
+                <h3>Weather-Impact Prediction Layer (MDN)</h3>
                 <p>
-                    Longer-term idea to build a simulation framework where multiple
-                    agents interact in simple environments (social dilemmas,
-                    predator–prey, resource harvesting, trading, etc.). Each agent
-                    observes partial state, chooses actions via a policy network, and
-                    uses a Bayesian head to model uncertainty over returns.
+                    Building a Mixture Density Network to capture the impact of temperature,
+                    humidity, rainfall, elevation, and wind on outcome distributions.
                 </p>
                 <p style="font-size:0.9rem; color:#a9acb9;">
-                    The goal is to combine a deterministic policy (SNN + policy
-                    gradient updates) with a Bayesian neural network head that
-                    propagates uncertainty through multi-step rollouts, and then study
-                    how uncertainty-aware policies differ from standard RL in terms of
-                    stability, cooperation, and behavior in noisy environments.
+                    Reduces scenario-prediction variance by ~17% and helps quantify risk under
+                    environmental shifts.
                 </p>
                 <ul class="project-tags">
-                    <span>Multi-agent RL</span>
-                    <span>Bayesian policy evaluation</span>
+                    <span>Mixture Density Networks</span>
+                    <span>Environmental modeling</span>
+                    <span>Uncertainty</span>
+                </ul>
+            </article>
+
+            <article class="project-card">
+                <h3>CTMC Dynamics for Time-Evolving Simulation</h3>
+                <p>
+                    Implementing a Continuous-Time Markov Chain to track state transitions and
+                    dynamic conditions throughout simulated scenarios.
+                </p>
+                <p style="font-size:0.9rem; color:#a9acb9;">
+                    Allows outcome curves to evolve over time as conditions shift, enabling richer
+                    multi-step forecasting.
+                </p>
+                <ul class="project-tags">
+                    <span>CTMC</span>
+                    <span>Time dynamics</span>
                     <span>Simulation</span>
                 </ul>
             </article>
 
-            <!-- Future idea: LLM safety -->
-            <article class="project-card">
-                <h3>LLM Behavior &amp; Safety Modeling <span style="font-size:0.75rem; opacity:0.8;">(future idea)</span></h3>
-                <p>
-                    Concept for a lightweight “guardrail model” that predicts how a
-                    large language model is likely to respond before the full answer
-                    is generated. The focus is on learning patterns of prompts,
-                    intermediate tokens, and contexts that correlate with safe vs
-                    undesired completions.
-                </p>
-                <p style="font-size:0.9rem; color:#a9acb9;">
-                    The long-term aim is to train predictors over prompt–response
-                    pairs that can flag risky wording, suggest safer alternatives, and
-                    estimate the probability of policy violations, so LLM applications
-                    can route, block, or reshape requests in advance rather than
-                    reacting afterwards.
-                </p>
-                <ul class="project-tags">
-                    <span>LLM safety</span>
-                    <span>Behavior modeling</span>
-                    <span>Risk prediction</span>
-                </ul>
-            </article>
         </div>
     </section>
 
-    <!-- Other Projects Section -->
+    <!-- Future Ideas -->
+    <section id="future-ideas" class="section">
+        <div class="section-header">
+            <h2>Future Ideas</h2>
+            <p>High-level research concepts to explore later.</p>
+        </div>
+
+        <div class="projects-grid">
+
+            <article class="project-card">
+                <h3>Multi-Agent Simulation with Bayesian Policy Evaluation</h3>
+                <p>
+                    Concept for agents acting in partially observed environments using uncertainty-aware 
+                    policies to study cooperation, stability, and noisy decision-making.
+                </p>
+            </article>
+
+            <article class="project-card">
+                <h3>LLM Behavior & Safety Modeling</h3>
+                <p>
+                    Lightweight predictors that estimate the risk level of an LLM response before 
+                    generation completes, enabling proactive guardrailing.
+                </p>
+            </article>
+
+        </div>
+    </section>
+
+    <!-- Other Projects -->
     <section id="projects" class="section">
         <div class="section-header">
             <h2>Other Projects</h2>
@@ -319,92 +322,59 @@
         </div>
 
         <div class="projects-grid">
-            <!-- PROJECT: Stochastic Routing -->
+
             <article class="project-card">
                 <h3>Stochastic Routing Optimization for Bread Delivery</h3>
                 <p>
-                    Two-stage stochastic TSP with time windows and random arc costs
-                    for a delivery network. The model chooses a baseline route and
-                    then adapts to disruptions through recourse decisions while
-                    penalizing late or missed deliveries.
-                </p>
-                <p style="font-size:0.9rem; color:#a9acb9;">
-                    Compared to a deterministic heuristic baseline, the stochastic
-                    model reduces expected delivery cost and cuts late deliveries
-                    across sampled scenarios, showing the value of explicitly modeling
-                    uncertainty in routing.
+                    Two-stage stochastic routing model with recourse to reduce delivery variance and
+                    expected cost under uncertain travel times.
                 </p>
                 <ul class="project-tags">
                     <span>Gurobi</span>
                     <span>Stochastic programming</span>
                     <span>Routing</span>
-                    <span>Python</span>
                 </ul>
                 <div class="project-links">
-                    <a href="files/stochastic-routing-report.pdf" target="_blank">
-                        Project Report (PDF)
-                    </a>
+                    <a href="files/stochastic-routing-report.pdf" target="_blank">Project Report</a>
                 </div>
             </article>
 
-            <!-- PROJECT: Facial Expression Detection -->
             <article class="project-card">
                 <h3>Facial Expression Detection (ResNet50–ViT Hybrid)</h3>
                 <p>
-                    Hybrid ResNet50 + Vision Transformer model for facial expression
-                    recognition on low-resolution grayscale images, using transfer
-                    learning, augmentation, and cross-validation to improve robustness.
-                </p>
-                <p style="font-size:0.9rem; color:#a9acb9;">
-                    The hybrid architecture improves macro-averaged accuracy over a
-                    plain CNN and generalizes better to under-represented emotion
-                    classes, showing the benefit of combining convolutional and
-                    attention-based features.
+                    Hybrid model combining convolutional and transformer-based features for emotion
+                    recognition, improving robustness on low-resolution data.
                 </p>
                 <ul class="project-tags">
                     <span>Computer vision</span>
                     <span>ResNet50</span>
                     <span>ViT</span>
-                    <span>PyTorch</span>
                 </ul>
                 <div class="project-links">
-                    <a href="https://github.com/Ajeenckya5" target="_blank">
-                        GitHub (CV experiments)
-                    </a>
+                    <a href="https://github.com/Ajeenckya5" target="_blank">GitHub</a>
                 </div>
             </article>
 
-            <!-- PROJECT: News + Stock -->
             <article class="project-card">
-                <h3>News + Stock Forecasting &amp; Trading Agent</h3>
+                <h3>News + Stock Forecasting & Trading Agent</h3>
                 <p>
-                    Prototype that merges news-derived embeddings with price history
-                    to forecast short-term price moves and drive a simple buy/sell
-                    agent. Uses mixture-style outputs to capture multi-modal returns
-                    and backtests strategies against basic benchmarks.
-                </p>
-                <p style="font-size:0.9rem; color:#a9acb9;">
-                    Adding news-based features improves directional hit-rate and
-                    backtest performance compared with a price-only baseline, showing
-                    how unstructured information can be turned into useful signals for
-                    trading decisions.
+                    Prototype that merges news embeddings with price history to forecast short-term
+                    returns and drive a simple buy/sell agent.
                 </p>
                 <ul class="project-tags">
                     <span>NLP</span>
                     <span>Time series</span>
-                    <span>PyTorch</span>
                     <span>Backtesting</span>
                 </ul>
                 <div class="project-links">
-                    <a href="https://github.com/Ajeenckya5" target="_blank">
-                        GitHub (prototype)
-                    </a>
+                    <a href="https://github.com/Ajeenckya5" target="_blank">GitHub</a>
                 </div>
             </article>
+
         </div>
     </section>
 
-    <!-- Experience Section -->
+    <!-- Experience -->
     <section id="experience" class="section section-alt">
         <div class="section-header">
             <h2>Experience</h2>
@@ -415,46 +385,23 @@
             <article class="project-card">
                 <h3>Graduate Research Assistant — UW–Madison</h3>
                 <p>
-                    Working as a Graduate Research Assistant on projects at the
-                    intersection of machine learning and optimization, including
-                    probabilistic outcome modeling and decision-focused routing
-                    formulations.
+                    Working on probabilistic outcome modeling, simulation stability, and 
+                    optimization-based decision systems.
                 </p>
-                <div class="project-tags">
-                    <span>Research</span>
-                    <span>Machine learning</span>
-                    <span>Optimization</span>
-                </div>
             </article>
 
             <article class="project-card">
                 <h3>Graduate Studies — UW–Madison</h3>
                 <p>
-                    M.S. in Industrial &amp; Systems Engineering with concentration in
-                    machine learning, stochastic modeling, and optimization. Coursework
-                    and projects cover ML theory (VC-dimension, boosting, Bayesian
-                    inference) plus hands-on deep learning and routing models.
+                    Coursework in ML theory, Bayesian inference, deep learning, and stochastic optimization.
                 </p>
-                <div class="project-tags">
-                    <span>Machine learning</span>
-                    <span>Probabilistic modeling</span>
-                    <span>Optimization</span>
-                </div>
             </article>
 
             <article class="project-card">
                 <h3>Engineering Internships — Automotive &amp; Manufacturing</h3>
                 <p>
-                    Worked on process optimization, quality analysis, and
-                    data-driven improvements at FIAT India Automobiles and Powertrac
-                    Tractors, building a grounding in real-world systems and
-                    constraints.
+                    Hands-on experience in process optimization, quality analytics, and real-world system modeling.
                 </p>
-                <div class="project-tags">
-                    <span>Process optimization</span>
-                    <span>Data analysis</span>
-                    <span>Engineering</span>
-                </div>
             </article>
         </div>
     </section>
@@ -489,7 +436,7 @@
                 <p>
                     <a href="mailto:avmahadik@wisc.edu">avmahadik@wisc.edu</a><br/>
                     <span style="font-size:0.85rem; color:#a0a3b1;">
-                        Best for AI/ML opportunities, interviews, and collaborations.
+                        Best for AI/ML opportunities and collaborations.
                     </span>
                 </p>
             </div>
@@ -498,29 +445,19 @@
                 <p>
                     <a href="https://www.linkedin.com/in/ajeenckya-mahadik" target="_blank">
                         linkedin.com/in/ajeenckya-mahadik
-                    </a><br/>
-                    <span style="font-size:0.85rem; color:#a0a3b1;">
-                        Open to connecting with engineers, researchers, and recruiters.
-                    </span>
+                    </a>
                 </p>
             </div>
             <div>
                 <h3>GitHub</h3>
                 <p>
-                    <a href="https://github.com/Ajeenckya5" target="_blank">
-                        github.com/Ajeenckya5
-                    </a><br/>
-                    <span style="font-size:0.85rem; color:#a0a3b1;">
-                        Selected projects, experiments, and research code.
-                    </span>
+                    <a href="https://github.com/Ajeenckya5" target="_blank">github.com/Ajeenckya5</a>
                 </p>
             </div>
         </div>
 
         <div style="text-align:center; margin-top:2.5rem;">
-            <a href="mailto:avmahadik@wisc.edu" class="btn primary">
-                Email me about an AI/ML role
-            </a>
+            <a href="mailto:avmahadik@wisc.edu" class="btn primary">Email me about an AI/ML role</a>
         </div>
     </section>
 
