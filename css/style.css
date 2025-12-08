@@ -30,17 +30,15 @@ body {
   scroll-behavior: smooth;
 }
 
+/* Global background image for entire site */
 body {
   font-family: var(--font-main);
   background-color: #050814;
-  /* layer 1: subtle dark gradient, layer 2: network-style image */
-  background-image:
-    radial-gradient(circle at top left, #131a33 0, #050814 55%),
-    url("../assets/bg-network.jpg");
-  background-repeat: no-repeat, no-repeat;
-  background-size: cover, cover;
-  background-attachment: scroll, fixed;
-  background-position: center top, center;
+  background-image: url("assets/bg.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+  background-position: center center;
   color: var(--text);
   line-height: 1.6;
 }
@@ -157,17 +155,12 @@ body {
   position: relative;
   padding: 4.5rem 1.5rem 4.5rem;
   overflow: hidden;
+  background: transparent;
 }
 
-/* Siemens-style hero: big AI/ML image and gradient overlay */
+/* Remove hero overlay & separate hero background */
 .hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at left, rgba(5, 8, 20, 0.96) 0, rgba(5, 8, 20, 0.9) 42%, rgba(5, 8, 20, 1) 82%),
-    url("../assets/bg-network.jpg") no-repeat right center / cover;
-  z-index: -1;
+  content: none;
 }
 
 .hero-inner {
