@@ -32,7 +32,15 @@ body {
 
 body {
   font-family: var(--font-main);
-  background: radial-gradient(circle at top left, #131a33 0, #050814 55%);
+  background-color: #050814;
+  /* layer 1: subtle dark gradient, layer 2: network-style image */
+  background-image:
+    radial-gradient(circle at top left, #131a33 0, #050814 55%),
+    url("../assets/bg-network.jpg");
+  background-repeat: no-repeat, no-repeat;
+  background-size: cover, cover;
+  background-attachment: scroll, fixed;
+  background-position: center top, center;
   color: var(--text);
   line-height: 1.6;
 }
@@ -45,8 +53,8 @@ body {
 }
 
 .section-inner,
-.hero-inner,
-.footer-inner {
+.footer-inner,
+.hero-inner {
   max-width: 1120px;
   margin: 0 auto;
 }
@@ -146,25 +154,29 @@ body {
 /* Hero */
 
 .hero {
-  padding-top: 4.5rem;
+  position: relative;
+  padding: 4.5rem 1.5rem 4.5rem;
+  overflow: hidden;
+}
+
+/* Siemens-style hero: big AI/ML image and gradient overlay */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at left, rgba(5, 8, 20, 0.96) 0, rgba(5, 8, 20, 0.9) 42%, rgba(5, 8, 20, 1) 82%),
+    url("../assets/profile.jpg") no-repeat right center / cover;
+  z-index: -1;
 }
 
 .hero-inner {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 3rem;
+  flex-direction: column;
 }
 
 .hero-text {
-  flex: 1.1;
-}
-
-.hero-visual {
-  flex: 0.9;
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
+  max-width: 36rem;
 }
 
 .hero-kicker {
@@ -214,142 +226,6 @@ body {
 
 .hero-links a:hover {
   color: var(--text);
-}
-
-/* Hero visual */
-
-.hero-orbit {
-  position: relative;
-  padding: 1.8rem;
-  border-radius: var(--radius-lg);
-  background: radial-gradient(circle at top left, #202744 0, #0a0e1c 55%);
-  border: 1px solid var(--border-soft);
-  box-shadow: var(--shadow-soft);
-  overflow: hidden;
-}
-
-.hero-core {
-  position: relative;
-  margin: 0 auto;
-  width: 120px;
-  height: 120px;
-  border-radius: 999px;
-  background: radial-gradient(circle at 30% 20%, #ffffff 0, #ffb347 32%, #ff7a3c 70%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: #201116;
-  text-align: center;
-  box-shadow: 0 22px 55px rgba(0, 0, 0, 0.7);
-}
-
-.hero-node {
-  position: absolute;
-  padding: 0.5rem 0.7rem;
-  border-radius: 14px;
-  background: rgba(13, 20, 42, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: var(--muted);
-  font-size: 0.7rem;
-  line-height: 1.3;
-  max-width: 110px;
-  backdrop-filter: blur(8px);
-}
-
-.hero-node-1 {
-  top: 10%;
-  left: 8%;
-}
-
-.hero-node-2 {
-  top: 14%;
-  right: 6%;
-}
-
-.hero-node-3 {
-  bottom: 7%;
-  right: 18%;
-}
-
-/* metrics card */
-
-.hero-metrics-card {
-  border-radius: var(--radius-lg);
-  background: var(--card);
-  border: 1px solid var(--border-soft);
-  padding: 1.1rem 1.2rem;
-  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.55);
-}
-
-.hero-metrics-header {
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--muted);
-  margin-bottom: 0.7rem;
-}
-
-.hero-metrics {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 0.7rem;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.5rem 1rem;
-  font-size: 0.78rem;
-}
-
-.hero-metrics li {
-  display: flex;
-  flex-direction: column;
-}
-
-.hero-metrics span {
-  color: var(--muted);
-}
-
-.hero-metrics strong {
-  font-size: 0.9rem;
-}
-
-.hero-bars {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-}
-
-.hero-bar {
-  font-size: 0.75rem;
-}
-
-.hero-bar span {
-  display: inline-block;
-  margin-bottom: 0.18rem;
-  color: var(--muted);
-}
-
-.hero-bar-track {
-  width: 100%;
-  height: 6px;
-  border-radius: 99px;
-  background: #1a2135;
-  overflow: hidden;
-}
-
-.hero-bar-fill {
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, #ff7a3c, #ffb347);
-}
-
-.hero-bar-fill-1 {
-  width: 82%;
-}
-
-.hero-bar-fill-2 {
-  width: 74%;
 }
 
 /* Sections / cards */
@@ -491,10 +367,6 @@ body {
     text-align: left;
   }
 
-  .hero-visual {
-    width: 100%;
-  }
-
   .about-grid {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -557,13 +429,11 @@ body {
     font-size: 0.85rem;
   }
 
-  .hero-metrics {
-    grid-template-columns: minmax(0, 1fr);
+  .hero-subtitle {
+    font-size: 0.9rem;
   }
 
-  .hero-node-1,
-  .hero-node-2,
-  .hero-node-3 {
-    font-size: 0.65rem;
+  .section-header h2 {
+    font-size: 1.4rem;
   }
 }
