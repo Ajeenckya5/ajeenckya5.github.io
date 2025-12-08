@@ -19,10 +19,13 @@
                 <li><a href="#hero">Home</a></li>
                 <li><a href="#about">About</a></li>
                 <li><a href="#skills">Skills</a></li>
-                <li><a href="#current-projects">Current Project</a></li>
-                <li><a href="#upcoming-projects">Upcoming</a></li>
-                <li><a href="#future-ideas">Future Ideas</a></li>
-                <li><a href="#projects">Other Projects</a></li>
+
+                <!-- SINGLE PROJECTS TAB -->
+                <li><a href="#current-projects">Projects</a></li>
+
+                <!-- Optional: separate link to Other Projects -->
+                <li><a href="#other-projects">Other Projects</a></li>
+
                 <li><a href="#experience">Experience</a></li>
                 <li><a href="#resume">Resume</a></li>
                 <li><a href="#contact">Contact</a></li>
@@ -43,19 +46,17 @@
             <h1>Hi, I'm <span class="accent">Ajeenckya</span> Mahadik</h1>
             <p class="hero-subtitle">
                 I design and train machine learning systems with a focus on
-                probabilistic modeling and decision-making — from calibrated neural
-                networks for outcome prediction to stochastic routing and computer
-                vision.
+                probabilistic modeling and decision-making — from calibrated prediction engines
+                to stochastic optimization and computer vision.
             </p>
 
             <div style="margin-bottom:1rem; font-size:0.9rem; color:#c4c6d3;">
                 Graduating <strong>May 2026</strong> from UW–Madison (M.S. Industrial &amp; Systems Engineering),
-                currently working on a structured vs Bayesian neural network project for
-                probabilistic outcome modeling.
+                currently building a probabilistic outcome-simulation system.
             </div>
 
             <div class="hero-actions">
-                <a href="#current-projects" class="btn primary">View Current Research Project</a>
+                <a href="#current-projects" class="btn primary">View Current Project</a>
                 <a href="files/resume.pdf" class="btn ghost" target="_blank">Download Resume</a>
             </div>
 
@@ -90,26 +91,23 @@
                 </p>
                 <p>
                     I like taking messy, high-dimensional problems and turning them
-                    into <strong>end-to-end ML systems</strong>: neural networks that
-                    model calibrated probabilities, optimization models that reason
-                    under uncertainty, and pipelines that are easy to debug and
-                    iterate on.
+                    into <strong>end-to-end ML systems</strong>: calibrated probability models,
+                    simulation-ready outputs, and pipelines that support fast iteration.
                 </p>
                 <p>
-                    My current research centers on a <strong>Probabilistic AI System for Outcome Simulation</strong>,
-                    combining structured and Bayesian neural networks to generate calibrated
-                    predictive distributions and stable scenario analyses.
+                    My current project focuses on a <strong>Probabilistic AI System for Outcome Simulation</strong>,
+                    designed to generate stable probability distributions and support robust scenario analysis.
                 </p>
             </div>
             <div>
                 <h3>What I enjoy working on</h3>
                 <ul class="pill-list">
-                    <li>Probabilistic / Bayesian ML</li>
-                    <li>Neural networks for structured data</li>
-                    <li>Outcome prediction &amp; simulation</li>
-                    <li>Stochastic routing &amp; optimization</li>
-                    <li>Deep learning for vision</li>
-                    <li>LLM-augmented feature engineering</li>
+                    <li>Probabilistic ML</li>
+                    <li>Prediction & Simulation</li>
+                    <li>Stochastic modeling</li>
+                    <li>Optimization</li>
+                    <li>Computer Vision</li>
+                    <li>LLM-based feature engineering</li>
                 </ul>
             </div>
         </div>
@@ -125,62 +123,42 @@
         <div class="projects-grid">
             <article class="project-card">
                 <h3>Representation Learning &amp; Text Features</h3>
-                <p>
-                    Using pretrained models and embeddings to extract signal from news,
-                    text, and metadata, and feeding those features into downstream
-                    forecasting and decision models.
-                </p>
+                <p>Extracting meaningful signals from news, text, and metadata for downstream ML systems.</p>
                 <div class="project-tags">
                     <span>Embeddings</span>
                     <span>LLM features</span>
                     <span>Text preprocessing</span>
-                    <span>Feature engineering</span>
                 </div>
             </article>
 
             <article class="project-card">
                 <h3>Machine Learning &amp; Deep Learning</h3>
-                <p>
-                    Supervised learning, regularization, and evaluation for structured
-                    data and time series, with neural networks as well as classical
-                    models.
-                </p>
+                <p>Building prediction systems for structured data, time series, and vision tasks.</p>
                 <div class="project-tags">
                     <span>PyTorch</span>
                     <span>scikit-learn</span>
-                    <span>XGBoost</span>
                     <span>CNNs</span>
                     <span>Transformers</span>
                 </div>
             </article>
 
             <article class="project-card">
-                <h3>Probabilistic &amp; Bayesian Methods</h3>
-                <p>
-                    Bayesian neural networks, uncertainty estimation, and calibration
-                    metrics to make predictions that are not just accurate but also
-                    honest about their confidence.
-                </p>
+                <h3>Probabilistic Modeling</h3>
+                <p>Calibration, uncertainty estimation, Monte-Carlo evaluation, and scenario forecasting.</p>
                 <div class="project-tags">
-                    <span>Bayesian NN</span>
-                    <span>Posterior sampling</span>
-                    <span>Predictive uncertainty</span>
+                    <span>Uncertainty estimation</span>
+                    <span>Calibration</span>
+                    <span>Prediction intervals</span>
                 </div>
             </article>
 
             <article class="project-card">
                 <h3>Optimization &amp; Systems</h3>
-                <p>
-                    Stochastic and deterministic optimization with realistic
-                    constraints, plus the engineering hygiene needed to keep
-                    experiments reproducible.
-                </p>
+                <p>Deterministic and stochastic optimization with real-world constraints.</p>
                 <div class="project-tags">
                     <span>Gurobi</span>
-                    <span>MIP / MILP</span>
                     <span>Routing</span>
-                    <span>Python</span>
-                    <span>Git</span>
+                    <span>MIP / MILP</span>
                 </div>
             </article>
         </div>
@@ -188,48 +166,41 @@
 
     <!-- Current Project -->
     <section id="current-projects" class="section">
-            <div class="section-header">
-                <h2>Current Project</h2>
-                <p>What I’m actively building and iterating on right now.</p>
-            </div>
-
-            <div class="projects-grid">
-                <article class="project-card">
-        <h3>Probabilistic AI System for Outcome Simulation</h3>
-        <p>
-            A prediction engine built to generate calibrated probability distributions 
-            rather than simple one-off predictions. It evaluates patterns in historical 
-            data to estimate both likely outcomes and how confident the system is in 
-            those estimates.
-        </p>
-        <p style="font-size:0.9rem; color:#a9acb9;">
-            Instead of producing a single answer, the system shows how outcomes shift 
-            under different conditions and how stable the predictions remain across 
-            repeated simulations—making it useful for forecasting, scenario testing, 
-            and uncertainty-aware decision-making.
-        </p>
-        <ul class="project-tags">
-            <span>Probability modeling</span>
-            <span>Simulation</span>
-            <span>Forecasting</span>
-            <span>Risk analysis</span>
-            <span>Bayesian neural networks</span>
-            <span>Uncertainty estimation</span>
-            <span>Transfer Learning</span>
-        </ul>
-        <div class="project-links">
-            <a href="https://github.com/Ajeenckya5" target="_blank">
-                GitHub (code &amp; experiments)
-            </a>
+        <div class="section-header">
+            <h2>Projects</h2>
+            <p>My ongoing and upcoming machine learning work.</p>
         </div>
-    </article>
 
+        <div class="projects-grid">
+            <article class="project-card">
+                <h3>Probabilistic AI System for Outcome Simulation</h3>
+                <p>
+                    A prediction engine that generates calibrated probability distributions instead of
+                    single hard outputs. It analyzes historical patterns, estimates likely outcomes,
+                    and measures how confident the system is in each scenario.
+                </p>
+                <p style="font-size:0.9rem; color:#a9acb9;">
+                    Designed for forecasting and decision-making under uncertainty: it shows how outcomes 
+                    shift as conditions change and how stable predictions remain across repeated simulations.
+                </p>
+                <ul class="project-tags">
+                    <span>Probability modeling</span>
+                    <span>Simulation</span>
+                    <span>Forecasting</span>
+                    <span>Risk analysis</span>
+                </ul>
+                <div class="project-links">
+                    <a href="https://github.com/Ajeenckya5" target="_blank">GitHub (code & experiments)</a>
+                </div>
+            </article>
+        </div>
+    </section>
 
     <!-- Upcoming Projects -->
     <section id="upcoming-projects" class="section section-alt">
         <div class="section-header">
             <h2>Upcoming Projects</h2>
-            <p>Concrete next phases extending my probabilistic outcome-simulation system.</p>
+            <p>Concrete next phases extending my probabilistic prediction system.</p>
         </div>
 
         <div class="projects-grid">
@@ -237,13 +208,11 @@
             <article class="project-card">
                 <h3>News-Driven Behavioral Signal Modeling</h3>
                 <p>
-                    Developing a microservice that transforms real-time news into structured
-                    behavioral vectors using a 3B–7B LLM model. These vectors plug into the
-                    simulation pipeline to improve calibration and directional accuracy.
+                    A microservice that turns real-time news into structured behavioral vectors using 
+                    lightweight LLMs. These features improve probability calibration and directional accuracy.
                 </p>
                 <p style="font-size:0.9rem; color:#a9acb9;">
-                    Early deployment improves probability calibration by ~12% and strengthens
-                    scenario-based reasoning.
+                    Early prototypes improve calibration by ~12% and strengthen scenario reasoning.
                 </p>
                 <ul class="project-tags">
                     <span>LLM embeddings</span>
@@ -255,34 +224,30 @@
             <article class="project-card">
                 <h3>Weather-Impact Prediction Layer (MDN)</h3>
                 <p>
-                    Building a Mixture Density Network to capture the impact of temperature,
-                    humidity, rainfall, elevation, and wind on outcome distributions.
+                    A Mixture Density Network designed to model environmental influences—temperature, 
+                    humidity, rainfall, elevation—on outcome distributions.
                 </p>
                 <p style="font-size:0.9rem; color:#a9acb9;">
-                    Reduces scenario-prediction variance by ~17% and helps quantify risk under
-                    environmental shifts.
+                    Reduces scenario variance by ~17% and helps quantify environmental uncertainty.
                 </p>
                 <ul class="project-tags">
                     <span>Mixture Density Networks</span>
                     <span>Environmental modeling</span>
-                    <span>Uncertainty</span>
                 </ul>
             </article>
 
             <article class="project-card">
                 <h3>CTMC Dynamics for Time-Evolving Simulation</h3>
                 <p>
-                    Implementing a Continuous-Time Markov Chain to track state transitions and
-                    dynamic conditions throughout simulated scenarios.
+                    A Continuous-Time Markov Chain (CTMC) layer to track dynamic shifts in conditions 
+                    throughout simulated scenarios.
                 </p>
                 <p style="font-size:0.9rem; color:#a9acb9;">
-                    Allows outcome curves to evolve over time as conditions shift, enabling richer
-                    multi-step forecasting.
+                    Enables richer multi-step forecasting and evolving probability curves.
                 </p>
                 <ul class="project-tags">
                     <span>CTMC</span>
                     <span>Time dynamics</span>
-                    <span>Simulation</span>
                 </ul>
             </article>
 
@@ -293,24 +258,24 @@
     <section id="future-ideas" class="section">
         <div class="section-header">
             <h2>Future Ideas</h2>
-            <p>High-level research concepts to explore later.</p>
+            <p>High-level concepts to explore next.</p>
         </div>
 
         <div class="projects-grid">
 
             <article class="project-card">
-                <h3>Multi-Agent Simulation with Bayesian Policy Evaluation</h3>
+                <h3>Multi-Agent Simulation</h3>
                 <p>
-                    Concept for agents acting in partially observed environments using uncertainty-aware 
-                    policies to study cooperation, stability, and noisy decision-making.
+                    Concept for agents acting under uncertainty to study cooperation, stability, 
+                    and complex decision behavior.
                 </p>
             </article>
 
             <article class="project-card">
                 <h3>LLM Behavior & Safety Modeling</h3>
                 <p>
-                    Lightweight predictors that estimate the risk level of an LLM response before 
-                    generation completes, enabling proactive guardrailing.
+                    A lightweight predictor that estimates the risk of an LLM response before 
+                    generation completes—enabling proactive filters and safer applications.
                 </p>
             </article>
 
@@ -318,7 +283,7 @@
     </section>
 
     <!-- Other Projects -->
-    <section id="projects" class="section">
+    <section id="other-projects" class="section">
         <div class="section-header">
             <h2>Other Projects</h2>
             <p>Additional work in optimization, vision, and forecasting.</p>
@@ -329,13 +294,12 @@
             <article class="project-card">
                 <h3>Stochastic Routing Optimization for Bread Delivery</h3>
                 <p>
-                    Two-stage stochastic routing model with recourse to reduce delivery variance and
-                    expected cost under uncertain travel times.
+                    A two-stage stochastic routing model with recourse to minimize expected cost 
+                    under uncertain travel times.
                 </p>
                 <ul class="project-tags">
-                    <span>Gurobi</span>
-                    <span>Stochastic programming</span>
                     <span>Routing</span>
+                    <span>Stochastic programming</span>
                 </ul>
                 <div class="project-links">
                     <a href="files/stochastic-routing-report.pdf" target="_blank">Project Report</a>
@@ -343,10 +307,9 @@
             </article>
 
             <article class="project-card">
-                <h3>Facial Expression Detection (ResNet50–ViT Hybrid)</h3>
+                <h3>Facial Expression Detection</h3>
                 <p>
-                    Hybrid model combining convolutional and transformer-based features for emotion
-                    recognition, improving robustness on low-resolution data.
+                    A ResNet50 + Vision Transformer hybrid for low-resolution emotion recognition.
                 </p>
                 <ul class="project-tags">
                     <span>Computer vision</span>
@@ -361,13 +324,12 @@
             <article class="project-card">
                 <h3>News + Stock Forecasting & Trading Agent</h3>
                 <p>
-                    Prototype that merges news embeddings with price history to forecast short-term
-                    returns and drive a simple buy/sell agent.
+                    Combines news embeddings with historical price data to forecast short-term trends 
+                    and drive a simple buy/sell trading agent.
                 </p>
                 <ul class="project-tags">
                     <span>NLP</span>
-                    <span>Time series</span>
-                    <span>Backtesting</span>
+                    <span>Time-series forecasting</span>
                 </ul>
                 <div class="project-links">
                     <a href="https://github.com/Ajeenckya5" target="_blank">GitHub</a>
@@ -388,45 +350,44 @@
             <article class="project-card">
                 <h3>Graduate Research Assistant — UW–Madison</h3>
                 <p>
-                    Working on probabilistic outcome modeling, simulation stability, and 
-                    optimization-based decision systems.
+                    Working on probabilistic modeling, simulation stability, and 
+                    optimization-based ML systems.
                 </p>
             </article>
 
             <article class="project-card">
                 <h3>Graduate Studies — UW–Madison</h3>
                 <p>
-                    Coursework in ML theory, Bayesian inference, deep learning, and stochastic optimization.
+                    Coursework in ML theory, probabilistic modeling, deep learning, and 
+                    stochastic optimization.
                 </p>
             </article>
 
             <article class="project-card">
-                <h3>Engineering Internships — Automotive &amp; Manufacturing</h3>
+                <h3>Engineering Internships — Automotive & Manufacturing</h3>
                 <p>
-                    Hands-on experience in process optimization, quality analytics, and real-world system modeling.
+                    Hands-on work in process optimization, quality analytics, and data-driven improvements.
                 </p>
             </article>
         </div>
     </section>
 
-    <!-- Resume Section -->
+    <!-- Resume -->
     <section id="resume" class="section">
         <div class="section-header">
             <h2>Resume</h2>
-            <p>One-page snapshot of my AI/ML work.</p>
+            <p>One-page snapshot of my AI/ML background.</p>
         </div>
         <div class="resume-block">
             <p>
                 Download my resume for a concise view of my projects, experience, and
-                technical skills tailored for AI/ML Engineer and Applied Scientist roles.
+                technical skills tailored for AI/ML Engineer roles.
             </p>
-            <a href="files/resume.pdf" class="btn primary" target="_blank">
-                Open Resume (PDF)
-            </a>
+            <a href="files/resume.pdf" class="btn primary" target="_blank">Open Resume (PDF)</a>
         </div>
     </section>
 
-    <!-- Contact Section -->
+    <!-- Contact -->
     <section id="contact" class="section section-alt">
         <div class="section-header">
             <h2>Contact</h2>
@@ -436,26 +397,15 @@
         <div class="contact-grid">
             <div>
                 <h3>Email</h3>
-                <p>
-                    <a href="mailto:avmahadik@wisc.edu">avmahadik@wisc.edu</a><br/>
-                    <span style="font-size:0.85rem; color:#a0a3b1;">
-                        Best for AI/ML opportunities and collaborations.
-                    </span>
-                </p>
+                <p><a href="mailto:avmahadik@wisc.edu">avmahadik@wisc.edu</a></p>
             </div>
             <div>
                 <h3>LinkedIn</h3>
-                <p>
-                    <a href="https://www.linkedin.com/in/ajeenckya-mahadik" target="_blank">
-                        linkedin.com/in/ajeenckya-mahadik
-                    </a>
-                </p>
+                <p><a href="https://www.linkedin.com/in/ajeenckya-mahadik" target="_blank">linkedin.com/in/ajeenckya-mahadik</a></p>
             </div>
             <div>
                 <h3>GitHub</h3>
-                <p>
-                    <a href="https://github.com/Ajeenckya5" target="_blank">github.com/Ajeenckya5</a>
-                </p>
+                <p><a href="https://github.com/Ajeenckya5" target="_blank">github.com/Ajeenckya5</a></p>
             </div>
         </div>
 
