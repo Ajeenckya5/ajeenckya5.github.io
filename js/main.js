@@ -1,15 +1,14 @@
-// Mobile nav toggle
 const navToggle = document.getElementById("navToggle");
-const navList = document.querySelector(".nav ul");
+const nav = document.getElementById("siteNav");
+const yearSpan = document.getElementById("year");
 
-if (navToggle && navList) {
-    navToggle.addEventListener("click", () => {
-        navList.classList.toggle("open");
-    });
+if (navToggle && nav) {
+  navToggle.addEventListener("click", () => {
+    nav.classList.toggle("open");
+  });
 }
 
-// Dynamic year in footer
-const yearSpan = document.getElementById("year");
+// set footer year
 if (yearSpan) {
-    yearSpan.textContent = new Date().getFullYear();
+  yearSpan.textContent = new Date().getFullYear();
 }
