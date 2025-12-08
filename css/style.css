@@ -335,11 +335,55 @@ body {
 
 /* Contact */
 
+/* CONTACT BUTTONS — Glassmorphism + Black Icons + Theme Colors */
 .contact-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 1.8rem;
+  display: flex;
+  justify-content: center;
+  gap: 1.6rem;
+  flex-wrap: wrap;
+  margin-top: 2rem;
 }
+
+/* Main Contact Button */
+.contact-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+
+  padding: 0.9rem 1.6rem;
+
+  background: rgba(20, 25, 40, 0.55);         /* dark glass layer */
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 14px;
+  text-decoration: none;
+
+  transition:
+    background 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s ease,
+    color 0.25s ease;
+}
+
+/* Black Icons */
+.contact-btn img {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+/* Hover Effect — Accent Glow */
+.contact-btn:hover {
+  background: rgba(255, 122, 60, 0.25);       /* soft warm orange tint */
+  box-shadow: 0 12px 32px rgba(255, 122, 60, 0.35);
+  transform: translateY(-3px);
+  color: #ffffff;
+}
+
 
 /* Footer */
 
