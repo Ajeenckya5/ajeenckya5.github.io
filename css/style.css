@@ -166,7 +166,7 @@ body {
   inset: 0;
   background:
     radial-gradient(circle at left, rgba(5, 8, 20, 0.96) 0, rgba(5, 8, 20, 0.9) 42%, rgba(5, 8, 20, 1) 82%),
-    url("../assets/profile.jpg") no-repeat right center / cover;
+    url("../assets/bg-network.jpg") no-repeat right center / cover;
   z-index: -1;
 }
 
