@@ -104,7 +104,6 @@ body {
   font-size: 0.9rem;
   color: var(--muted);
   text-decoration: none;
-  transition: color 0.18s ease;
 }
 
 .nav a:hover {
@@ -162,6 +161,22 @@ body {
 
 .hero-text {
   max-width: 36rem;
+}
+
+/* Fix hero links (Email • GitHub • LinkedIn) */
+.hero-links a,
+.hero-links a:visited {
+  color: rgba(245, 246, 255, 0.75);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.hero-links a:hover {
+  color: #ffffff;
+}
+
+.hero-links span {
+  color: rgba(245, 246, 255, 0.35);
 }
 
 /* ======================================================
@@ -226,7 +241,7 @@ body {
 }
 
 /* ======================================================
-   TAGS / SKILLS (VISIBLE & HIGHLIGHTED)
+   TAGS / SKILLS
 ====================================================== */
 
 .project-tags {
@@ -240,26 +255,14 @@ body {
   font-size: 0.78rem;
   padding: 0.25rem 0.7rem;
   border-radius: 999px;
-
   color: rgba(245, 246, 255, 0.88);
   background: rgba(255, 255, 255, 0.07);
   border: 1px solid rgba(255, 255, 255, 0.15);
-
-  transition:
-    transform 0.2s ease,
-    background 0.2s ease,
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
 }
 
 .project-card:hover .project-tags span {
   background: rgba(255, 122, 60, 0.15);
   border-color: rgba(255, 122, 60, 0.35);
-}
-
-.project-tags span:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(255, 122, 60, 0.2);
 }
 
 /* ======================================================
@@ -274,39 +277,25 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
   padding: 0.45rem 0.95rem;
   border-radius: 999px;
-
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.02em;
-
   color: #ffffff;
   background: rgba(255, 122, 60, 0.18);
   border: 1px solid rgba(255, 122, 60, 0.35);
   text-decoration: none;
-
-  transition:
-    transform 0.2s ease,
-    background 0.2s ease,
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
 }
 
 .project-links a:hover {
-  transform: translateY(-2px);
   background: rgba(255, 122, 60, 0.32);
   border-color: rgba(255, 122, 60, 0.55);
   box-shadow: 0 14px 28px rgba(255, 122, 60, 0.22);
 }
 
-.project-links a:active {
-  transform: translateY(-1px) scale(0.98);
-}
-
 /* ======================================================
-   CONTACT (UNCHANGED LOGIC, POLISHED)
+   CONTACT (FIX ICON SIZE ISSUE)
 ====================================================== */
 
 .contact-grid {
@@ -320,7 +309,8 @@ body {
 .contact-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.8rem;
+  justify-content: center;
+  gap: 0.7rem;
 
   padding: 0.9rem 1.6rem;
   background: rgba(20, 25, 40, 0.55);
@@ -332,11 +322,16 @@ body {
   font-weight: 500;
   border-radius: 14px;
   text-decoration: none;
+}
 
-  transition:
-    background 0.25s ease,
-    box-shadow 0.25s ease,
-    transform 0.25s ease;
+/* HARD CLAMP ICON SIZE — prevents giant images */
+.contact-btn img {
+  width: 22px !important;
+  height: 22px !important;
+  max-width: 22px !important;
+  max-height: 22px !important;
+  object-fit: contain;
+  display: block;
 }
 
 /* ======================================================
