@@ -6,461 +6,364 @@
     <title>Ajeenckya Mahadik | AI/ML Engineer</title>
     <link rel="stylesheet" href="css/style.css" />
     <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
-    <meta name="description"
-          content="Portfolio of Ajeenckya Mahadik — AI/ML engineer focused on probabilistic outcome modeling, deep learning, and optimization." />
+    <meta name="description" content="AI/ML Engineer portfolio for Ajeenckya Mahadik, focused on forecasting, RAG systems, LLM agents, model serving, and MLOps." />
 </head>
 <body>
-
-    <!-- Navigation -->
     <header class="site-header">
-        <div class="logo">Ajeenckya <span class="accent">Mahadik</span></div>
-        <nav class="nav" id="siteNav">
+        <a href="#hero" class="logo" aria-label="Ajeenckya Mahadik home">
+            <span>Ajeenckya</span>
+            <strong>Mahadik</strong>
+        </a>
+
+        <nav class="nav" id="siteNav" aria-label="Primary navigation">
             <ul>
-                <li><a href="#hero">Home</a></li>
                 <li><a href="#about">About</a></li>
-                <li><a href="#skills">Skills</a></li>
-                <li><a href="#current-projects">Projects</a></li>
-                <li><a href="#other-projects">Other Projects</a></li>
                 <li><a href="#experience">Experience</a></li>
-                <li><a href="#resume">Resume</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#skills">Skills</a></li>
+                <li><a href="#education">Education</a></li>
                 <li><a href="#contact">Contact</a></li>
             </ul>
         </nav>
-        <a href="#contact" class="btn primary header-cta">
-            Contact / Hire Me
-        </a>
-        <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
-            ☰
+
+        <a href="files/resume.pdf" class="btn btn-small header-cta" target="_blank" rel="noopener">Resume</a>
+
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+            <span></span>
+            <span></span>
+            <span></span>
         </button>
     </header>
 
-    <!-- Hero Section -->
-    <section id="hero" class="hero">
-        <div class="hero-inner">
-            <div class="hero-text">
-                <p class="hero-kicker">AI/ML Engineer • Probabilistic Modeling • Deep Learning • Optimization</p>
-                <h1>Hi, I'm <span class="accent">Ajeenckya</span> Mahadik</h1>
-                <p class="hero-subtitle">
-                    I design and train machine learning systems with a focus on
-                    probabilistic modeling and decision-making — from calibrated prediction engines
-                    to stochastic optimization and computer vision.
-                </p>
+    <main>
+        <section id="hero" class="hero">
+            <img src="assets/ajeenckya-mahadik.jpg" alt="Ajeenckya Mahadik in a classroom discussion" class="hero-photo" />
+            <div class="hero-shade" aria-hidden="true"></div>
 
-                <div class="hero-meta">
-                    Graduating <strong>May 2026</strong> from UW–Madison (M.S. Industrial &amp; Systems Engineering),
-                    currently building a probabilistic outcome-simulation system.
+            <div class="hero-inner">
+                <div class="hero-copy">
+                    <p class="eyebrow">AI/ML Engineer | M.S. AI/ML, UW-Madison</p>
+                    <h1>Ajeenckya Mahadik</h1>
+                    <p class="hero-subtitle">
+                        I build forecasting, RAG, and agentic AI systems with production-ready
+                        data pipelines, calibrated model evaluation, and cloud deployment.
+                    </p>
+
+                    <div class="hero-actions">
+                        <a href="files/resume.pdf" class="btn primary" target="_blank" rel="noopener">View Resume</a>
+                        <a href="#projects" class="btn secondary">Selected Work</a>
+                    </div>
+
+                    <div class="hero-contact" aria-label="Contact links">
+                        <span>Madison, WI</span>
+                        <a href="mailto:ajeenckyam@gmail.com">ajeenckyam@gmail.com</a>
+                        <a href="https://www.linkedin.com/in/ajeenckya-mahadik" target="_blank" rel="noopener">LinkedIn</a>
+                        <a href="https://github.com/Ajeenckya5" target="_blank" rel="noopener">GitHub</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="snapshot" aria-label="Career highlights">
+            <div class="section-inner snapshot-grid">
+                <article class="metric">
+                    <span>0.176</span>
+                    <p>Brier score from Bayesian calibration over a forecasting model</p>
+                </article>
+                <article class="metric">
+                    <span>84%</span>
+                    <p>Recall achieved while improving scenario prediction stability</p>
+                </article>
+                <article class="metric">
+                    <span>12%</span>
+                    <p>Accuracy and calibration lift from weather and news-derived features</p>
+                </article>
+                <article class="metric">
+                    <span>May 2026</span>
+                    <p>M.S. Industrial Engineering, AI/ML specialization</p>
+                </article>
+            </div>
+        </section>
+
+        <section id="about" class="section">
+            <div class="section-inner two-column">
+                <div class="section-header">
+                    <p class="eyebrow">About</p>
+                    <h2>Machine learning engineer with an operations-first systems background.</h2>
                 </div>
 
-                <div class="hero-actions">
-                    <a href="#current-projects" class="btn primary">View Current Project</a>
-                    <a href="files/resume.pdf" class="btn ghost" target="_blank">Download Resume</a>
+                <div class="prose">
+                    <p>
+                        I am pursuing an M.S. in Industrial Engineering at the University of
+                        Wisconsin-Madison with a specialization in AI/ML. My work connects model
+                        development with practical deployment: forecasting pipelines, Bayesian
+                        calibration, RAG applications, model serving, and monitoring loops.
+                    </p>
+                    <p>
+                        Before graduate school, I worked across automotive and service operations,
+                        turning noisy logs, timestamps, throughput data, and diagnostic records into
+                        structured ML-ready datasets and decision-support systems.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="experience" class="section section-alt">
+            <div class="section-inner">
+                <div class="section-header compact">
+                    <p class="eyebrow">Experience</p>
+                    <h2>Applied AI/ML, analytics, and production-minded engineering.</h2>
                 </div>
 
-                <a href="mailto:avmahadik@wisc.edu" class="contact-btn" target="_blank" rel="noopener">
-                    <span class="icon-wrap icon-email">
-                        <img src="assets/email-black.jpg" alt="Email" class="contact-icon">
-                    </span>
-                    Email
-                </a>
+                <div class="timeline">
+                    <article class="timeline-item">
+                        <div class="timeline-meta">
+                            <span>2025 - Present</span>
+                            <strong>Madison, WI</strong>
+                        </div>
+                        <div class="timeline-body">
+                            <h3>Graduate Research Assistant</h3>
+                            <p class="company">University of Wisconsin-Madison</p>
+                            <ul>
+                                <li>Built an end-to-end ML forecasting pipeline with weather signals, news-derived features, feature engineering, model evaluation, and FastAPI serving.</li>
+                                <li>Formulated a Bayesian calibration layer over a policy-network forecasting model, reaching a 0.176 Brier score, 84% recall, and 17% lower scenario variance.</li>
+                                <li>Trained and evaluated XGBoost weather-impact models across temperature, humidity, and precipitation features for stable inference.</li>
+                            </ul>
+                        </div>
+                    </article>
 
-                <a href="https://www.linkedin.com/in/ajeenckya-mahadik" class="contact-btn" target="_blank" rel="noopener">
-                    <span class="icon-wrap icon-linkedin">
-                        <img src="assets/linkedin-black.jpg" alt="LinkedIn" class="contact-icon">
-                    </span>
-                    LinkedIn
-                </a>
+                    <article class="timeline-item">
+                        <div class="timeline-meta">
+                            <span>2023 - 2024</span>
+                            <strong>India</strong>
+                        </div>
+                        <div class="timeline-body">
+                            <h3>Graduate Associate Engineer</h3>
+                            <p class="company">Fiat India Automobiles Pvt. Ltd.</p>
+                            <ul>
+                                <li>Developed Scikit-learn regression models to identify delay-prone operations and improve operational efficiency by 9%.</li>
+                                <li>Created ML-ready datasets from noisy operational logs using schema standardization, missing-value imputation, and feature engineering.</li>
+                                <li>Structured AWS workflows with S3, Lambda, IAM, and CloudWatch for validation, transformation, and decision-support outputs.</li>
+                            </ul>
+                        </div>
+                    </article>
 
-                <a href="https://github.com/Ajeenckya5" class="contact-btn" target="_blank" rel="noopener">
-                    <span class="icon-wrap icon-github">
-                        <img src="assets/github-black.jpg" alt="GitHub" class="contact-icon">
-                    </span>
-                    GitHub
-                </a>
+                    <article class="timeline-item">
+                        <div class="timeline-meta">
+                            <span>2022 - 2023</span>
+                            <strong>India</strong>
+                        </div>
+                        <div class="timeline-body">
+                            <h3>Analytics Engineer</h3>
+                            <p class="company">Powertrac</p>
+                            <ul>
+                                <li>Engineered predictive maintenance pipelines from diagnostic logs and service records, reducing unplanned downtime by 12%.</li>
+                                <li>Built a risk-score prioritization model that replaced manual triage with data-informed service routing.</li>
+                                <li>Established a monitoring loop for low-confidence predictions and upstream feature-quality fixes.</li>
+                            </ul>
+                        </div>
+                    </article>
+
+                    <article class="timeline-item">
+                        <div class="timeline-meta">
+                            <span>2021 - 2022</span>
+                            <strong>India</strong>
+                        </div>
+                        <div class="timeline-body">
+                            <h3>Graduate Engineer</h3>
+                            <p class="company">Tata Motors</p>
+                            <ul>
+                                <li>Designed ML feature pipelines over high-volume operations data, standardizing timestamps, throughput logs, and performance metrics.</li>
+                                <li>Deployed anomaly detection workflows that improved system efficiency by 18% and throughput by 15%.</li>
+                                <li>Built a data-driven process optimization framework that reduced operational costs by 20% and earned the Kaizen Award.</li>
+                            </ul>
+                        </div>
+                    </article>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- About Section -->
-    <section id="about" class="section">
-        <div class="section-inner">
-            <div class="section-header">
-                <h2>About</h2>
-                <p>AI/ML engineering with a solid optimization and probabilistic modeling backbone.</p>
+        <section id="projects" class="section">
+            <div class="section-inner">
+                <div class="section-header compact">
+                    <p class="eyebrow">Projects</p>
+                    <h2>Selected AI systems and engineering projects.</h2>
+                </div>
+
+                <div class="projects-grid">
+                    <article class="project-card featured">
+                        <p class="project-type">LLM Tooling</p>
+                        <h3>Autonomous CLI Coding Agent</h3>
+                        <p>
+                            Framework-free LLM coding agent using raw APIs, a multi-step tool-calling
+                            loop, six workspace tools, and safety guardrails. Built for faster iteration
+                            than heavier agent frameworks.
+                        </p>
+                        <div class="project-tags">
+                            <span>LLM agents</span>
+                            <span>Tool calling</span>
+                            <span>Python</span>
+                            <span>Guardrails</span>
+                        </div>
+                        <a href="https://github.com/Ajeenckya5/CLI_AI_Agent" target="_blank" rel="noopener" class="text-link">View repository</a>
+                    </article>
+
+                    <article class="project-card">
+                        <p class="project-type">Agent Evaluation</p>
+                        <h3>Self-Improving LLM Agent</h3>
+                        <p>
+                            Long-horizon agent workflow across AgentBench and WebArena with trace
+                            logging, failure labeling, strategy-memory retrieval, GPT-4 evaluation,
+                            ReAct baselines, LLaMA3-8B inference, and QLoRA 4-bit quantization.
+                        </p>
+                        <div class="project-tags">
+                            <span>AgentBench</span>
+                            <span>WebArena</span>
+                            <span>QLoRA</span>
+                            <span>LLaMA</span>
+                        </div>
+                        <a href="https://github.com/Ajeenckya5/opticode-agentr" target="_blank" rel="noopener" class="text-link">View repository</a>
+                    </article>
+
+                    <article class="project-card">
+                        <p class="project-type">RAG Application</p>
+                        <h3>AI Document Chat</h3>
+                        <p>
+                            Asynchronous RAG pipeline using chunking, embeddings, vector indexing,
+                            cosine retrieval, FastAPI, Streamlit, Docker, CI/CD workflows, PostgreSQL,
+                            and pgvector.
+                        </p>
+                        <div class="project-tags">
+                            <span>RAG</span>
+                            <span>pgvector</span>
+                            <span>FastAPI</span>
+                            <span>Docker</span>
+                        </div>
+                        <a href="https://github.com/Ajeenckya5/LLM_RAG" target="_blank" rel="noopener" class="text-link">View repository</a>
+                    </article>
+                </div>
             </div>
-            <div class="about-grid">
+        </section>
+
+        <section id="skills" class="section section-alt">
+            <div class="section-inner">
+                <div class="section-header compact">
+                    <p class="eyebrow">Skills</p>
+                    <h2>Technical stack for AI/ML engineering roles.</h2>
+                </div>
+
+                <div class="skills-grid">
+                    <article class="skill-card">
+                        <h3>Languages &amp; Backend</h3>
+                        <ul class="skill-list">
+                            <li>Python</li>
+                            <li>SQL</li>
+                            <li>FastAPI</li>
+                            <li>Streamlit</li>
+                            <li>Git</li>
+                        </ul>
+                    </article>
+
+                    <article class="skill-card">
+                        <h3>ML &amp; Deep Learning</h3>
+                        <ul class="skill-list">
+                            <li>Scikit-learn</li>
+                            <li>PyTorch</li>
+                            <li>TensorFlow</li>
+                            <li>XGBoost</li>
+                            <li>Bayesian modeling</li>
+                            <li>Model evaluation</li>
+                        </ul>
+                    </article>
+
+                    <article class="skill-card">
+                        <h3>LLM &amp; AI Systems</h3>
+                        <ul class="skill-list">
+                            <li>RAG</li>
+                            <li>Knowledge Graph RAG</li>
+                            <li>Agentic workflows</li>
+                            <li>Transformers</li>
+                            <li>LangChain</li>
+                            <li>RLHF</li>
+                            <li>Hugging Face</li>
+                        </ul>
+                    </article>
+
+                    <article class="skill-card">
+                        <h3>Data, Cloud &amp; MLOps</h3>
+                        <ul class="skill-list">
+                            <li>PostgreSQL</li>
+                            <li>pgvector</li>
+                            <li>AWS S3</li>
+                            <li>AWS Lambda</li>
+                            <li>Docker</li>
+                            <li>Kubernetes</li>
+                            <li>GitHub Actions</li>
+                        </ul>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section id="education" class="section">
+            <div class="section-inner education-grid">
+                <div class="section-header">
+                    <p class="eyebrow">Education</p>
+                    <h2>Academic foundation in AI/ML and engineering systems.</h2>
+                </div>
+
+                <div class="education-list">
+                    <article class="education-item">
+                        <span>May 2026</span>
+                        <h3>University of Wisconsin-Madison</h3>
+                        <p>M.S. Industrial Engineering, specialization in AI/ML</p>
+                        <p class="muted">Coursework: Machine Learning, AI Systems, Deep Learning, NLP, Trustworthy AI, AI Agents</p>
+                    </article>
+
+                    <article class="education-item">
+                        <span>May 2020</span>
+                        <h3>Shivaji University</h3>
+                        <p>B.E. Mechanical Engineering</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="section contact-section">
+            <div class="section-inner contact-panel">
                 <div>
+                    <p class="eyebrow">Contact</p>
+                    <h2>Open to AI/ML engineering roles and applied ML projects.</h2>
                     <p>
-                        I'm a Master's student in Industrial &amp; Systems Engineering at
-                        the University of Wisconsin–Madison, specializing in machine
-                        learning, stochastic modeling, and optimization.
-                    </p>
-                    <p>
-                        I like taking messy, high-dimensional problems and turning them
-                        into <strong>end-to-end ML systems</strong>: calibrated probability models,
-                        simulation-ready outputs, and pipelines that support fast iteration.
-                    </p>
-                    <p>
-                        My current project focuses on a <strong>Probabilistic AI System for Outcome Simulation</strong>,
-                        designed to generate stable probability distributions and support robust scenario analysis.
+                        Reach out for work involving forecasting systems, LLM applications,
+                        model evaluation, RAG, MLOps, or data-driven operations.
                     </p>
                 </div>
-                <div>
-                    <h3>What I enjoy working on</h3>
-                    <ul class="pill-list">
-                        <li>Probabilistic ML</li>
-                        <li>Prediction &amp; Simulation</li>
-                        <li>Stochastic modeling</li>
-                        <li>Optimization</li>
-                        <li>Computer Vision</li>
-                        <li>LLM-based feature engineering</li>
-                    </ul>
+
+                <div class="contact-actions">
+                    <a href="mailto:ajeenckyam@gmail.com" class="contact-btn">
+                        <img src="assets/email-black.jpg" alt="" />
+                        Email
+                    </a>
+                    <a href="https://www.linkedin.com/in/ajeenckya-mahadik" class="contact-btn" target="_blank" rel="noopener">
+                        <img src="assets/linkedin-black.jpg" alt="" />
+                        LinkedIn
+                    </a>
+                    <a href="https://github.com/Ajeenckya5" class="contact-btn" target="_blank" rel="noopener">
+                        <img src="assets/github-black.jpg" alt="" />
+                        GitHub
+                    </a>
+                    <a href="files/resume.pdf" class="contact-btn" target="_blank" rel="noopener">
+                        Resume
+                    </a>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
+    </main>
 
-    <!-- Skills Section -->
-    <section id="skills" class="section section-alt">
-        <div class="section-inner">
-            <div class="section-header">
-                <h2>Skills &amp; Tools</h2>
-                <p>Core areas I use to design, train, and analyze models.</p>
-            </div>
-
-            <div class="projects-grid">
-                <article class="project-card">
-                    <h3>Representation Learning &amp; Text Features</h3>
-                    <p>Extracting meaningful signals from news, text, and metadata for downstream ML systems.</p>
-                    <div class="project-tags">
-                        <span>Embeddings</span>
-                        <span>LLM features</span>
-                        <span>Text preprocessing</span>
-                    </div>
-                </article>
-
-                <article class="project-card">
-                    <h3>Machine Learning &amp; Deep Learning</h3>
-                    <p>Building prediction systems for structured data, time series, and vision tasks.</p>
-                    <div class="project-tags">
-                        <span>PyTorch</span>
-                        <span>scikit-learn</span>
-                        <span>CNNs</span>
-                        <span>Transformers</span>
-                    </div>
-                </article>
-
-                <article class="project-card">
-                    <h3>Probabilistic Modeling</h3>
-                    <p>Calibration, uncertainty estimation, Monte-Carlo evaluation, and scenario forecasting.</p>
-                    <div class="project-tags">
-                        <span>Uncertainty estimation</span>
-                        <span>Calibration</span>
-                        <span>Prediction intervals</span>
-                    </div>
-                </article>
-
-                <article class="project-card">
-                    <h3>Optimization &amp; Systems</h3>
-                    <p>Deterministic and stochastic optimization with real-world constraints.</p>
-                    <div class="project-tags">
-                        <span>Gurobi</span>
-                        <span>Routing</span>
-                        <span>MIP / MILP</span>
-                    </div>
-                </article>
-            </div>
-        </div>
-    </section>
-
-    <!-- Projects: Current -->
-    <section id="current-projects" class="section">
-        <div class="section-inner">
-            <div class="section-header">
-                <h2>Projects</h2>
-                <p>My ongoing and upcoming machine learning work.</p>
-            </div>
-
-            <div class="projects-grid">
-                <article class="project-card">
-                    <h3>Probabilistic AI System for Outcome Simulation</h3>
-                    <p>
-                        A prediction engine that generates calibrated probability distributions instead of
-                        single hard outputs. It analyzes historical patterns, estimates likely outcomes,
-                        and measures how confident the system is in each scenario.
-                    </p>
-                    <p style="font-size:0.9rem; color:#a9acb9;">
-                        Designed for forecasting and decision-making under uncertainty: it shows how outcomes 
-                        shift as conditions change and how stable predictions remain across repeated simulations.
-                    </p>
-                    <div class="project-tags">
-                        <span>Probability modeling</span>
-                        <span>Simulation</span>
-                        <span>Forecasting</span>
-                        <span>Risk analysis</span>
-                    </div>
-                    <div class="project-links">
-                        <a href="https://github.com/Ajeenckya5" target="_blank">GitHub (code &amp; experiments)</a>
-                    </div>
-                </article>
-            </div>
-        </div>
-    </section>
-
-    <!-- Projects: Upcoming -->
-    <section id="upcoming-projects" class="section section-alt">
-        <div class="section-inner">
-            <div class="section-header">
-                <h2>Upcoming Projects</h2>
-                <p>Concrete next phases extending my probabilistic prediction system.</p>
-            </div>
-
-            <div class="projects-grid">
-
-                <article class="project-card">
-                    <h3>News-Driven Behavioral Signal Modeling</h3>
-                    <p>
-                        A microservice that turns real-time news into structured behavioral vectors using 
-                        lightweight LLMs. These features improve probability calibration and directional accuracy.
-                    </p>
-                    <p style="font-size:0.9rem; color:#a9acb9;">
-                        Early prototypes improve calibration by ~12% and strengthen scenario reasoning.
-                    </p>
-                    <div class="project-tags">
-                        <span>LLM embeddings</span>
-                        <span>Feature engineering</span>
-                        <span>Microservice</span>
-                    </div>
-                </article>
-
-                <article class="project-card">
-                    <h3>Weather-Impact Prediction Layer (MDN)</h3>
-                    <p>
-                        A Mixture Density Network designed to model environmental influences—temperature, 
-                        humidity, rainfall, elevation—on outcome distributions.
-                    </p>
-                    <p style="font-size:0.9rem; color:#a9acb9;">
-                        Reduces scenario variance by ~17% and helps quantify environmental uncertainty.
-                    </p>
-                    <div class="project-tags">
-                        <span>Mixture Density Networks</span>
-                        <span>Environmental modeling</span>
-                    </div>
-                </article>
-
-                <article class="project-card">
-                    <h3>CTMC Dynamics for Time-Evolving Simulation</h3>
-                    <p>
-                        A Continuous-Time Markov Chain (CTMC) layer to track dynamic shifts in conditions 
-                        throughout simulated scenarios.
-                    </p>
-                    <p style="font-size:0.9rem; color:#a9acb9;">
-                        Enables richer multi-step forecasting and evolving probability curves.
-                    </p>
-                    <div class="project-tags">
-                        <span>CTMC</span>
-                        <span>Time dynamics</span>
-                    </div>
-                </article>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- Projects: Future Ideas -->
-    <section id="future-ideas" class="section">
-        <div class="section-inner">
-            <div class="section-header">
-                <h2>Future Ideas</h2>
-                <p>High-level concepts to explore next.</p>
-            </div>
-
-            <div class="projects-grid">
-
-                <article class="project-card">
-                    <h3>Multi-Agent Simulation</h3>
-                    <p>
-                        Concept for agents acting under uncertainty to study cooperation, stability, 
-                        and complex decision behavior.
-                    </p>
-                </article>
-
-                <article class="project-card">
-                    <h3>LLM Behavior &amp; Safety Modeling</h3>
-                    <p>
-                        A lightweight predictor that estimates the risk of an LLM response before 
-                        generation completes—enabling proactive filters and safer applications.
-                    </p>
-                </article>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- Other Projects -->
-    <section id="other-projects" class="section">
-        <div class="section-inner">
-            <div class="section-header">
-                <h2>Other Projects</h2>
-                <p>Additional work in optimization, vision, and forecasting.</p>
-            </div>
-
-            <div class="projects-grid">
-
-                <article class="project-card">
-                    <h3>Adpative Two Stage Stochastic Routing</h3>
-                    <p>
-                        A two-stage stochastic routing model with recourse to minimize expected cost 
-                        under uncertain travel times.
-                    </p>
-                    <div class="project-tags">
-                        <span>Routing</span>
-                        <span>Stochastic programming</span>
-                    </div>
-                    <div class="project-links">
-                        <a href="https://github.com/Ajeenckya5/Adpative_Two-Stage_Stochastic_Routing" target="_blank" class = "repo_btn">
-                            GitHub
-                        </a>
-                    </div>
-                </article>
-
-                <article class="project-card">
-                    <h3>Facial Expression Detection</h3>
-                    <p>
-                        A ResNet50 + Vision Transformer hybrid for low-resolution emotion recognition.
-                    </p>
-                    <div class="project-tags">
-                        <span>Computer vision</span>
-                        <span>ResNet50</span>
-                        <span>ViT</span>
-                    </div>
-                    <div class="project-links">
-                        <a href="https://github.com/Ajeenckya5/Facial_Expressions_Recognation" target="_blank" class = "repo_btn">
-                            GitHub
-                        </a>
-                    </div>
-                </article>
-
-                <article class="project-card">
-                    <h3>Mulitmodal Route Optimization</h3>
-                    <p>
-                        A constrained multimodal routing framework that computes cost–time optimal travel paths across bus, train, and flight networks.
-                    </p>
-                    <div class="project-tags">
-                        <span>Pyomo</span>
-                        <span>Travel Salesman Problem</span>
-                    </div>
-                    <div class="project-links">
-                        <a href="https://github.com/Ajeenckya5/Multimodal_Optimization_Framework" target="_blank" class="repo_btn">
-                            GitHub
-                        </a>
-                    </div>
-                </article>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- Experience -->
-    <section id="experience" class="section section-alt">
-        <div class="section-inner">
-            <div class="section-header">
-                <h2>Experience</h2>
-                <p>Where I’ve applied engineering and analytical thinking so far.</p>
-            </div>
-
-            <div class="projects-grid">
-
-                <article class="project-card">
-                    <h3>Graduate Research Assistant — UW–Madison</h3>
-                    <p>
-                        Working on probabilistic modeling, simulation stability, and 
-                        optimization-based ML systems supporting research workflows.
-                    </p>
-                </article>
-
-                <article class="project-card">
-                    <h3>FIAT India Automobiles — Graduate Apprentice Trainee</h3>
-                    <p>
-                        Improved powertrain launch operations through cycle-time analytics and 
-                        constraint-driven line balancing, increasing assembly efficiency by 9%. 
-                        Built digital procedures and engine-assembly workflows that enabled 
-                        traceable metrics and automation-ready process data.
-                    </p>
-                </article>
-
-                <article class="project-card">
-                    <h3>Powertrac Tractors — Maintenance Engineer</h3>
-                    <p>
-                        Applied reliability analysis to reduce downtime patterns and improve technician 
-                        productivity by 12%. Designed engineered jigs, gauges, and optimized layouts 
-                        to generate cleaner operational signals and more consistent maintenance data 
-                        for future predictive systems.
-                    </p>
-                </article>
-            </div>
-        </div>
-    </section>
-
-    <!-- Resume -->
-    <section id="resume" class="section">
-        <div class="section-inner">
-            <div class="section-header">
-                <h2>Resume</h2>
-                <p>One-page snapshot of my AI/ML background.</p>
-            </div>
-            <div class="resume-block">
-                <p>
-                    Download my resume for a concise view of my projects, experience, and
-                    technical skills tailored for AI/ML Engineer roles.
-                </p>
-                <a href="files/resume.pdf" class="btn primary" target="_blank">Open Resume (PDF)</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact -->
-    <section id="contact" class="section section-alt">
-        <div class="section-inner">
-            <div class="section-header">
-                <h2>Contact</h2>
-                <p>Best ways to reach me.</p>
-            </div>
-
-            <div class="contact-grid">
-
-                <a href="mailto:avmahadik@wisc.edu" class="contact-btn" target="_blank" rel="noopener">
-                    <span class="icon-wrap icon-email">
-                    <img src="assets/email-black.jpg" alt="Email" class="contact-icon">
-                    </span>
-                    Email
-                </a>
-
-                <a href="https://www.linkedin.com/in/ajeenckya-mahadik" class="contact-btn" target="_blank" rel="noopener">
-                    <span class="icon-wrap icon-linkedin">
-                    <img src="assets/linkedin-black.jpg" alt="LinkedIn" class="contact-icon">
-                    </span>
-                    LinkedIn
-                </a>
-
-                <a href="https://github.com/Ajeenckya5" class="contact-btn" target="_blank" rel="noopener">
-                    <span class="icon-wrap icon-github">
-                    <img src="assets/github-black.jpg" alt="GitHub" class="contact-icon">
-                    </span>
-                    GitHub
-                </a>
-
-            </div>
-
-            <div style="text-align:center; margin-top:2.5rem;">
-                <a href="mailto:avmahadik@wisc.edu" class="btn primary">Email me about an AI/ML role</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
     <footer class="site-footer">
         <div class="section-inner footer-inner">
-            <p>© <span id="year"></span> Ajeenckya Mahadik — Portfolio</p>
+            <p>&copy; <span id="year"></span> Ajeenckya Mahadik. AI/ML Engineer.</p>
         </div>
     </footer>
 
