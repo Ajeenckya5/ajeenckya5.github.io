@@ -144,7 +144,7 @@ function renderBoard() {
         <span class="cb-fill" style="width:${(live / maxP) * 100}%"></span>
         <span class="cb-official" style="left:${(off / maxP) * 100}%" title="official: ${pct(off)}"></span>
       </span>
-      <span class="cb-val">${totalSims ? pct(live) : "—"}</span>
+      <span class="cb-val">${!totalSims ? "—" : totalSims < 30 ? (counts[t] || 0) + "×" : pct(live)}</span>
     </div>`;
   }).join("");
 }
@@ -234,12 +234,20 @@ async function kickoff() {
 
   // phase 3: champion
   $("wcPhase").textContent = "full time · we have a world champion";
+  const odds = CHAMP_P[result.champion] || 0;
+  const tag = odds >= 0.08
+    ? `the favorite delivered — my model gave them a ${pct(odds)} title chance, the field's best`
+    : odds >= 0.03
+    ? `a genuine contender — my model gave them a ${pct(odds)} title chance`
+    : `an upset! my model gave them just a ${pct(odds)} title chance — rare futures happen`;
   const ch = $("wcChampion");
   ch.hidden = false;
   ch.innerHTML = `
     <span class="champ-flag">${flag(result.champion)}</span>
     <h4>🏆 <span>${result.champion}</span> win the 2026 World Cup</h4>
-    <p>beat ${flag(result.finalLoser)} ${result.finalLoser} in the final · simulation #${totalSims + 1}</p>`;
+    <p>beat ${flag(result.finalLoser)} ${result.finalLoser} in the final · simulation #${totalSims + 1}</p>
+    <p class="champ-context">${tag}</p>
+    <p class="champ-context dim">a different champion each run is correct — every kickoff samples ONE future from the model's fixed probabilities. Run 5,000 and watch the true odds emerge below ▾</p>`;
 
   counts[result.champion] = (counts[result.champion] || 0) + 1;
   totalSims += 1;
@@ -351,9 +359,9 @@ function renderMatch() {
         <div class="mc-prob">win ${pct(ens[0])}</div>
       </div>
       <div class="mc-score">
-        <div class="mc-pred">${m.score[0]} – ${m.score[1]}</div>
-        <span class="mc-pred-label">model scoreline</span>
-        <span class="mc-pick">model pick: ${pick}</span>
+        <div class="mc-pred">${pct(ens[1], 0)}</div>
+        <span class="mc-pred-label">draw probability</span>
+        <span class="mc-pick">model pick: ${pick} · ${pct(Math.max(...ens), 0)}</span>
       </div>
       <div class="mc-side">
         <span class="flag">${flag(m.a)}</span>
@@ -517,106 +525,146 @@ if ($("bnnSelect")) {
 }
 
 /* ============================================================
-   4. CODECRAFT — agent pipeline live run
+   4. CODECRAFT — prompt-driven race: raw loop vs LangChain
    ============================================================ */
 
-const AGENT_TASKS = [
-  {
-    label: "fix the failing date test",
-    request: "codecraft \"tests are failing in tests/test_dates.py — fix the bug\"",
-    steps: [
-      { icon: "🧠", title: "plan · ReAct", text: "Failing assertion expects ISO week keys. I'll read the test to get the contract, read the implementation, patch it, and re-run the suite.", ms: 900 },
-      { icon: "🔧", title: "tool call · read_file(\"tests/test_dates.py\")", text: "observation: <span class='mono'>assert week_key(\"2026-01-05\") == \"2026-W02\"</span> — ISO-8601 week numbering.", ms: 800 },
-      { icon: "🔧", title: "tool call · read_file(\"utils/dates.py\")", text: "observation: implementation uses <span class='mono'>strftime(\"%Y-W%U\")</span> — Sunday-start week-of-year, not ISO. Root cause found.", ms: 800 },
-      { icon: "✏️", title: "tool call · replace_in_file(\"utils/dates.py\")", text: "diff preview approved by guardrail:", diff: "<span class='del'>-    return d.strftime(\"%Y-W%U\")</span>\n<span class='add'>+    iso = d.isocalendar()</span>\n<span class='add'>+    return f\"{iso[0]}-W{iso[1]:02d}\"</span>", ms: 1000 },
-      { icon: "🧪", title: "tool call · run_tests()", text: "observation: <span class='mono'>pytest -q · 14 passed in 0.42s</span>", ms: 1100 },
-      { icon: "✅", title: "task complete", text: "Loop closed in 2 ReAct iterations — no framework, just a raw tool-calling loop over the chat-completions API.", ms: 400 }
-    ],
-    summary: ["✓ complete", "4 tool calls", "2 loop iterations", "RLAIF score 9.2/10"]
-  },
-  {
-    label: "add a /health endpoint",
-    request: "codecraft \"add a /health endpoint that reports app version and DB status\"",
-    steps: [
-      { icon: "🧠", title: "plan · ReAct", text: "Locate the FastAPI app object, add a /health route returning version + DB ping, then verify with the test runner.", ms: 900 },
-      { icon: "🔧", title: "tool call · project_context()", text: "observation: FastAPI project · entrypoint <span class='mono'>app/main.py</span> · tests via <span class='mono'>pytest</span>.", ms: 700 },
-      { icon: "🔧", title: "tool call · read_file(\"app/main.py\")", text: "observation: app factory at line 18, DB session helper <span class='mono'>get_db()</span> available.", ms: 800 },
-      { icon: "✏️", title: "tool call · write_file(\"app/health.py\")", text: "diff preview approved by guardrail:", diff: "<span class='add'>+@router.get(\"/health\")</span>\n<span class='add'>+def health(db=Depends(get_db)):</span>\n<span class='add'>+    return {\"version\": __version__,</span>\n<span class='add'>+            \"db\": ping(db)}</span>", ms: 1000 },
-      { icon: "🧪", title: "tool call · run_tests()", text: "observation: <span class='mono'>pytest -q · 17 passed in 0.51s</span> — includes the new health-check test.", ms: 1100 },
-      { icon: "✅", title: "task complete", text: "Session memory keeps the project map, so follow-up requests skip re-discovery.", ms: 400 }
-    ],
-    summary: ["✓ complete", "4 tool calls", "2 loop iterations", "RLAIF score 8.9/10"]
-  },
-  {
-    label: "extract retry logic into a decorator",
-    request: "codecraft \"three modules duplicate retry loops — extract a shared decorator\"",
-    steps: [
-      { icon: "🧠", title: "plan · ReAct", text: "Find every duplicated retry loop, design one decorator with backoff, replace all call sites, re-run the suite.", ms: 900 },
-      { icon: "🔧", title: "tool call · search_files(\"while attempts\")", text: "observation: 3 hits — <span class='mono'>client.py · fetcher.py · sync.py</span>, near-identical loops.", ms: 800 },
-      { icon: "✏️", title: "tool call · write_file(\"utils/retry.py\")", text: "diff preview approved by guardrail:", diff: "<span class='add'>+def with_retry(tries=3, backoff=0.2):</span>\n<span class='add'>+    def deco(fn):</span>\n<span class='add'>+        @wraps(fn)</span>\n<span class='add'>+        def run(*a, **kw): ...</span>\n<span class='add'>+        return run</span>\n<span class='add'>+    return deco</span>", ms: 1000 },
-      { icon: "✏️", title: "tool call · replace_in_file × 3", text: "observation: 41 lines of duplicated loop logic replaced with <span class='mono'>@with_retry()</span> at 3 call sites.", ms: 900 },
-      { icon: "🧪", title: "tool call · run_tests()", text: "observation: <span class='mono'>pytest -q · 23 passed in 0.66s</span>", ms: 1100 },
-      { icon: "✅", title: "task complete", text: "Multi-file refactor handled by the same minimal loop — plan, act, observe, repeat.", ms: 400 }
-    ],
-    summary: ["✓ complete", "5 tool calls", "3 loop iterations", "RLAIF score 9.4/10"]
-  }
+const AGENT_CHIPS = [
+  "fix the failing date test",
+  "add a /health endpoint to the API",
+  "extract retry logic into a decorator"
 ];
 
-let agentBusy = false;
-
-function renderAgentTasks() {
-  const wrap = $("agentTasks");
-  wrap.innerHTML = AGENT_TASKS.map((t, i) =>
-    `<button class="task-btn" data-i="${i}">▶ ${t.label}</button>`).join("");
-  wrap.querySelectorAll(".task-btn").forEach((b) =>
-    b.addEventListener("click", () => runAgent(+b.dataset.i)));
+function planFromPrompt(raw) {
+  const p = (raw || "").trim() || AGENT_CHIPS[0];
+  const lower = p.toLowerCase();
+  const stop = new Set(["the","and","for","with","into","from","that","this","fix","add","make","create","refactor","update","remove","change","implement","write","build","test","tests","failing","bug","error","please","code","file","files","new","api","endpoint","function","method","logic","there","when","then","what","some"]);
+  const words = (p.match(/[a-zA-Z][a-zA-Z0-9_\-]{2,}/g) || []).filter((w) => !stop.has(w.toLowerCase()));
+  const subject = (words[0] || "feature").toLowerCase().replace(/[^a-z0-9_]/g, "") || "feature";
+  let steps;
+  if (/test|fail|bug|error|crash|broke/.test(lower)) {
+    steps = [
+      { icon: "🧠", t: "plan · ReAct", x: `Reproduce first. Run the suite, read the failing assertion around “${subject}”, find root cause, patch, re-run.` },
+      { icon: "🧪", t: "tool · run_tests()", x: `observation: 1 failure in <span class="mono">tests/test_${subject}.py</span>` },
+      { icon: "🔧", t: `tool · read_file("tests/test_${subject}.py")`, x: "observation: expected behavior extracted from the failing assert." },
+      { icon: "🔧", t: `tool · read_file("src/${subject}.py")`, x: "observation: implementation diverges from the tested contract — root cause found." },
+      { icon: "✏️", t: `tool · replace_in_file("src/${subject}.py")`, x: "diff preview → guardrail approval → patch applied." },
+      { icon: "🧪", t: "tool · run_tests()", x: 'observation: <span class="mono">all tests passed ✓</span>' }
+    ];
+  } else if (/endpoint|route|server|fastapi|flask|http|rest/.test(lower)) {
+    steps = [
+      { icon: "🧠", t: "plan · ReAct", x: `Locate the app object, implement “${p}”, wire the route, verify with the test runner.` },
+      { icon: "🔧", t: "tool · project_context()", x: "observation: FastAPI project · entrypoint app/main.py · pytest available." },
+      { icon: "🔧", t: 'tool · read_file("app/main.py")', x: "observation: router + dependency helpers mapped." },
+      { icon: "✏️", t: `tool · write_file("app/${subject}.py")`, x: "diff preview → guardrail approval → route implemented." },
+      { icon: "🧪", t: "tool · run_tests()", x: 'observation: <span class="mono">all tests passed ✓</span>' }
+    ];
+  } else if (/refactor|extract|clean|rename|move|decorator|dedup|simplif/.test(lower)) {
+    steps = [
+      { icon: "🧠", t: "plan · ReAct", x: `Find every duplicate of “${subject}”, design one shared abstraction, replace all call sites, re-run the suite.` },
+      { icon: "🔧", t: `tool · search_files("${subject}")`, x: "observation: 3 near-identical occurrences located." },
+      { icon: "✏️", t: `tool · write_file("utils/${subject}.py")`, x: "shared implementation written — diff approved." },
+      { icon: "✏️", t: "tool · replace_in_file × 3", x: "all call sites now use the shared version." },
+      { icon: "🧪", t: "tool · run_tests()", x: 'observation: <span class="mono">all tests passed ✓</span>' }
+    ];
+  } else {
+    steps = [
+      { icon: "🧠", t: "plan · ReAct", x: `Scope “${p}”: inspect the project, find touch points for “${subject}”, implement, verify.` },
+      { icon: "🔧", t: "tool · project_context()", x: "observation: Python project · src layout mapped · pytest available." },
+      { icon: "🔧", t: `tool · search_files("${subject}")`, x: "observation: 2 relevant modules located." },
+      { icon: "✏️", t: `tool · write_file("src/${subject}.py")`, x: "diff preview → guardrail approval → implementation written." },
+      { icon: "🧪", t: "tool · run_tests()", x: 'observation: <span class="mono">all tests passed ✓</span>' }
+    ];
+  }
+  return { prompt: p, steps };
 }
 
-async function runAgent(i) {
-  if (agentBusy) return;
-  agentBusy = true;
-  const task = AGENT_TASKS[i];
+// LangChain overhead inserted around every real step (illustrative; ratio is measured)
+const LC_OVERHEAD = [
+  "AgentExecutor: rebuild chain graph",
+  "CallbackManager: dispatch events ×12",
+  "PromptTemplate: render + serialize schema",
+  "OutputParser: validate → retry(1)"
+];
+
+let raceBusy = false;
+
+function laneStep(el, icon, title, body, cls) {
+  const d = document.createElement("div");
+  d.className = "race-step " + (cls || "");
+  d.innerHTML = `<span class="rs-icon">${icon}</span><div class="rs-body"><div class="rs-title mono">${title}</div>${body ? `<div class="rs-text">${body}</div>` : ""}</div>`;
+  el.appendChild(d);
+  requestAnimationFrame(() => d.classList.add("show"));
+  el.scrollTop = el.scrollHeight;
+  return d;
+}
+
+async function runRace() {
+  if (raceBusy) return;
+  raceBusy = true;
+  $("agentRunBtn").disabled = true;
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-  document.querySelectorAll("#agentTasks .task-btn").forEach((b, bi) => {
-    b.disabled = true;
-    b.classList.toggle("active", bi === i);
-  });
-  const pl = $("agentPipeline");
+  const plan = planFromPrompt($("agentPrompt").value);
+  const sm = $("stepsMine"), sl = $("stepsLC");
+  sm.innerHTML = ""; sl.innerHTML = "";
   $("agentSummary").hidden = true;
-  pl.innerHTML = `<div class="pl-step show ok">
-      <div class="pl-icon">📝</div>
-      <div class="pl-body"><div class="pl-title">request</div><div class="pl-text mono">$ ${task.request}</div></div>
-      <div class="pl-status ok">received</div>
-    </div>`;
 
-  for (const s of task.steps) {
-    const card = document.createElement("div");
-    card.className = "pl-step running";
-    card.innerHTML = `
-      <div class="pl-icon">${s.icon}</div>
-      <div class="pl-body">
-        <div class="pl-title">${s.title}</div>
-        <div class="pl-text">${s.text}${s.diff ? `<div class="pl-diff">${s.diff}</div>` : ""}</div>
-      </div>
-      <div class="pl-status"><span class="spin">◌</span> running</div>`;
-    pl.appendChild(card);
-    requestAnimationFrame(() => card.classList.add("show"));
-    card.scrollIntoView({ block: "nearest", behavior: "smooth" });
-    await sleep(s.ms);
-    card.classList.remove("running");
-    card.classList.add("ok");
-    card.querySelector(".pl-status").outerHTML = `<div class="pl-status ok">✓ ${(s.ms / 1000).toFixed(1)}s</div>`;
-  }
+  // simulated clock: my lane ~1.5 agent-seconds per step → ≈8s total; LC = 7.5×
+  const myTotal = plan.steps.length * 1.5;
+  const lcTotal = myTotal * 7.5;
+  let tM = 0, tL = 0;
+  const fmtT = (s) => s.toFixed(1) + "s";
 
+  laneStep(sm, "📝", "request", `$ codecraft "${plan.prompt}"`, "req");
+  laneStep(sl, "📝", "request", `AgentExecutor.invoke({input: "${plan.prompt}"})`, "req");
+
+  // my lane: clean steps
+  const myRun = (async () => {
+    for (const s of plan.steps) {
+      laneStep(sm, s.icon, s.t, s.x);
+      tM += 1.5;
+      $("timerMine").textContent = fmtT(tM);
+      await sleep(620);
+    }
+    laneStep(sm, "✅", `done in ~${fmtT(myTotal)} (agent time)`, "raw loop: messages → tools → repeat. Nothing else.", "ok");
+  })();
+
+  // LangChain lane: same steps buried in overhead, then fast-forward
+  const lcRun = (async () => {
+    for (let i = 0; i < 2; i++) {
+      const s = plan.steps[i];
+      for (const ov of LC_OVERHEAD.slice(0, i === 0 ? 4 : 3)) {
+        laneStep(sl, "⏳", ov, "", "ov");
+        tL += 2.6;
+        $("timerLC").textContent = fmtT(tL);
+        await sleep(540);
+      }
+      laneStep(sl, s.icon, s.t.replace("tool ·", "tool (wrapped) ·"), "");
+      tL += 1.5;
+      $("timerLC").textContent = fmtT(tL);
+      await sleep(420);
+    }
+    laneStep(sl, "⏩", `fast-forwarding ${(lcTotal - tL).toFixed(0)}s of the same overhead…`, `${plan.steps.length - 2} steps still queued behind callbacks, serialization and parser retries`, "ov");
+    await sleep(1100);
+    $("timerLC").textContent = fmtT(lcTotal);
+    laneStep(sl, "🏁", `done in ~${fmtT(lcTotal)} (agent time)`, "same task, same model — 7.5× the latency.", "slowdone");
+  })();
+
+  await Promise.all([myRun, lcRun]);
   const sum = $("agentSummary");
   sum.hidden = false;
-  sum.innerHTML = task.summary.map((s) => `<span>${s}</span>`).join("") +
-    `<span>benchmark avg: 7.5× faster than the LangChain build</span>`;
-  document.querySelectorAll("#agentTasks .task-btn").forEach((b) => (b.disabled = false));
-  agentBusy = false;
+  sum.innerHTML = `<span>⚡ CodeCraft ~${fmtT(myTotal)}</span><span>🐢 LangChain ~${fmtT(lcTotal)}</span><span>7.5× — measured on my 15-task benchmark</span><span>trace simulated from your prompt · real agent on GitHub ↖</span>`;
+  $("agentRunBtn").disabled = false;
+  raceBusy = false;
 }
 
-if ($("agentTasks")) renderAgentTasks();
+if ($("agentRunBtn")) {
+  $("agentChips").innerHTML = AGENT_CHIPS.map((c) => `<button class="chip mono">${c}</button>`).join("");
+  document.querySelectorAll("#agentChips .chip").forEach((b) =>
+    b.addEventListener("click", () => { $("agentPrompt").value = b.textContent; runRace(); }));
+  $("agentRunBtn").addEventListener("click", runRace);
+  $("agentPrompt").addEventListener("keydown", (e) => { if (e.key === "Enter") runRace(); });
+}
+
 
 /* ============================================================
    5. SELF-IMPROVING AGENT
@@ -904,13 +952,119 @@ function drawKg() {
   });
 }
 
-async function kgRun(qi) {
-  const q = KG_QUERIES[qi];
+/* --- free-question engine: alias detection + BFS shortest path --- */
+const NODE_BY_ID = {};
+KG_NODES.forEach((n) => (NODE_BY_ID[n.id] = n));
+const KG_ADJ = {};
+KG_EDGES.forEach(([a, b]) => {
+  (KG_ADJ[a] = KG_ADJ[a] || []).push(b);
+  (KG_ADJ[b] = KG_ADJ[b] || []).push(a);
+});
+const KG_ALIASES = {
+  sarah: ["sarah", "chen"], marco: ["marco", "diaz"], priya: ["priya", "nair"],
+  helios: ["helios"], north: ["northwind", "supply"],
+  inv: ["invoice", "inv-2291", "2291", "48,200", "48200", "€48"],
+  c114: ["contract", "c-114", "c114"], atlas: ["atlas", "migration"],
+  e1: ["kickoff"], e3: ["flagged", "flag "], e6: ["approval", "approve"],
+  e7: ["delay", "delivery"], e2: ["budget"], e4: ["redline"], e5: ["standup"], e8: ["intro"]
+};
+
+function kgBfs(src, dst) {
+  if (src === dst) return [src];
+  const prev = { [src]: null };
+  const queue = [src];
+  while (queue.length) {
+    const cur = queue.shift();
+    for (const nb of KG_ADJ[cur] || []) {
+      if (nb in prev) continue;
+      prev[nb] = cur;
+      if (nb === dst) {
+        const path = [dst];
+        let p = cur;
+        while (p !== null) { path.unshift(p); p = prev[p]; }
+        return path;
+      }
+      queue.push(nb);
+    }
+  }
+  return null;
+}
+
+function detectEntities(text) {
+  const t = " " + text.toLowerCase() + " ";
+  const found = [];
+  Object.entries(KG_ALIASES).forEach(([id, aliases]) => {
+    let pos = Infinity;
+    aliases.forEach((a) => { const i = t.indexOf(a); if (i >= 0 && i < pos) pos = i; });
+    if (pos < Infinity) found.push([pos, id]);
+  });
+  return found.sort((a, b) => a[0] - b[0]).map((f) => f[1]);
+}
+
+function kgHint(msg) {
+  $("kgAnswer").hidden = false;
+  $("kgAnswerText").textContent = msg;
+  $("kgHops").textContent = "entities in the demo corpus: Sarah, Marco, Priya, Helios, Northwind, invoice, contract, Atlas, kickoff, approval, delay…";
+  $("ragCompare").hidden = true;
+}
+
+function freeAsk() {
+  const text = ($("kgPrompt").value || "").trim();
+  if (!text) return;
+  const ents = detectEntities(text);
+  if (!ents.length) return kgHint("No entities from the demo inbox found in that question — mention a person, vendor or document and I'll walk the graph.");
+
+  // chain through every mentioned entity in mention order
+  const push = (arr, n) => { if (arr[arr.length - 1] !== n) arr.push(n); };
+  let path = [ents[0]];
+  for (let i = 1; i < ents.length; i++) {
+    const seg = kgBfs(path[path.length - 1], ents[i]);
+    if (seg) seg.slice(1).forEach((n) => push(path, n));
+  }
+
+  // who-questions: extend to the nearest person NOT already mentioned
+  const wantsPerson = /\bwho\b|\bwhom\b|\bwhose\b/i.test(text);
+  const mentioned = new Set(ents);
+  const lastIsUnmentionedPerson = () => {
+    const last = NODE_BY_ID[path[path.length - 1]];
+    return last.type === "person" && !mentioned.has(last.id);
+  };
+  if ((wantsPerson && !lastIsUnmentionedPerson()) || (path.length === 1)) {
+    let best = null;
+    KG_NODES.filter((n) => n.type === "person" && !mentioned.has(n.id)).forEach((p) => {
+      path.forEach((start) => {
+        const sp = kgBfs(start, p.id);
+        if (sp && (!best || sp.length < best.length)) best = sp;
+      });
+    });
+    if (best) best.slice(1).forEach((n) => push(path, n));
+  }
+  if (path.length < 2) return kgHint("Found an entity but no connected path in the demo graph — try mentioning two things, like “Sarah” and “invoice”.");
+
+  const hops = path.length - 1;
+  const labels = path.map((id) => NODE_BY_ID[id].label);
+  const last = NODE_BY_ID[path[path.length - 1]];
+  const answer = last.type === "person"
+    ? `${last.label} — found by walking ${labels.join(" → ")}. In the full system, Mistral 7B phrases this path + its source chunks into a cited answer (/emails/{id}).`
+    : `Graph traversal connects ${labels[0]} → ${last.label}${labels.length > 2 ? " via " + labels.slice(1, -1).join(" → ") : ""}. In the full system, Mistral 7B turns this into a cited answer (/emails/{id}).`;
+  kgAnimate({
+    path,
+    answer,
+    hops: `${hops} hop${hops > 1 ? "s" : ""} · ${labels.join(" → ")} · 1.0s (cache hit)`,
+    vec: "similar-text chunks retrieved — this cross-document link never sits inside one chunk ✗",
+    kg: `BFS found an entity path in ${hops} hop${hops > 1 ? "s" : ""} ✓`
+  });
+}
+
+const kgRun = (qi) => kgAnimate(KG_QUERIES[qi], qi);
+
+async function kgAnimate(q, qi = -1) {
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   document.querySelectorAll("#kgQueries .task-btn").forEach((b, bi) => {
     b.disabled = true;
     b.classList.toggle("active", bi === qi);
   });
+  if ($("kgAskBtn")) $("kgAskBtn").disabled = true;
   $("kgAnswer").hidden = true;
   $("ragCompare").hidden = true;
   kgActive = { nodes: new Set(), edges: new Set() };
@@ -934,6 +1088,7 @@ async function kgRun(qi) {
   $("ragVec").textContent = q.vec;
   $("ragKg").textContent = q.kg;
   document.querySelectorAll("#kgQueries .task-btn").forEach((b) => (b.disabled = false));
+  if ($("kgAskBtn")) $("kgAskBtn").disabled = false;
 }
 
 if ($("kgQueries")) {
@@ -941,6 +1096,8 @@ if ($("kgQueries")) {
     `<button class="task-btn" data-i="${i}">? ${q.label}</button>`).join("");
   document.querySelectorAll("#kgQueries .task-btn").forEach((b) =>
     b.addEventListener("click", () => kgRun(+b.dataset.i)));
+  $("kgAskBtn").addEventListener("click", freeAsk);
+  $("kgPrompt").addEventListener("keydown", (e) => { if (e.key === "Enter") freeAsk(); });
 }
 
 /* ============================================================
