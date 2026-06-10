@@ -537,7 +537,7 @@ const AGENT_CHIPS = [
 function planFromPrompt(raw) {
   const p = (raw || "").trim() || AGENT_CHIPS[0];
   const lower = p.toLowerCase();
-  const stop = new Set(["the","and","for","with","into","from","that","this","fix","add","make","create","refactor","update","remove","change","implement","write","build","test","tests","failing","bug","error","please","code","file","files","new","api","endpoint","function","method","logic","there","when","then","what","some"]);
+  const stop = new Set(["the","and","for","with","into","from","that","this","fix","add","make","create","refactor","update","remove","change","implement","write","build","test","tests","failing","bug","error","please","code","file","files","new","api","endpoint","function","method","logic","there","when","then","what","some","broken","slow","missing","wrong","old","bad","our","all","app","more"]);
   const words = (p.match(/[a-zA-Z][a-zA-Z0-9_\-]{2,}/g) || []).filter((w) => !stop.has(w.toLowerCase()));
   const subject = (words[0] || "feature").toLowerCase().replace(/[^a-z0-9_]/g, "") || "feature";
   let steps;
