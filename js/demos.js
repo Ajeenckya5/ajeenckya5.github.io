@@ -52,8 +52,20 @@ const GROUP_MATCHES = {};
 WC_MATCHES.forEach((m) => (GROUP_MATCHES[m.grp] = GROUP_MATCHES[m.grp] || []).push(m));
 const GROUP_KEYS = Object.keys(WC_GROUPS).sort();
 
+// RNG is swappable: Math.random for live dice, a seeded generator for the
+// reproducible forecast (same 5,000 futures every click).
+let RNG = Math.random;
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 function sample3(p) {
-  const r = Math.random() * (p[0] + p[1] + p[2]);
+  const r = RNG() * (p[0] + p[1] + p[2]);
   return r < p[0] ? 0 : r < p[0] + p[1] ? 1 : 2;
 }
 const argmax3 = (p) => p.indexOf(Math.max(...p));
@@ -70,7 +82,7 @@ function simulateGroupStage(det) {
       else { tbl[m.h].pts += 1; tbl[m.a].pts += 1; }
     });
     tables[g] = Object.values(tbl).sort(
-      (x, y) => y.pts - x.pts || y.gd - x.gd || STR[y.team] - STR[x.team] || (det ? 0 : Math.random() - 0.5)
+      (x, y) => y.pts - x.pts || y.gd - x.gd || STR[y.team] - STR[x.team] || (det ? 0 : RNG() - 0.5)
     );
   });
   return tables;
@@ -97,7 +109,7 @@ function simulateTournament(det) {
     thirds.push(tables[g][2]);
   });
   const bySeed = (arr) => arr.slice().sort((x, y) => y.pts - x.pts || y.gd - x.gd || STR[y.team] - STR[x.team]);
-  thirds.sort((x, y) => y.pts - x.pts || y.gd - x.gd || STR[y.team] - STR[x.team] || (det ? 0 : Math.random() - 0.5));
+  thirds.sort((x, y) => y.pts - x.pts || y.gd - x.gd || STR[y.team] - STR[x.team] || (det ? 0 : RNG() - 0.5));
   const qualified = bySeed(winners).concat(bySeed(runners), bySeed(thirds.slice(0, 8)));
   const seeds = qualified.map((q) => q.team); // index 0 = seed 1
 
@@ -107,7 +119,7 @@ function simulateTournament(det) {
     const ties = [], next = [];
     for (let i = 0; i < field.length; i += 2) {
       const a = field[i], b = field[i + 1];
-      const w = det ? (koWin(a, b) >= 0.5 ? a : b) : (Math.random() < koWin(a, b) ? a : b);
+      const w = det ? (koWin(a, b) >= 0.5 ? a : b) : (RNG() < koWin(a, b) ? a : b);
       ties.push({ a, b, w });
       next.push(w);
     }
@@ -315,8 +327,64 @@ function resetCup() {
   renderBoard();
 }
 
+/* ----- the model's forecast: seeded Monte Carlo, reproducible every click ----- */
+let predCache = null;
+
+function runPrediction() {
+  if (cupBusy) return;
+  cupBusy = true;
+  setCupButtons(true);
+  $("wcGroups").style.display = "none";
+  $("wcBracketWrap").hidden = true;
+  $("wcChampion").hidden = true;
+
+  const N = 5000;
+  const finish = (tally) => {
+    const ranked = Object.entries(tally).sort((a, b) => b[1] - a[1]);
+    const [top, topN] = ranked[0];
+    const rows = ranked.slice(0, 8).map(([t, n]) => `
+      <div class="fc-row">
+        <span class="flag">${flag(t)}</span>
+        <span class="fc-name">${t}</span>
+        <span class="fc-val mono">${pct(n / N)}</span>
+        <span class="fc-off mono">official ◇ ${pct(CHAMP_P[t] || 0)}</span>
+      </div>`).join("");
+    $("wcPhase").textContent = "the model's forecast · 5,000 seeded futures · identical on every click";
+    const ch = $("wcChampion");
+    ch.hidden = false;
+    ch.innerHTML = `
+      <span class="champ-flag">${flag(top)}</span>
+      <h4>📊 Most likely champion: <span>${top}</span> — ${pct(topN / N)}</h4>
+      <p>a calibrated model's prediction is a distribution, not a guarantee — no team reaches 14%, this Cup is genuinely open</p>
+      <div class="forecast-board">${rows}</div>
+      <p class="champ-context dim">reproducible by design: fixed-seed Monte Carlo over the model's fixed probabilities (seed 42, mulberry32). Click again — the numbers won't move. ◇ = my official Python run.</p>`;
+    cupBusy = false;
+    setCupButtons(false);
+  };
+
+  if (predCache) { finish(predCache); return; }
+
+  RNG = mulberry32(42);
+  const tally = {};
+  let done = 0;
+  function chunk() {
+    for (let i = 0; i < 250 && done < N; i++, done++) {
+      const r = simulateTournament(false);
+      tally[r.champion] = (tally[r.champion] || 0) + 1;
+    }
+    $("wcPhase").textContent = `computing the forecast · seeded future ${done.toLocaleString()} / ${N.toLocaleString()}`;
+    if (done < N) requestAnimationFrame(chunk);
+    else {
+      RNG = Math.random;
+      predCache = tally;
+      finish(tally);
+    }
+  }
+  requestAnimationFrame(chunk);
+}
+
 if ($("cupKickoffBtn")) {
-  $("cupDetBtn").addEventListener("click", () => kickoff(true));
+  $("cupDetBtn").addEventListener("click", runPrediction);
   $("cupKickoffBtn").addEventListener("click", () => kickoff(false));
   $("cupMcBtn").addEventListener("click", () => runMonteCarlo(5000));
   $("cupResetBtn").addEventListener("click", resetCup);
