@@ -117,8 +117,8 @@
                     <!-- Tab: full World Cup simulation -->
                     <div class="tab-pane active" id="pane-cup">
                         <div class="cup-controls">
-                            <button class="btn primary" id="cupDetBtn">📊 The model's forecast</button>
-                            <button class="btn secondary" id="cupKickoffBtn">🎲 One random future</button>
+                            <button class="btn primary" id="cupKickoffBtn">▶ Play the predicted World Cup</button>
+                            <button class="btn secondary" id="cupDetBtn">📊 The model's forecast</button>
                             <button class="btn secondary" id="cupMcBtn">⚡ Run 5,000</button>
                             <button class="btn ghost" id="cupResetBtn">Reset</button>
                             <div class="cup-readout mono">
@@ -127,12 +127,12 @@
                             </div>
                         </div>
                         <p class="pane-explain cup-note">
-                            Three ways to run the same fixed model. <strong>📊 The model's forecast</strong> is the legitimate prediction:
-                            5,000 Monte Carlo futures with a <strong>fixed seed</strong>, aggregated into calibrated title probabilities —
-                            identical numbers on every click, because a probabilistic model's answer is a <em>distribution</em>, not a single name.
-                            <strong>🎲 One random future</strong> samples exactly one of those futures, so its winner changes run to run —
-                            correct behavior when even the favorite holds only ~13%. <strong>⚡ Run 5,000</strong> re-derives the forecast
-                            live with fresh dice so you can watch it converge to the official ◇ distribution.
+                            Everything here is <strong>reproducible — same result on every click</strong>, because the model is fixed.
+                            <strong>▶ Play the predicted World Cup</strong> animates the model's representative tournament — groups, bracket,
+                            champion — from a fixed random seed, so it always ends the same way.
+                            <strong>📊 The model's forecast</strong> is the formal prediction: 5,000 seeded Monte Carlo futures aggregated into
+                            calibrated title probabilities, because a probabilistic model's answer is a <em>distribution</em>, not one name.
+                            <strong>⚡ Run 5,000</strong> re-runs everything with fresh dice — watch the numbers land on the official ◇ odds again.
                         </p>
 
                         <div class="wc-stage">
@@ -288,6 +288,27 @@
                                 <button class="btn primary" id="agentRunBtn">▶ Race</button>
                             </div>
                             <div class="chip-row" id="agentChips"></div>
+                            <details class="key-panel" id="keyPanel">
+                                <summary>🔑 Real mode — run the actual agent live, with your own key</summary>
+                                <div class="kp-body">
+                                    <p class="fine-print">
+                                        Paste any OpenAI-compatible API key (free keys: Groq or OpenRouter). It is used <strong>only inside your browser</strong> —
+                                        calls go straight from your browser to the provider; this site has no servers and never sees it.
+                                        Real mode = the agent's genuine tool-calling loop hitting a live LLM, with code <strong>actually executed</strong>
+                                        by real Python (Pyodide/WebAssembly) in this page. Type <span class="mono">mock</span> as the key to test the
+                                        full pipeline (scripted LLM, real execution) without any key. With a key saved, the self-improving agent
+                                        and DocGraph demos below also switch to live runs.
+                                    </p>
+                                    <div class="kp-grid">
+                                        <select id="llmProvider" class="match-select mono"></select>
+                                        <input id="llmModel" class="prompt-input mono" placeholder="model (optional)" />
+                                        <input id="llmKey" class="prompt-input mono" type="password" placeholder="api key · stays in your browser" />
+                                        <label class="kp-remember mono"><input type="checkbox" id="llmRemember" /> remember in this browser</label>
+                                        <button class="btn secondary" id="llmSave">Save</button>
+                                        <span class="kp-status mono" id="llmStatus"></span>
+                                    </div>
+                                </div>
+                            </details>
                             <div class="bench-mini">
                                 <p class="mono bench-title">measured · 15 identical tool-calling tasks, same model &amp; tools</p>
                                 <div class="bench-row"><span class="bench-label mono">CodeCraft</span><div class="bench-bar"><div class="bench-fill fast" style="width:13%"></div></div><span class="bench-val mono">1.0× · 15/15 ✓</span></div>
@@ -357,6 +378,7 @@
                                 <button class="btn primary" id="siRunBtn">▶ Watch it learn</button>
                                 <button class="btn ghost" id="siResetBtn">Reset</button>
                             </div>
+                            <p class="fine-print">🔑 with a key saved in the CodeCraft panel above, this becomes a LIVE run: your LLM writes the code, real Python verifies it against hidden tests, and the strategies in memory are written by the LLM from its own failures. Without a key it plays a recorded demo.</p>
                             <div class="memory-stack">
                                 <p class="mono bench-title">strategy memory (ChromaDB)</p>
                                 <div id="memoryCards"><p class="memory-empty mono">∅ empty — no strategies learned yet</p></div>
@@ -419,6 +441,7 @@
                             </div>
                             <div class="task-buttons" id="kgQueries"></div>
                             <p class="repo-link mono">⚙ full system (10K emails · Mistral 7B): <a href="https://github.com/Ajeenckya5/LLM_RAG" target="_blank" rel="noopener">github.com/Ajeenckya5/LLM_RAG</a></p>
+                            <p class="fine-print">entity detection + BFS always run for real in your browser; 🔑 with a key saved above, the final answer is also phrased live by your LLM from the traversed path.</p>
                             <div class="kg-answer" id="kgAnswer" hidden>
                                 <p class="mono kg-answer-label">answer · via graph traversal</p>
                                 <p id="kgAnswerText"></p>
@@ -582,6 +605,7 @@
 
     <script src="js/data.js"></script>
     <script src="js/results.js"></script>
+    <script src="js/llm.js"></script>
     <script src="js/demos.js"></script>
     <script src="js/main.js"></script>
 </body>
