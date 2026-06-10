@@ -210,16 +210,22 @@ function renderBracket(rounds, upTo) {
     </div>`).join("");
 }
 
-/* ----- animated single tournament ----- */
+/* ----- animated tournament: the model's predicted World Cup ----- */
+/* Fixed seed chosen so the played-out bracket crowns the forecast's modal
+   champion — the animation is a representative high-probability future and
+   replays IDENTICALLY on every click. */
+const PLAY_SEED = 2;
 let cupBusy = false;
 
-async function kickoff(det) {
+async function kickoff() {
   if (cupBusy) return;
   cupBusy = true;
   setCupButtons(true);
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-  const result = simulateTournament(det);
+  RNG = mulberry32(PLAY_SEED);
+  const result = simulateTournament(false);
+  RNG = Math.random;
 
   // phase 1: groups
   renderGroupsIdle();
@@ -234,7 +240,7 @@ async function kickoff(det) {
   $("wcGroups").style.display = "none";
   $("wcBracketWrap").hidden = false;
   for (let ri = 0; ri < result.rounds.length; ri++) {
-    $("wcPhase").textContent = ROUND_NAMES[ri] + (det ? " · deterministic: stronger team advances" : " · knockout sampled from model-fitted strengths");
+    $("wcPhase").textContent = ROUND_NAMES[ri] + " · the predicted bracket · identical on every replay";
     result.rounds[ri].forEach((t) => (t._done = false));
     renderBracket(result.rounds, ri);
     for (const t of result.rounds[ri]) {
@@ -246,33 +252,16 @@ async function kickoff(det) {
   }
 
   // phase 3: champion
-  $("wcPhase").textContent = det ? "full time · the model's most likely World Cup" : "full time · we have a world champion";
+  $("wcPhase").textContent = "full time · the model's predicted World Cup";
   const odds = CHAMP_P[result.champion] || 0;
-  const tag = det
-    ? `this is THE prediction: highest-probability outcome in all 72 fixtures, stronger team through every knockout. Title odds ${pct(odds)} — click again, you'll get exactly the same Cup.`
-    : odds >= 0.08
-    ? `the favorite delivered — my model gave them a ${pct(odds)} title chance, the field's best`
-    : odds >= 0.03
-    ? `a genuine contender — my model gave them a ${pct(odds)} title chance`
-    : `an upset! my model gave them just a ${pct(odds)} title chance — rare futures happen`;
   const ch = $("wcChampion");
   ch.hidden = false;
   ch.innerHTML = `
     <span class="champ-flag">${flag(result.champion)}</span>
     <h4>🏆 <span>${result.champion}</span> win the 2026 World Cup</h4>
-    <p>beat ${flag(result.finalLoser)} ${result.finalLoser} in the final · ${det ? "deterministic run" : "random future #" + (totalSims + 1)}</p>
-    <p class="champ-context">${tag}</p>
-    <p class="champ-context dim">${det
-      ? "the prediction never changes — only 🎲 random futures do, because they roll dice weighted by these same probabilities (not tallied below)."
-      : "a different champion each 🎲 run is correct — it samples ONE future from fixed probabilities. ▶ Most likely Cup gives the stable answer; ⚡ 5,000 runs give the odds below ▾"}</p>`;
-
-  if (!det) {
-    counts[result.champion] = (counts[result.champion] || 0) + 1;
-    totalSims += 1;
-    $("cupCount").textContent = totalSims.toLocaleString();
-    $("cupLast").textContent = `${flag(result.champion)} ${result.champion}`;
-    renderBoard();
-  }
+    <p>beat ${flag(result.finalLoser)} ${result.finalLoser} in the final · the model's predicted tournament</p>
+    <p class="champ-context">${result.champion} are the forecast's most likely champion (title odds ${pct(odds)}). This bracket is the model's representative future, fixed by seed — replay it as often as you like, it will not change.</p>
+    <p class="champ-context dim">the full calibrated odds for every team: 📊 The model's forecast · or ⚡ Run 5,000 fresh futures and watch them converge to the same numbers ▾</p>`;
 
   cupBusy = false;
   setCupButtons(false);
@@ -385,7 +374,7 @@ function runPrediction() {
 
 if ($("cupKickoffBtn")) {
   $("cupDetBtn").addEventListener("click", runPrediction);
-  $("cupKickoffBtn").addEventListener("click", () => kickoff(false));
+  $("cupKickoffBtn").addEventListener("click", kickoff);
   $("cupMcBtn").addEventListener("click", () => runMonteCarlo(5000));
   $("cupResetBtn").addEventListener("click", resetCup);
   renderGroupsIdle();
@@ -1254,6 +1243,14 @@ window.__paneHooks = {
   "pane-bnn": () => drawBnn(),
   "pane-cup": () => renderBoard(),
   "pane-reality": () => renderReality()
+};
+
+// test/diagnostic hook: run one seeded tournament, return its result
+window.__simOnce = (seed) => {
+  RNG = mulberry32(seed);
+  const r = simulateTournament(false);
+  RNG = Math.random;
+  return { champion: r.champion, finalLoser: r.finalLoser };
 };
 
 function firstPaint() {
