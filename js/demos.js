@@ -10,6 +10,8 @@
 const $ = (id) => document.getElementById(id);
 const pct = (x, d = 1) => (100 * x).toFixed(d) + "%";
 const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const hasLLM = () => window.LLM && window.LLM.configured();
 
 const FLAGS = {
   "Algeria":"🇩🇿","Argentina":"🇦🇷","Australia":"🇦🇺","Austria":"🇦🇹","Belgium":"🇧🇪",
@@ -654,6 +656,89 @@ const LC_OVERHEAD = [
 
 let raceBusy = false;
 
+/* ===== REAL MODE: live LLM tool-calling loop + genuine Python (Pyodide) ===== */
+const REAL_SYS = `You are CodeCraft, a precise coding agent working in a fresh virtual workspace.
+Tools: write_file(path, content) creates/overwrites a file; read_file(path) reads one; run_python(path) executes the file with REAL Python and returns its output.
+Method: plan briefly, write the code AND a test file (plain asserts + a final print), run the tests with run_python, fix any failure, and when tests pass reply with a 1-2 sentence completion summary and NO tool calls. Keep files small and dependency-free.`;
+
+const REAL_TOOLS = [
+  { type: "function", function: { name: "write_file", description: "Create or overwrite a file in the workspace", parameters: { type: "object", properties: { path: { type: "string" }, content: { type: "string" } }, required: ["path", "content"] } } },
+  { type: "function", function: { name: "read_file", description: "Read a file from the workspace", parameters: { type: "object", properties: { path: { type: "string" } }, required: ["path"] } } },
+  { type: "function", function: { name: "run_python", description: "Execute a python file for real and return its stdout/stderr", parameters: { type: "object", properties: { path: { type: "string" } }, required: ["path"] } } }
+];
+
+async function runReal() {
+  if (raceBusy) return;
+  raceBusy = true;
+  $("agentRunBtn").disabled = true;
+  if (LLM.isMock && LLM.isMock()) LLM.mockReset();
+  const prompt = ($("agentPrompt").value || "").trim() || "fix my two sum code";
+  const sm = $("stepsMine"), sl = $("stepsLC");
+  sm.innerHTML = ""; sl.innerHTML = "";
+  $("agentSummary").hidden = true;
+  $("timerLC").textContent = "—";
+  laneStep(sl, "ℹ️", "framework lane idles in real mode", "the 7.5× figure is my offline 15-task benchmark; this lane only races in the simulated demo.", "ov");
+  laneStep(sm, "📝", "request · REAL RUN", `$ codecraft "${esc(prompt)}"`, "req");
+
+  const t0 = performance.now();
+  const fmt = () => ((performance.now() - t0) / 1000).toFixed(1) + "s";
+  const vfs = {};
+  const messages = [{ role: "system", content: REAL_SYS }, { role: "user", content: prompt }];
+  let toolCalls = 0, iters = 0, failed = false;
+
+  try {
+    for (let i = 0; i < 8; i++) {
+      iters++;
+      const waitCard = laneStep(sm, "🛰", "calling the model — live…", "", "");
+      let msg;
+      try { msg = await LLM.chat(messages, REAL_TOOLS); }
+      finally { waitCard.remove(); }
+      messages.push(msg);
+      if (msg.content) laneStep(sm, "🧠", "assistant", esc(msg.content).slice(0, 600));
+      $("timerMine").textContent = fmt();
+      if (!msg.tool_calls || !msg.tool_calls.length) break;
+
+      for (const tc of msg.tool_calls) {
+        toolCalls++;
+        let args = {};
+        try { args = JSON.parse(tc.function.arguments || "{}"); } catch (e) { /* tolerate */ }
+        const name = tc.function.name;
+        let resultText;
+        if (name === "write_file") {
+          vfs[args.path || "file.py"] = String(args.content || "");
+          laneStep(sm, "✏️", `tool · write_file("${esc(args.path || "")}")`, `<div class="pl-diff">${esc(String(args.content || "").slice(0, 700))}</div>`);
+          resultText = "ok, written (" + String(args.content || "").length + " chars)";
+        } else if (name === "read_file") {
+          resultText = vfs[args.path] !== undefined ? vfs[args.path] : "ERROR: no such file";
+          laneStep(sm, "🔧", `tool · read_file("${esc(args.path || "")}")`, esc(String(resultText).slice(0, 300)));
+        } else if (name === "run_python") {
+          const st = laneStep(sm, "🐍", `tool · run_python("${esc(args.path || "")}") · executing for real…`, "");
+          let r;
+          try {
+            r = await PY.run(vfs, args.path, (s) => { st.querySelector(".rs-title").textContent = s; });
+          } catch (e) { r = { ok: false, out: "Pyodide error: " + e.message }; }
+          st.remove();
+          laneStep(sm, r.ok ? "🧪" : "❌", `run_python("${esc(args.path || "")}") — real output`, `<div class="pl-diff">${esc(r.out)}</div>`, r.ok ? "ok" : "ov");
+          resultText = (r.ok ? "EXIT OK\n" : "EXIT WITH ERROR\n") + r.out;
+        } else {
+          resultText = "ERROR: unknown tool " + name;
+        }
+        messages.push({ role: "tool", tool_call_id: tc.id, content: String(resultText).slice(0, 1500) });
+        $("timerMine").textContent = fmt();
+      }
+    }
+  } catch (e) {
+    failed = true;
+    laneStep(sm, "⚠️", "real run stopped", esc(e.message), "ov");
+  }
+  if (!failed) laneStep(sm, "✅", "REAL run complete in " + fmt(), "live LLM tool-calling loop + genuine Python execution, all in your browser.", "ok");
+  const sum = $("agentSummary");
+  sum.hidden = false;
+  sum.innerHTML = `<span>${failed ? "⚠ stopped" : "✓ REAL RUN"}</span><span>${toolCalls} tool calls · ${iters} loop turns</span><span>${fmt()} wall clock</span><span>workspace: ${esc(Object.keys(vfs).join(", ") || "—")}</span>`;
+  $("agentRunBtn").disabled = false;
+  raceBusy = false;
+}
+
 function laneStep(el, icon, title, body, cls) {
   const d = document.createElement("div");
   d.className = "race-step " + (cls || "");
@@ -664,7 +749,7 @@ function laneStep(el, icon, title, body, cls) {
   return d;
 }
 
-async function runRace() {
+async function runSim() {
   if (raceBusy) return;
   raceBusy = true;
   $("agentRunBtn").disabled = true;
@@ -723,12 +808,47 @@ async function runRace() {
   raceBusy = false;
 }
 
+function runRace() { return hasLLM() ? runReal() : runSim(); }
+
+function refreshAgentMode() {
+  const real = hasLLM();
+  if ($("agentRunBtn")) $("agentRunBtn").textContent = real ? "▶ Run for REAL" : "▶ Race (simulated)";
+  if ($("llmStatus")) $("llmStatus").textContent = real
+    ? (LLM.isMock() ? "● mock mode active — full pipeline, scripted LLM, real Python" : "● real mode active — " + (LLM.getConfig().provider))
+    : "○ no key — demos run simulated";
+}
+
+function wireKeyPanel() {
+  if (!$("llmSave")) return;
+  const cfg = LLM.getConfig();
+  $("llmProvider").innerHTML = Object.entries(LLM.PROVIDERS).map(([k, p]) =>
+    `<option value="${k}"${k === cfg.provider ? " selected" : ""}>${p.name}</option>`).join("");
+  $("llmModel").placeholder = LLM.PROVIDERS[cfg.provider].model;
+  $("llmModel").value = cfg.model || "";
+  if (cfg.key && cfg.key !== "mock") $("llmKey").value = cfg.key;
+  $("llmRemember").checked = !!cfg.remember;
+  $("llmProvider").addEventListener("change", () => {
+    $("llmModel").placeholder = LLM.PROVIDERS[$("llmProvider").value].model;
+  });
+  $("llmSave").addEventListener("click", () => {
+    LLM.setConfig({
+      provider: $("llmProvider").value,
+      model: $("llmModel").value.trim(),
+      key: $("llmKey").value.trim(),
+      remember: $("llmRemember").checked
+    });
+    refreshAgentMode();
+  });
+}
+
 if ($("agentRunBtn")) {
   $("agentChips").innerHTML = AGENT_CHIPS.map((c) => `<button class="chip mono">${c}</button>`).join("");
   document.querySelectorAll("#agentChips .chip").forEach((b) =>
     b.addEventListener("click", () => { $("agentPrompt").value = b.textContent; runRace(); }));
   $("agentRunBtn").addEventListener("click", runRace);
   $("agentPrompt").addEventListener("keydown", (e) => { if (e.key === "Enter") runRace(); });
+  wireKeyPanel();
+  refreshAgentMode();
 }
 
 
@@ -860,8 +980,75 @@ function siReset() {
   drawSiChart(0);
 }
 
+/* ===== REAL self-improvement: live attempts, real verification, real learned strategies ===== */
+const SI_SPEC = `Write a single Python file defining parse_total(lines) -> float.
+Each line looks like "Item; 12.30 USD". Sum all amounts and return the total as float.
+Edge cases exist in the hidden tests. Return ONLY raw Python code, no markdown fences, no explanations.`;
+const SI_HIDDEN_TESTS = `from parse_total import parse_total
+assert abs(parse_total(["a; 1.50 USD","b; 2.25 USD"]) - 3.75) < 1e-6, "basic sum failed"
+assert abs(parse_total(["a; 4,75 USD","b; 1.00 USD"]) - 5.75) < 1e-6, "comma-decimal failed: '4,75 USD' means 4.75"
+assert parse_total([]) == 0, "empty list should be 0"
+print("verifier: all hidden tests passed")`;
+
+const stripFences = (s) => String(s || "").replace(/^```[a-z]*\n?/i, "").replace(/```\s*$/i, "").trim();
+
+async function runRealSI() {
+  if (siBusy) return;
+  siBusy = true;
+  $("siRunBtn").disabled = true;
+  const lane = $("attemptLane"), mem = $("memoryCards");
+  lane.innerHTML = "";
+  mem.innerHTML = '<p class="memory-empty mono">∅ empty — no strategies learned yet</p>';
+  drawSiChart(0);
+  const strategies = [];
+  let passed = false;
+
+  try {
+    for (let attempt = 1; attempt <= 3 && !passed; attempt++) {
+      const card = document.createElement("div");
+      card.className = "attempt-card";
+      card.innerHTML = `<h4><span>attempt ${attempt} · LIVE · ${strategies.length} strateg${strategies.length === 1 ? "y" : "ies"} retrieved</span><span class="mono">running…</span></h4><p>asking your LLM for a solution${strategies.length ? " with retrieved strategies injected" : ""}…</p>`;
+      lane.appendChild(card);
+      requestAnimationFrame(() => card.classList.add("show"));
+
+      const prompt = SI_SPEC + (strategies.length
+        ? "\n\nApply these strategies learned from earlier failures:\n- " + strategies.join("\n- ")
+        : "");
+      const msg = await LLM.chat([{ role: "user", content: prompt }]);
+      const code = stripFences(msg.content);
+      const r = await PY.run({ "parse_total.py": code, "verify.py": SI_HIDDEN_TESTS }, "verify.py");
+      passed = r.ok && r.out.includes("all hidden tests passed");
+
+      card.className = `attempt-card show ${passed ? "pass" : "fail"}`;
+      card.innerHTML = `
+        <h4><span>attempt ${attempt} · LIVE${strategies.length ? " · retrieved " + strategies.length : ""}</span><span class="verdict-${passed ? "pass" : "fail"}">${passed ? "✓ PASS (real verifier)" : "✗ FAIL (real verifier)"}</span></h4>
+        <p class="mono" style="font-size:.68rem">${esc(r.out.split("\n").slice(-3).join(" · ").slice(0, 220))}</p>`;
+      drawSiChart(passed ? 1 : attempt / 3.5);
+
+      if (!passed && attempt < 3) {
+        const an = await LLM.chat([{ role: "user", content: `A Python solution for this task failed hidden tests.\nTask: ${SI_SPEC}\nVerifier output:\n${r.out.slice(0, 500)}\nWrite ONE short reusable strategy (a single sentence, no preamble) that would prevent this class of failure.` }]);
+        const strategy = stripFences(an.content).split("\n")[0].slice(0, 220);
+        strategies.push(strategy);
+        if (strategies.length === 1) mem.innerHTML = "";
+        const mc = document.createElement("div");
+        mc.className = "memory-card";
+        mc.innerHTML = `<span class="mem-id">📥 strategy-${String(16 + strategies.length).padStart(3, "0")} · written by your LLM just now</span>${esc(strategy)}`;
+        mem.appendChild(mc);
+        requestAnimationFrame(() => mc.classList.add("show"));
+      }
+    }
+  } catch (e) {
+    const err = document.createElement("div");
+    err.className = "attempt-card show fail";
+    err.innerHTML = `<h4><span>live run stopped</span><span class="verdict-fail">⚠</span></h4><p>${esc(e.message)}</p>`;
+    lane.appendChild(err);
+  }
+  $("siRunBtn").disabled = false;
+  siBusy = false;
+}
+
 if ($("siRunBtn")) {
-  $("siRunBtn").addEventListener("click", siRun);
+  $("siRunBtn").addEventListener("click", () => (hasLLM() && !LLM.isMock() ? runRealSI() : siRun()));
   $("siResetBtn").addEventListener("click", siReset);
 }
 
@@ -1153,6 +1340,23 @@ async function kgAnimate(q, qi = -1) {
   $("ragCompare").hidden = false;
   $("ragVec").textContent = q.vec;
   $("ragKg").textContent = q.kg;
+
+  // with a key: phrase the real traversal result with a live LLM
+  if (hasLLM() && q.path && !LLM.isMock()) {
+    const base = q.answer;
+    $("kgAnswerText").textContent = "phrasing the graph path with your LLM…";
+    try {
+      const facts = q.path.map((id) => `${NODE_BY_ID[id].label} (${NODE_BY_ID[id].type})`).join(" -> ");
+      const msg = await LLM.chat([
+        { role: "system", content: "You answer questions about an email knowledge graph. Use ONLY the given path facts. One concise sentence." },
+        { role: "user", content: `Question: ${($("kgPrompt") && $("kgPrompt").value) || "connection?"}\nGraph path found by BFS: ${facts}` }
+      ]);
+      $("kgAnswerText").textContent = (msg.content || base).slice(0, 400);
+      $("kgHops").textContent += " · phrased live by your LLM";
+    } catch (e) {
+      $("kgAnswerText").textContent = base;
+    }
+  }
   document.querySelectorAll("#kgQueries .task-btn").forEach((b) => (b.disabled = false));
   if ($("kgAskBtn")) $("kgAskBtn").disabled = false;
 }
