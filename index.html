@@ -117,8 +117,9 @@
                     <!-- Tab: full World Cup simulation -->
                     <div class="tab-pane active" id="pane-cup">
                         <div class="cup-controls">
-                            <button class="btn primary" id="cupKickoffBtn">▶ Kick off a World Cup</button>
-                            <button class="btn secondary" id="cupMcBtn">⚡ Run 5,000 tournaments</button>
+                            <button class="btn primary" id="cupDetBtn">📊 The model's forecast</button>
+                            <button class="btn secondary" id="cupKickoffBtn">🎲 One random future</button>
+                            <button class="btn secondary" id="cupMcBtn">⚡ Run 5,000</button>
                             <button class="btn ghost" id="cupResetBtn">Reset</button>
                             <div class="cup-readout mono">
                                 <span><span class="readout-label">tournaments</span> <strong id="cupCount">0</strong></span>
@@ -126,11 +127,12 @@
                             </div>
                         </div>
                         <p class="pane-explain cup-note">
-                            One click = one complete World Cup. All 72 group fixtures are decided by sampling my model's
-                            <strong>real published probabilities</strong>, then the knockout bracket plays out round of 32 → final.
-                            Getting a <strong>different champion almost every run is the point</strong>: my model gives even the
-                            favorite (Argentina) only a 12.9% title chance, so roughly half of all simulated tournaments end in a surprise.
-                            That's honest probabilistic forecasting — one click is one possible future, 5,000 clicks are the odds.
+                            Three ways to run the same fixed model. <strong>📊 The model's forecast</strong> is the legitimate prediction:
+                            5,000 Monte Carlo futures with a <strong>fixed seed</strong>, aggregated into calibrated title probabilities —
+                            identical numbers on every click, because a probabilistic model's answer is a <em>distribution</em>, not a single name.
+                            <strong>🎲 One random future</strong> samples exactly one of those futures, so its winner changes run to run —
+                            correct behavior when even the favorite holds only ~13%. <strong>⚡ Run 5,000</strong> re-derives the forecast
+                            live with fresh dice so you can watch it converge to the official ◇ distribution.
                         </p>
 
                         <div class="wc-stage">
@@ -246,7 +248,7 @@
                             <p>Each fixture is described by engineered team-pair features: rolling form and attack/defense rates with time-decay weighting (the same idea as EWMA in volatility modeling), ranking deltas, rest and travel context, and host advantage. On top of that sit two live signals: an NLP pipeline that pulls RSS news, scores sentiment per team and per key player, and folds it into the features — and a weather block (temperature, humidity, precipitation, wind, cloud cover, pressure) for the actual stadium and kickoff window, which you can toggle in the Match center to see its real effect per fixture.</p>
 
                             <h4>Architecture — three models, one ensemble</h4>
-                            <p><strong>SNN</strong>: a PyTorch policy-gradient neural network over the engineered features, trained with a policy-gradient objective and emitting a 3-way softmax. It's the fast, deterministic baseline — one forward pass, one answer. <strong>BNN</strong>: the same backbone extended with a Bayesian output head. Instead of fixed weights, the head learns weight <em>distributions</em>; at inference I draw hundreds of Monte Carlo weight samples, each producing a slightly different network and prediction. The spread of those predictions decomposes into total uncertainty (predictive entropy), epistemic uncertainty (mutual information — what the model doesn't know because it hasn't seen enough data) and the win-probability standard deviation you can watch being sampled in the "Inside the model" tab. <strong>XGBoost weather sub-model</strong>: a gradient-boosted tree model that learns how weather shifts outcomes, feeding the ensemble. The final <strong>calibrated ensemble</strong> blends SNN and BNN with the weather signal and applies temperature scaling so that "70%" means 70%.</p>
+                            <p><strong>SNN</strong>: a PyTorch policy-gradient neural network over the engineered features, trained with a policy-gradient objective and emitting a 3-way softmax. It's the fast, deterministic baseline — one forward pass, one answer. <strong>BNN</strong>: the same backbone extended with a Bayesian output head. Instead of fixed weights, the head learns weight <em>distributions</em>; at inference I draw hundreds of Monte Carlo weight samples, each producing a slightly different network and prediction. The spread of those predictions decomposes into total uncertainty (predictive entropy), epistemic uncertainty (mutual information — what the model doesn't know because it hasn't seen enough data) and the win-probability standard deviation you can watch being sampled in the "Inside the model" tab. <strong>XGBoost weather sub-model</strong>: a gradient-boosted tree model that learns how weather shifts outcomes, feeding the ensemble. The final <strong>calibrated ensemble</strong> blends SNN and BNN with the weather signal and applies temperature scaling so that "70%" means 70%. On top sits a <strong>Poisson scoreline layer</strong>: it inverts the calibrated win/draw/loss probabilities into goal rates (λ<sub>home</sub>, λ<sub>away</sub>) and reports the most likely scoreline consistent with the pick — score predictions are a pure function of the same probabilities, not a separate guess.</p>
 
                             <h4>Training &amp; validation</h4>
                             <p>Validated with 5-fold cross-validation and historical backtests; every variant comparison (e.g. weather on vs off) goes through McNemar tests in an A/B framework, so a feature only survives if it helps beyond noise. Calibration diagnostics — reliability diagrams, expected calibration error, Brier decomposition — plus experiment metadata are logged to PostgreSQL. Results: Brier score 0.24 → <strong>0.176</strong> (−26.7% vs baseline), recall 84%, scenario variance −17%.</p>
