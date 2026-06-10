@@ -3,23 +3,34 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ajeenckya Mahadik | AI/ML Engineer</title>
+    <title>Ajeenckya Mahadik | AI/ML Engineer — Run My Models</title>
     <link rel="stylesheet" href="css/style.css" />
     <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
-    <meta name="description" content="AI/ML Engineer portfolio for Ajeenckya Mahadik, focused on forecasting, RAG systems, LLM agents, model serving, and MLOps." />
+    <meta name="description" content="AI/ML engineer portfolio with live, interactive demos: Bayesian World Cup forecasting, Monte Carlo simulation, LLM coding agents, self-improving agents, and knowledge-graph RAG — all running in your browser on real model outputs." />
+
+    <!-- LinkedIn / social sharing -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://ajeenckya5.github.io/" />
+    <meta property="og:title" content="Ajeenckya Mahadik — ML models you can actually run" />
+    <meta property="og:description" content="Don't read about my models. Run them. Live Monte Carlo World Cup simulation, Bayesian uncertainty, LLM agent loops, and knowledge-graph RAG — in your browser." />
+    <meta property="og:image" content="https://ajeenckya5.github.io/assets/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
 </head>
 <body>
-    <header class="site-header">
+    <header class="site-header" id="siteHeader">
         <a href="#hero" class="logo" aria-label="Ajeenckya Mahadik home">
-            <span>Ajeenckya</span>
-            <strong>Mahadik</strong>
+            <span class="logo-mark">&gt;_</span>
+            <span class="logo-text">ajeenckya<strong>.mahadik</strong></span>
         </a>
 
         <nav class="nav" id="siteNav" aria-label="Primary navigation">
             <ul>
-                <li><a href="#about">About</a></li>
+                <li><a href="#lab">The Lab</a></li>
                 <li><a href="#experience">Experience</a></li>
-                <li><a href="#projects">Projects</a></li>
                 <li><a href="#skills">Skills</a></li>
                 <li><a href="#education">Education</a></li>
                 <li><a href="#contact">Contact</a></li>
@@ -29,153 +40,448 @@
         <a href="files/resume.pdf" class="btn btn-small header-cta" target="_blank" rel="noopener">Resume</a>
 
         <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
-            <span></span>
-            <span></span>
-            <span></span>
+            <span></span><span></span><span></span>
         </button>
     </header>
 
     <main>
+        <!-- ============ HERO ============ -->
         <section id="hero" class="hero">
-            <img src="assets/ajeenckya-mahadik.jpg" alt="Ajeenckya Mahadik in a classroom discussion" class="hero-photo" />
-            <div class="hero-shade" aria-hidden="true"></div>
-
+            <canvas id="heroCanvas" aria-hidden="true"></canvas>
             <div class="hero-inner">
                 <div class="hero-copy">
-                    <p class="eyebrow">AI/ML Engineer | M.S. AI/ML, UW-Madison</p>
+                    <p class="eyebrow mono">AI/ML Engineer · M.S. AI/ML, UW–Madison · graduating May 2026</p>
                     <h1>Ajeenckya Mahadik</h1>
                     <p class="hero-subtitle">
-                        I build forecasting, RAG, and agentic AI systems with production-ready
-                        data pipelines, calibrated model evaluation, and cloud deployment.
+                        I build calibrated probabilistic models and LLM agent systems.
+                        Most portfolios tell you about the models — <strong>this one lets you run them.</strong>
+                        Every demo below is powered by my real model outputs.
                     </p>
 
                     <div class="hero-actions">
-                        <a href="files/resume.pdf" class="btn primary" target="_blank" rel="noopener">View Resume</a>
-                        <a href="#projects" class="btn secondary">Selected Work</a>
+                        <a href="#lab" class="btn primary">▶ Run my models</a>
+                        <a href="files/resume.pdf" class="btn secondary" target="_blank" rel="noopener">View Resume</a>
                     </div>
 
-                    <div class="hero-contact" aria-label="Contact links">
+                    <div class="hero-contact mono" aria-label="Contact links">
                         <span>Madison, WI</span>
                         <a href="mailto:ajeenckyam@gmail.com">ajeenckyam@gmail.com</a>
                         <a href="https://www.linkedin.com/in/ajeenckya-mahadik" target="_blank" rel="noopener">LinkedIn</a>
                         <a href="https://github.com/Ajeenckya5" target="_blank" rel="noopener">GitHub</a>
                     </div>
                 </div>
+                <div class="hero-photo-wrap">
+                    <img src="assets/profile.jpg" alt="Ajeenckya Mahadik" class="hero-photo" />
+                    <div class="photo-badge mono">currently: GRA @ UW–Madison<br/>building probabilistic forecasting</div>
+                </div>
+            </div>
+
+            <div class="stat-strip" role="list">
+                <div class="stat" role="listitem"><strong>0.176</strong><span>Brier score (26.7% better than baseline)</span></div>
+                <div class="stat" role="listitem"><strong>7.5×</strong><span>lower latency than LangChain (own agent loop)</span></div>
+                <div class="stat" role="listitem"><strong>94%</strong><span>task completion, self-improving agent (Tau Bench)</span></div>
+                <div class="stat" role="listitem"><strong>−44%</strong><span>RAG retrieval latency via embedding caching</span></div>
             </div>
         </section>
 
-        <section class="snapshot" aria-label="Career highlights">
-            <div class="section-inner snapshot-grid">
-                <article class="metric">
-                    <span>0.176</span>
-                    <p>Brier score from Bayesian calibration over a forecasting model</p>
-                </article>
-                <article class="metric">
-                    <span>84%</span>
-                    <p>Recall achieved while improving scenario prediction stability</p>
-                </article>
-                <article class="metric">
-                    <span>12%</span>
-                    <p>Accuracy and calibration lift from weather and news-derived features</p>
-                </article>
-                <article class="metric">
-                    <span>May 2026</span>
-                    <p>M.S. Industrial Engineering, AI/ML specialization</p>
-                </article>
-            </div>
-        </section>
-
-        <section id="about" class="section">
-            <div class="section-inner two-column">
+        <!-- ============ THE LAB ============ -->
+        <section id="lab" class="section">
+            <div class="section-inner wide">
                 <div class="section-header">
-                    <p class="eyebrow">About</p>
-                    <h2>Machine learning engineer with an operations-first systems background.</h2>
+                    <p class="eyebrow mono">// the lab</p>
+                    <h2>Don't take my word for it. Run the models.</h2>
+                    <p class="section-sub">Four systems, live in your browser. The probabilities, simulations, and benchmark numbers below are actual outputs of models I trained — not mockups.</p>
                 </div>
 
-                <div class="prose">
-                    <p>
-                        I am pursuing an M.S. in Industrial Engineering at the University of
-                        Wisconsin-Madison with a specialization in AI/ML. My work connects model
-                        development with practical deployment: forecasting pipelines, Bayesian
-                        calibration, RAG applications, model serving, and monitoring loops.
-                    </p>
-                    <p>
-                        Before graduate school, I worked across automotive and service operations,
-                        turning noisy logs, timestamps, throughput data, and diagnostic records into
-                        structured ML-ready datasets and decision-support systems.
-                    </p>
-                </div>
+                <!-- ===== DEMO 1: WORLD CUP FORECASTER ===== -->
+                <article class="demo-panel" id="demo-fifa">
+                    <div class="demo-head">
+                        <div>
+                            <p class="demo-kicker mono">01 · Probabilistic forecasting — UW–Madison research</p>
+                            <h3>World Cup 2026 Bayesian Forecaster</h3>
+                            <p class="demo-desc">
+                                A PyTorch policy-gradient network with a <strong>Bayesian neural network head</strong> (Monte Carlo weight sampling),
+                                an <strong>XGBoost weather sub-model</strong>, temperature-scaled calibration, and a Monte Carlo tournament layer —
+                                served via FastAPI in the real system. Brier score <span class="mono hl">0.24 → 0.176</span>.
+                            </p>
+                        </div>
+                        <div class="demo-tags mono"><span>PyTorch</span><span>Bayesian NN</span><span>XGBoost</span><span>Monte Carlo</span><span>FastAPI</span></div>
+                    </div>
+
+                    <div class="tabs" role="tablist" aria-label="Forecaster demos">
+                        <button class="tab active" data-tab="cup" role="tab">🏆 Simulate the World Cup</button>
+                        <button class="tab" data-tab="match" role="tab">⚽ Match center</button>
+                        <button class="tab" data-tab="bnn" role="tab">🧠 Inside the model</button>
+                        <button class="tab" data-tab="reality" role="tab">📡 Model vs reality</button>
+                    </div>
+
+                    <!-- Tab: full World Cup simulation -->
+                    <div class="tab-pane active" id="pane-cup">
+                        <div class="cup-controls">
+                            <button class="btn primary" id="cupKickoffBtn">▶ Kick off a World Cup</button>
+                            <button class="btn secondary" id="cupMcBtn">⚡ Run 5,000 tournaments</button>
+                            <button class="btn ghost" id="cupResetBtn">Reset</button>
+                            <div class="cup-readout mono">
+                                <span><span class="readout-label">tournaments</span> <strong id="cupCount">0</strong></span>
+                                <span><span class="readout-label">last champion</span> <strong id="cupLast">—</strong></span>
+                            </div>
+                        </div>
+                        <p class="pane-explain cup-note">
+                            One click = one complete World Cup. All 72 group fixtures are decided by sampling my model's
+                            <strong>real published probabilities</strong>, then the knockout bracket plays out round of 32 → final.
+                            Run it 5,000 times and watch the title odds converge to my official Monte Carlo distribution.
+                        </p>
+
+                        <div class="wc-stage">
+                            <div class="wc-phase mono" id="wcPhase">group stage · 12 groups · 48 teams · fixtures from the real model</div>
+                            <div class="wc-groups" id="wcGroups"></div>
+                            <div class="wc-bracket-wrap" id="wcBracketWrap" hidden>
+                                <div class="wc-bracket" id="wcBracket"></div>
+                            </div>
+                            <div class="wc-champion" id="wcChampion" hidden></div>
+                        </div>
+
+                        <div class="champ-board-wrap">
+                            <p class="mono bench-title">world champion probability · <span class="board-live">▮ live simulation</span> vs ◇ official 5,000-run distribution</p>
+                            <div id="champBoard" class="champ-board"></div>
+                        </div>
+                        <p class="fine-print">Group results sample directly from the calibrated ensemble's real per-match probabilities. Knockout matchups use team strengths fitted to my official Monte Carlo run (◇); bracket pairings are approximated.</p>
+                    </div>
+
+                    <!-- Tab: match center -->
+                    <div class="tab-pane" id="pane-match">
+                        <div class="pane-grid">
+                            <div class="pane-controls">
+                                <p class="pane-explain">
+                                    A broadcast-style match center for all 72 group fixtures — except the win probabilities
+                                    are the <strong>exact outputs</strong> of the three model variants: the standard network (SNN),
+                                    the Bayesian head (BNN), and the calibrated ensemble that blends them with XGBoost weather features.
+                                </p>
+                                <label class="mono select-label" for="matchSelect">fixture</label>
+                                <select id="matchSelect" class="match-select mono"></select>
+                                <label class="toggle">
+                                    <input type="checkbox" id="weatherToggle" checked />
+                                    <span class="toggle-track"></span>
+                                    <span class="toggle-label">XGBoost weather sub-model <strong id="weatherState">ON</strong></span>
+                                </label>
+                                <p class="fine-print" id="weatherNote"></p>
+                            </div>
+                            <div class="pane-viz match-viz">
+                                <div class="match-card" id="matchCard"></div>
+                                <div id="matchBars"></div>
+                                <div class="uncertainty-row" id="uncertaintyRow"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab: BNN / calibration -->
+                    <div class="tab-pane" id="pane-bnn">
+                        <div class="pane-grid">
+                            <div class="pane-controls">
+                                <p class="pane-explain">
+                                    A Bayesian neural network doesn't have fixed weights — it has <strong>distributions over weights</strong>.
+                                    Each forward pass samples a slightly different network. Hundreds of passes produce a <em>spread</em> of predictions:
+                                    that spread is the model telling you how much to trust it.
+                                </p>
+                                <label class="mono select-label" for="bnnSelect">fixture</label>
+                                <select id="bnnSelect" class="match-select mono"></select>
+                                <div class="control-row">
+                                    <button class="btn primary" id="bnnSampleBtn">▶ Sample 300 networks</button>
+                                </div>
+                                <div class="sim-readout mono">
+                                    <div><span class="readout-label">samples drawn</span><strong id="bnnCount">0</strong></div>
+                                    <div><span class="readout-label">mean P(win)</span><strong id="bnnMean">—</strong></div>
+                                    <div><span class="readout-label">±2σ interval</span><strong id="bnnCI">—</strong></div>
+                                </div>
+                                <p class="pane-explain small">
+                                    Calibration means: when the model says 70%, it should be right ~70% of the time.
+                                    Temperature scaling + the BNN head moved the Brier score from
+                                    <span class="mono">0.24</span> to <span class="mono hl">0.176</span> and recall to <span class="mono hl">84%</span>,
+                                    validated with k-fold CV and McNemar tests, with diagnostics logged to PostgreSQL.
+                                </p>
+                            </div>
+                            <div class="pane-viz">
+                                <canvas id="bnnChart" height="420"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab: model vs reality -->
+                    <div class="tab-pane" id="pane-reality">
+                        <p class="pane-explain">
+                            The predictions on this page were locked in <strong>before the tournament</strong>.
+                            From June 11, a GitHub Action pulls official results every 6 hours and this scoreboard
+                            grades every group-stage prediction automatically — accuracy, live Brier score, no excuses.
+                        </p>
+                        <div class="reality-stats mono" id="realityStats"></div>
+                        <div class="scoreboard" id="scoreboard"></div>
+                        <div class="ko-tracker" id="koTracker"></div>
+                        <p class="fine-print">
+                            Brier score = mean squared error of the 3-way probabilities (lower is better; 0.667 = uniform guessing, my backtest = 0.176).
+                            Knockout fixtures aren't in the locked group-stage prediction set, so they're tracked as results only.
+                            Results source: fixturedownload.com, synced by .github/workflows/update-results.yml.
+                        </p>
+                    </div>
+
+                    <details class="deep-dive">
+                        <summary>📘 Model deep dive — architecture, features, training, calibration, serving</summary>
+                        <div class="dd-body">
+                            <h4>The problem</h4>
+                            <p>Football outcomes are low-count, high-variance events: a 3-way classification (home / draw / away) where even the best team loses often. The interesting challenge isn't predicting a winner — it's producing an <em>honest probability</em>, one you could bet on, plan inventory around, or price risk with. That's why the whole system is built around calibration rather than raw accuracy.</p>
+
+                            <h4>Features</h4>
+                            <p>Each fixture is described by engineered team-pair features: rolling form and attack/defense rates with time-decay weighting (the same idea as EWMA in volatility modeling), ranking deltas, rest and travel context, and host advantage. On top of that sit two live signals: an NLP pipeline that pulls RSS news, scores sentiment per team and per key player, and folds it into the features — and a weather block (temperature, humidity, precipitation, wind, cloud cover, pressure) for the actual stadium and kickoff window, which you can toggle in the Match center to see its real effect per fixture.</p>
+
+                            <h4>Architecture — three models, one ensemble</h4>
+                            <p><strong>SNN</strong>: a PyTorch policy-gradient neural network over the engineered features, trained with a policy-gradient objective and emitting a 3-way softmax. It's the fast, deterministic baseline — one forward pass, one answer. <strong>BNN</strong>: the same backbone extended with a Bayesian output head. Instead of fixed weights, the head learns weight <em>distributions</em>; at inference I draw hundreds of Monte Carlo weight samples, each producing a slightly different network and prediction. The spread of those predictions decomposes into total uncertainty (predictive entropy), epistemic uncertainty (mutual information — what the model doesn't know because it hasn't seen enough data) and the win-probability standard deviation you can watch being sampled in the "Inside the model" tab. <strong>XGBoost weather sub-model</strong>: a gradient-boosted tree model that learns how weather shifts outcomes, feeding the ensemble. The final <strong>calibrated ensemble</strong> blends SNN and BNN with the weather signal and applies temperature scaling so that "70%" means 70%.</p>
+
+                            <h4>Training &amp; validation</h4>
+                            <p>Validated with 5-fold cross-validation and historical backtests; every variant comparison (e.g. weather on vs off) goes through McNemar tests in an A/B framework, so a feature only survives if it helps beyond noise. Calibration diagnostics — reliability diagrams, expected calibration error, Brier decomposition — plus experiment metadata are logged to PostgreSQL. Results: Brier score 0.24 → <strong>0.176</strong> (−26.7% vs baseline), recall 84%, scenario variance −17%.</p>
+
+                            <h4>The Monte Carlo tournament layer</h4>
+                            <p>Match probabilities become title odds by simulation: sample all 72 group fixtures from the ensemble's distributions, resolve standings (including the 8 best third-placed teams in the 48-team format), play the bracket to the final, repeat 5,000 times, and count champions. Uncertainty propagates from single matches all the way to the trophy — exactly what the simulator tab does in your browser with the same numbers.</p>
+
+                            <h4>Serving &amp; feedback</h4>
+                            <p>The real system runs behind FastAPI: REST endpoints for predictions, team data and result uploads, a post-match feedback loop that updates the model as results land, and the news pipeline refreshing sentiment features continuously. It's deployable software, not a notebook.</p>
+
+                            <h4>Why it generalizes</h4>
+                            <p>Calibrated low-count forecasting is the same problem as demand planning for slow-moving inventory, credit-risk PDs, and insurance claim frequency. The football is the demo; the method is the product.</p>
+                        </div>
+                    </details>
+                </article>
+
+                <!-- ===== DEMO 2: CLI CODING AGENT ===== -->
+                <article class="demo-panel" id="demo-agent">
+                    <div class="demo-head">
+                        <div>
+                            <p class="demo-kicker mono">02 · LLM agents from scratch</p>
+                            <h3>CodeCraft — framework-free CLI coding agent</h3>
+                            <p class="demo-desc">
+                                A coding agent built on <strong>raw API tool-calling loops</strong> — no LangChain, no CrewAI.
+                                ReAct planning, session memory, diff previews, approval guardrails, RLAIF scoring, Docker-packaged.
+                                <span class="mono hl">100% completion</span> and <span class="mono hl">7.5× lower latency</span> than LangChain on an identical 15-task benchmark.
+                            </p>
+                        </div>
+                        <div class="demo-tags mono"><span>Raw tool calling</span><span>ReAct</span><span>RLAIF</span><span>Docker</span></div>
+                    </div>
+
+                    <div class="pane-grid">
+                        <div class="pane-controls">
+                            <p class="pane-explain">Pick a task and watch a live run of the agent loop — <strong>how it works</strong> on the right, <strong>how it performs</strong> below. Each card is one step of the real loop: <span class="mono">plan → tool call → observe → repeat</span>.</p>
+                            <div class="task-buttons" id="agentTasks"></div>
+                            <div class="bench-mini">
+                                <p class="mono bench-title">how it performs · 15 identical tool-calling tasks</p>
+                                <div class="bench-row"><span class="bench-label mono">CodeCraft</span><div class="bench-bar"><div class="bench-fill fast" style="width:13%"></div></div><span class="bench-val mono">1.0× latency · 15/15 ✓</span></div>
+                                <div class="bench-row"><span class="bench-label mono">LangChain</span><div class="bench-bar"><div class="bench-fill slow" style="width:98%"></div></div><span class="bench-val mono">7.5× latency</span></div>
+                                <p class="fine-print bench-foot">Same model, same 15 tasks, same tools — the only variable is the orchestration layer. Raw API loops beat framework overhead.</p>
+                            </div>
+                        </div>
+                        <div class="pane-viz">
+                            <div class="pipeline" id="agentPipeline">
+                                <p class="pipeline-empty mono">⌥ pick a task on the left to watch the agent work</p>
+                            </div>
+                            <div class="run-summary mono" id="agentSummary" hidden></div>
+                        </div>
+                    </div>
+
+                    <details class="deep-dive">
+                        <summary>📘 Model deep dive — the loop, the tools, the guardrails, the benchmark</summary>
+                        <div class="dd-body">
+                            <h4>Zero-framework by design</h4>
+                            <p>CodeCraft talks to the LLM with raw HTTPS calls to an OpenAI-compatible chat-completions endpoint (xAI by default) using only the Python standard library — no LangChain, no CrewAI, no AutoGen. The point isn't framework allergy; it's that an agent is fundamentally a <em>while loop around an API</em>, and owning that loop means owning latency, cost, and failure modes.</p>
+
+                            <h4>How the loop works</h4>
+                            <p>The model receives the conversation plus JSON schemas for the local tools (native function calling). Each turn it either answers or returns <span class="mono">tool_calls</span>; the agent executes them in the workspace, appends the observations, and calls the model again — ReAct's think → act → observe cycle until the task is done. Session memory keeps the project map and prior decisions across requests, so follow-ups skip re-discovery.</p>
+
+                            <h4>The tool set</h4>
+                            <p>Eleven workspace-scoped tools: project_context, list_files, read_file, search_files, write_file, replace_in_file, make_directory, git_status, git_diff, run_tests, and run_command. Every file write shows a diff preview and every shell command requires approval by default (with an explicit <span class="mono">--auto-approve</span> escape hatch) — guardrails are part of the architecture, not an afterthought. A <span class="mono">doctor</span> command diagnoses provider/tool-call issues.</p>
+
+                            <h4>RLAIF scoring</h4>
+                            <p>Completed trajectories are scored by Grok 4 acting as an AI judge — task success, efficiency, and safety of the action sequence — giving a reward signal used to refine the agent's prompting policy over time (reinforcement learning from AI feedback, without human labeling).</p>
+
+                            <h4>The benchmark</h4>
+                            <p>15 identical tool-calling coding tasks, same model, same tools, run through CodeCraft and through a LangChain implementation. Result: <strong>15/15 completed, 7.5× lower latency</strong>. The gap is pure orchestration overhead — chain abstractions, callback layers, and serialization the raw loop simply doesn't have. Packaged with Docker for reproducibility.</p>
+                        </div>
+                    </details>
+                </article>
+
+                <!-- ===== DEMO 3: SELF-IMPROVING AGENT ===== -->
+                <article class="demo-panel" id="demo-selfimprove">
+                    <div class="demo-head">
+                        <div>
+                            <p class="demo-kicker mono">03 · Agents that learn from failure</p>
+                            <h3>Self-Improving LLM Agent</h3>
+                            <p class="demo-desc">
+                                An agent that gets better <strong>without retraining</strong>: it analyzes its own failed execution traces,
+                                writes corrective strategies into <strong>ChromaDB semantic memory</strong>, and retrieves them on similar future tasks.
+                                Distilled Grok 4 → QLoRA LLaMA-3.2-1B. <span class="mono hl">94% task completion</span> on Tau Bench.
+                            </p>
+                        </div>
+                        <div class="demo-tags mono"><span>ChromaDB</span><span>QLoRA</span><span>LLaMA-3.2-1B</span><span>Distillation</span></div>
+                    </div>
+
+                    <div class="pane-grid">
+                        <div class="pane-controls">
+                            <p class="pane-explain">
+                                The hypothesis: <strong>failure memory compounds</strong>. Watch the same task attempted three times —
+                                each failure becomes a strategy, and each strategy makes the next attempt smarter.
+                            </p>
+                            <div class="control-row">
+                                <button class="btn primary" id="siRunBtn">▶ Watch it learn</button>
+                                <button class="btn ghost" id="siResetBtn">Reset</button>
+                            </div>
+                            <div class="memory-stack">
+                                <p class="mono bench-title">strategy memory (ChromaDB)</p>
+                                <div id="memoryCards"><p class="memory-empty mono">∅ empty — no strategies learned yet</p></div>
+                            </div>
+                        </div>
+                        <div class="pane-viz">
+                            <div class="attempt-lane" id="attemptLane"></div>
+                            <p class="mono bench-title">how it performs · task success during the run (final: 94% on Tau Bench)</p>
+                            <canvas id="siChart" height="170"></canvas>
+                        </div>
+                    </div>
+
+                    <details class="deep-dive">
+                        <summary>📘 Model deep dive — failure analysis, strategy memory, distillation, evaluation</summary>
+                        <div class="dd-body">
+                            <h4>The hypothesis</h4>
+                            <p><strong>Failure memory compounds.</strong> Inspired by SELF-REFINE (Madaan et al., 2023): if an agent analyzes why it failed and stores the lesson, retrieval of those lessons should make every future attempt smarter — improvement <em>without touching the model weights</em>.</p>
+
+                            <h4>Three agents, one benchmark</h4>
+                            <p>The system implements three strategies for controlled comparison: <strong>ReAct</strong> (think-act-observe baseline), <strong>Plan-and-Act</strong> (upfront planning baseline), and <strong>Strategy-Guided</strong> — the contribution, which augments planning with retrieved strategies from memory.</p>
+
+                            <h4>The learning loop</h4>
+                            <p>Every execution is traced step by step. When a task fails, a failure-analysis pass (heuristic rules plus LLM reasoning over the trace) produces a <em>corrective strategy</em> — a short, generalizable instruction like "sort by total price including fees before selecting." The strategy is embedded and stored in <strong>ChromaDB</strong>. On a new task, the agent retrieves the top-k semantically similar strategies and injects them into its planning prompt. The demo above is this exact loop: fail → analyze → store → retrieve → pass.</p>
+
+                            <h4>Distillation to a 1B model</h4>
+                            <p>To make the agent cheap to run, Grok 4 teacher trajectories are distilled into <strong>LLaMA-3.2-1B via QLoRA</strong> — 4-bit NF4 quantization with low-rank adapters — so a 1-billion-parameter model inherits behavior from a frontier teacher at a fraction of the inference cost.</p>
+
+                            <h4>Evaluation</h4>
+                            <p><strong>94% task completion on Tau Bench</strong>, with additional OS-level and web-navigation task suites and an ablation study isolating each component's contribution (memory off vs on, heuristic vs LLM failure analysis). The success curve in the demo is illustrative in shape; the endpoint is the measured result.</p>
+                        </div>
+                    </details>
+                </article>
+
+                <!-- ===== DEMO 4: DOCGRAPH ===== -->
+                <article class="demo-panel" id="demo-docgraph">
+                    <div class="demo-head">
+                        <div>
+                            <p class="demo-kicker mono">04 · Retrieval beyond vector search</p>
+                            <h3>DocGraph — Knowledge-Graph RAG</h3>
+                            <p class="demo-desc">
+                                RAG over 10K emails using <strong>LightRAG + pgvector + Mistral 7B</strong> with JWT multi-user isolation.
+                                Graph traversal answers <strong>multi-hop questions flat vector search can't</strong>,
+                                and E5 embedding caching cut retrieval latency <span class="mono hl">1.8s → 1.0s (−44%)</span>.
+                            </p>
+                        </div>
+                        <div class="demo-tags mono"><span>Knowledge Graph</span><span>LightRAG</span><span>pgvector</span><span>Mistral 7B</span></div>
+                    </div>
+
+                    <div class="pane-grid">
+                        <div class="pane-controls">
+                            <p class="pane-explain">
+                                Ask a multi-hop question. Flat vector search retrieves chunks that <em>look similar</em> to the query —
+                                graph RAG <em>walks entity links</em> to connect facts that never appear in the same document.
+                            </p>
+                            <div class="task-buttons" id="kgQueries"></div>
+                            <div class="kg-answer" id="kgAnswer" hidden>
+                                <p class="mono kg-answer-label">answer · via graph traversal</p>
+                                <p id="kgAnswerText"></p>
+                                <p class="mono kg-hops" id="kgHops"></p>
+                            </div>
+                            <div class="rag-compare" id="ragCompare" hidden>
+                                <p class="mono bench-title">how it performs · same question, two retrieval strategies</p>
+                                <div class="rag-row bad"><span class="mono rag-name">flat vector search</span><span class="rag-result" id="ragVec"></span></div>
+                                <div class="rag-row good"><span class="mono rag-name">DocGraph (KG-RAG)</span><span class="rag-result" id="ragKg"></span></div>
+                                <div class="bench-row lat"><span class="bench-label mono">cold retrieval</span><div class="bench-bar"><div class="bench-fill slow" style="width:90%"></div></div><span class="bench-val mono">1.8s</span></div>
+                                <div class="bench-row lat"><span class="bench-label mono">E5 cache hit</span><div class="bench-bar"><div class="bench-fill fast" style="width:50%"></div></div><span class="bench-val mono">1.0s · −44%</span></div>
+                            </div>
+                        </div>
+                        <div class="pane-viz">
+                            <canvas id="kgCanvas" height="430"></canvas>
+                        </div>
+                    </div>
+
+                    <details class="deep-dive">
+                        <summary>📘 Model deep dive — ingestion, graph construction, hybrid retrieval, isolation</summary>
+                        <div class="dd-body">
+                            <h4>Why a graph at all</h4>
+                            <p>Flat vector RAG retrieves chunks that <em>look like</em> the query. But "who approved the invoice Sarah flagged?" needs facts from documents that never mention each other in the same paragraph. A knowledge graph stores entities (people, vendors, documents, projects) and their relations explicitly, so retrieval can <em>walk</em> from fact to fact — multi-hop reasoning vector similarity structurally cannot do.</p>
+
+                            <h4>Ingestion &amp; graph construction</h4>
+                            <p>10K emails are parsed (.eml, extendable to IMAP), chunked, and passed through <strong>LightRAG</strong>, which extracts entities and relations to build the knowledge graph alongside the text index. Every chunk is embedded with <strong>intfloat/e5-small-v2</strong> (384 dimensions — deliberately CPU-friendly) and stored in <strong>Postgres 16 + pgvector</strong> with cosine-distance indexing.</p>
+
+                            <h4>Hybrid retrieval</h4>
+                            <p>A query first hits pgvector for candidate entry points, then expands along graph edges to pull in connected entities and their supporting chunks — vector search for recall, graph traversal for reasoning. The assembled context goes to a fully local <strong>Mistral 7B Instruct</strong> (GGUF via llama.cpp), which answers with referenceable <span class="mono">/emails/{id}</span> source links. Nothing leaves the machine — by design, since email is about as private as data gets.</p>
+
+                            <h4>Multi-user isolation</h4>
+                            <p>Authentication is JWT-based, and isolation is enforced where it can't be bypassed: every retrieval query is filtered by <span class="mono">user_id</span> at the SQL layer. One database, many users, zero cross-user leakage.</p>
+
+                            <h4>Performance</h4>
+                            <p>E5 embedding caching cut end-to-end retrieval latency from <strong>1.8s to 1.0s (−44%)</strong>. The FastAPI backend ships with seed scripts, a benchmark harness, and an evaluation report comparing graph-RAG against flat vector baselines on multi-hop questions.</p>
+                        </div>
+                    </details>
+                </article>
             </div>
         </section>
 
+        <!-- ============ EXPERIENCE ============ -->
         <section id="experience" class="section section-alt">
             <div class="section-inner">
                 <div class="section-header compact">
-                    <p class="eyebrow">Experience</p>
-                    <h2>Applied AI/ML, analytics, and production-minded engineering.</h2>
+                    <p class="eyebrow mono">// experience</p>
+                    <h2>Four years of ML in production environments.</h2>
                 </div>
 
                 <div class="timeline">
                     <article class="timeline-item">
-                        <div class="timeline-meta">
-                            <span>2025 - Present</span>
-                            <strong>Madison, WI</strong>
-                        </div>
+                        <div class="timeline-meta mono"><span>May 2025 – Present</span><strong>Madison, WI</strong></div>
                         <div class="timeline-body">
                             <h3>Graduate Research Assistant</h3>
-                            <p class="company">University of Wisconsin-Madison</p>
+                            <p class="company">University of Wisconsin–Madison</p>
                             <ul>
-                                <li>Built an end-to-end ML forecasting pipeline with weather signals, news-derived features, feature engineering, model evaluation, and FastAPI serving.</li>
-                                <li>Formulated a Bayesian calibration layer over a policy-network forecasting model, reaching a 0.176 Brier score, 84% recall, and 17% lower scenario variance.</li>
-                                <li>Trained and evaluated XGBoost weather-impact models across temperature, humidity, and precipitation features for stable inference.</li>
+                                <li>Built a probabilistic forecasting stack: PyTorch policy-gradient network + XGBoost weather sub-model served via FastAPI, improving forecast accuracy by 12%.</li>
+                                <li>Extended it with a Bayesian neural network head via Monte Carlo sampling — Brier score 0.24 → 0.176 (−26.7%), recall 84%, variance −17%.</li>
+                                <li>Validated variants with Brier score and McNemar tests in an A/B framework; calibration diagnostics and experiment metadata logged to PostgreSQL.</li>
                             </ul>
                         </div>
                     </article>
 
                     <article class="timeline-item">
-                        <div class="timeline-meta">
-                            <span>2023 - 2024</span>
-                            <strong>India</strong>
-                        </div>
+                        <div class="timeline-meta mono"><span>2023 – 2024</span><strong>India</strong></div>
                         <div class="timeline-body">
                             <h3>Graduate Associate Engineer</h3>
-                            <p class="company">Fiat India Automobiles Pvt. Ltd.</p>
+                            <p class="company">Fiat India Automobiles</p>
                             <ul>
-                                <li>Developed Scikit-learn regression models to identify delay-prone operations and improve operational efficiency by 9%.</li>
-                                <li>Created ML-ready datasets from noisy operational logs using schema standardization, missing-value imputation, and feature engineering.</li>
-                                <li>Structured AWS workflows with S3, Lambda, IAM, and CloudWatch for validation, transformation, and decision-support outputs.</li>
+                                <li>Trained a Gradient Boosting Regressor on 150K assembly records to predict operation-level delay, giving managers a 2–4 hour intervention window and lifting line efficiency 9%.</li>
+                                <li>Engineered queue-depth, shift-context, operator-history, and product-complexity features with leakage-aware splits.</li>
+                                <li>Provisioned the AWS delivery pipeline (S3, Lambda, CloudWatch, IAM) feeding delay features to manufacturing teams.</li>
                             </ul>
                         </div>
                     </article>
 
                     <article class="timeline-item">
-                        <div class="timeline-meta">
-                            <span>2022 - 2023</span>
-                            <strong>India</strong>
-                        </div>
+                        <div class="timeline-meta mono"><span>2022 – 2023</span><strong>India</strong></div>
                         <div class="timeline-body">
                             <h3>Analytics Engineer</h3>
                             <p class="company">Powertrac</p>
                             <ul>
-                                <li>Engineered predictive maintenance pipelines from diagnostic logs and service records, reducing unplanned downtime by 12%.</li>
-                                <li>Built a risk-score prioritization model that replaced manual triage with data-informed service routing.</li>
-                                <li>Established a monitoring loop for low-confidence predictions and upstream feature-quality fixes.</li>
+                                <li>Built a predictive-maintenance XGBoost classifier for 30-day breakdown risk, cutting downtime 12%.</li>
+                                <li>Replaced manual triage with a risk-score dispatch system using greedy-knapsack technician assignment — routing efficiency +22%.</li>
+                                <li>Ran a monitoring loop tracing low-confidence predictions to feature drift, sustaining 88%+ precision in production.</li>
                             </ul>
                         </div>
                     </article>
 
                     <article class="timeline-item">
-                        <div class="timeline-meta">
-                            <span>2021 - 2022</span>
-                            <strong>India</strong>
-                        </div>
+                        <div class="timeline-meta mono"><span>2021 – 2022</span><strong>India</strong></div>
                         <div class="timeline-body">
                             <h3>Graduate Engineer</h3>
                             <p class="company">Tata Motors</p>
                             <ul>
-                                <li>Designed ML feature pipelines over high-volume operations data, standardizing timestamps, throughput logs, and performance metrics.</li>
-                                <li>Deployed anomaly detection workflows that improved system efficiency by 18% and throughput by 15%.</li>
-                                <li>Built a data-driven process optimization framework that reduced operational costs by 20% and earned the Kaizen Award.</li>
+                                <li>Deployed Isolation Forest anomaly detection on throughput, error-rate, and readiness signals — efficiency +18%, throughput +15%.</li>
+                                <li>Modeled deployment impact via Monte Carlo simulation, reducing operational costs 20%. Kaizen Award winner.</li>
                             </ul>
                         </div>
                     </article>
@@ -183,190 +489,66 @@
             </div>
         </section>
 
-        <section id="projects" class="section">
+        <!-- ============ SKILLS ============ -->
+        <section id="skills" class="section">
             <div class="section-inner">
                 <div class="section-header compact">
-                    <p class="eyebrow">Projects</p>
-                    <h2>Selected AI systems and engineering projects.</h2>
+                    <p class="eyebrow mono">// skills</p>
+                    <h2>The stack behind the demos.</h2>
                 </div>
-
-                <div class="projects-grid">
-                    <article class="project-card featured">
-                        <p class="project-type">LLM Tooling</p>
-                        <h3>Autonomous CLI Coding Agent</h3>
-                        <p>
-                            Framework-free LLM coding agent using raw APIs, a multi-step tool-calling
-                            loop, six workspace tools, and safety guardrails. Built for faster iteration
-                            than heavier agent frameworks.
-                        </p>
-                        <div class="project-tags">
-                            <span>LLM agents</span>
-                            <span>Tool calling</span>
-                            <span>Python</span>
-                            <span>Guardrails</span>
-                        </div>
-                        <a href="https://github.com/Ajeenckya5/CLI_AI_Agent" target="_blank" rel="noopener" class="text-link">View repository</a>
-                    </article>
-
-                    <article class="project-card">
-                        <p class="project-type">Agent Evaluation</p>
-                        <h3>Self-Improving LLM Agent</h3>
-                        <p>
-                            Long-horizon agent workflow across AgentBench and WebArena with trace
-                            logging, failure labeling, strategy-memory retrieval, GPT-4 evaluation,
-                            ReAct baselines, LLaMA3-8B inference, and QLoRA 4-bit quantization.
-                        </p>
-                        <div class="project-tags">
-                            <span>AgentBench</span>
-                            <span>WebArena</span>
-                            <span>QLoRA</span>
-                            <span>LLaMA</span>
-                        </div>
-                        <a href="https://github.com/Ajeenckya5/opticode-agentr" target="_blank" rel="noopener" class="text-link">View repository</a>
-                    </article>
-
-                    <article class="project-card">
-                        <p class="project-type">RAG Application</p>
-                        <h3>AI Document Chat</h3>
-                        <p>
-                            Asynchronous RAG pipeline using chunking, embeddings, vector indexing,
-                            cosine retrieval, FastAPI, Streamlit, Docker, CI/CD workflows, PostgreSQL,
-                            and pgvector.
-                        </p>
-                        <div class="project-tags">
-                            <span>RAG</span>
-                            <span>pgvector</span>
-                            <span>FastAPI</span>
-                            <span>Docker</span>
-                        </div>
-                        <a href="https://github.com/Ajeenckya5/LLM_RAG" target="_blank" rel="noopener" class="text-link">View repository</a>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <section id="skills" class="section section-alt">
-            <div class="section-inner">
-                <div class="section-header compact">
-                    <p class="eyebrow">Skills</p>
-                    <h2>Technical stack for AI/ML engineering roles.</h2>
-                </div>
-
                 <div class="skills-grid">
-                    <article class="skill-card">
-                        <h3>Languages &amp; Backend</h3>
-                        <ul class="skill-list">
-                            <li>Python</li>
-                            <li>SQL</li>
-                            <li>FastAPI</li>
-                            <li>Streamlit</li>
-                            <li>Git</li>
-                        </ul>
-                    </article>
-
-                    <article class="skill-card">
-                        <h3>ML &amp; Deep Learning</h3>
-                        <ul class="skill-list">
-                            <li>Scikit-learn</li>
-                            <li>PyTorch</li>
-                            <li>TensorFlow</li>
-                            <li>XGBoost</li>
-                            <li>Bayesian modeling</li>
-                            <li>Model evaluation</li>
-                        </ul>
-                    </article>
-
-                    <article class="skill-card">
-                        <h3>LLM &amp; AI Systems</h3>
-                        <ul class="skill-list">
-                            <li>RAG</li>
-                            <li>Knowledge Graph RAG</li>
-                            <li>Agentic workflows</li>
-                            <li>Transformers</li>
-                            <li>LangChain</li>
-                            <li>RLHF</li>
-                            <li>Hugging Face</li>
-                        </ul>
-                    </article>
-
-                    <article class="skill-card">
-                        <h3>Data, Cloud &amp; MLOps</h3>
-                        <ul class="skill-list">
-                            <li>PostgreSQL</li>
-                            <li>pgvector</li>
-                            <li>AWS S3</li>
-                            <li>AWS Lambda</li>
-                            <li>Docker</li>
-                            <li>Kubernetes</li>
-                            <li>GitHub Actions</li>
-                        </ul>
-                    </article>
+                    <div class="skill-card"><h3 class="mono">ML &amp; Deep Learning</h3><p>PyTorch · TensorFlow · Scikit-learn · XGBoost · Bayesian modeling · LoRA/QLoRA fine-tuning · calibration &amp; evaluation</p></div>
+                    <div class="skill-card"><h3 class="mono">LLMs &amp; Agents</h3><p>RAG · Knowledge-Graph RAG · tool use · agent memory · ReAct · guardrails · LangChain/LangGraph · multi-agent orchestration · RLAIF · LLM evaluation</p></div>
+                    <div class="skill-card"><h3 class="mono">Languages &amp; Backend</h3><p>Python · SQL · FastAPI · Streamlit · Playwright · REST APIs · Git</p></div>
+                    <div class="skill-card"><h3 class="mono">Data &amp; Cloud</h3><p>PostgreSQL · Redis · pgvector · AWS (S3, Lambda) · Docker · Kubernetes · CI/CD · model deployment</p></div>
                 </div>
             </div>
         </section>
 
-        <section id="education" class="section">
-            <div class="section-inner education-grid">
-                <div class="section-header">
-                    <p class="eyebrow">Education</p>
-                    <h2>Academic foundation in AI/ML and engineering systems.</h2>
+        <!-- ============ EDUCATION ============ -->
+        <section id="education" class="section section-alt">
+            <div class="section-inner">
+                <div class="section-header compact">
+                    <p class="eyebrow mono">// education</p>
+                    <h2>Education</h2>
                 </div>
-
-                <div class="education-list">
-                    <article class="education-item">
-                        <span>May 2026</span>
-                        <h3>University of Wisconsin-Madison</h3>
-                        <p>M.S. Industrial Engineering, specialization in AI/ML</p>
-                        <p class="muted">Coursework: Machine Learning, AI Systems, Deep Learning, NLP, Trustworthy AI, AI Agents</p>
-                    </article>
-
-                    <article class="education-item">
-                        <span>May 2020</span>
+                <div class="edu-grid">
+                    <div class="edu-card">
+                        <h3>University of Wisconsin–Madison</h3>
+                        <p class="mono">M.S. Industrial Engineering · AI/ML specialization · May 2026</p>
+                        <p>AI Agents · Advanced Deep Learning · Foundation Models · DL for NLP · Machine Learning</p>
+                    </div>
+                    <div class="edu-card">
                         <h3>Shivaji University</h3>
-                        <p>B.E. Mechanical Engineering</p>
-                    </article>
+                        <p class="mono">B.E. Mechanical Engineering · 2020</p>
+                    </div>
                 </div>
             </div>
         </section>
 
+        <!-- ============ CONTACT ============ -->
         <section id="contact" class="section contact-section">
-            <div class="section-inner contact-panel">
-                <div>
-                    <p class="eyebrow">Contact</p>
-                    <h2>Open to AI/ML engineering roles and applied ML projects.</h2>
-                    <p>
-                        Reach out for work involving forecasting systems, LLM applications,
-                        model evaluation, RAG, MLOps, or data-driven operations.
-                    </p>
-                </div>
-
-                <div class="contact-actions">
-                    <a href="mailto:ajeenckyam@gmail.com" class="contact-btn">
-                        <img src="assets/email-black.jpg" alt="" />
-                        Email
-                    </a>
-                    <a href="https://www.linkedin.com/in/ajeenckya-mahadik" class="contact-btn" target="_blank" rel="noopener">
-                        <img src="assets/linkedin-black.jpg" alt="" />
-                        LinkedIn
-                    </a>
-                    <a href="https://github.com/Ajeenckya5" class="contact-btn" target="_blank" rel="noopener">
-                        <img src="assets/github-black.jpg" alt="" />
-                        GitHub
-                    </a>
-                    <a href="files/resume.pdf" class="contact-btn" target="_blank" rel="noopener">
-                        Resume
-                    </a>
+            <div class="section-inner narrow center">
+                <p class="eyebrow mono">// contact</p>
+                <h2>Hiring for ML, applied AI, or agent engineering?</h2>
+                <p class="section-sub">I'm graduating in May 2026 and looking for roles where calibrated probabilistic thinking and hands-on LLM systems work matter. The fastest way to evaluate me is two scrolls up — the models speak for themselves.</p>
+                <div class="contact-row">
+                    <a href="mailto:ajeenckyam@gmail.com" class="btn primary">Email me</a>
+                    <a href="https://www.linkedin.com/in/ajeenckya-mahadik" class="btn secondary" target="_blank" rel="noopener">LinkedIn</a>
+                    <a href="https://github.com/Ajeenckya5" class="btn secondary" target="_blank" rel="noopener">GitHub</a>
+                    <a href="files/resume.pdf" class="btn secondary" target="_blank" rel="noopener">Resume PDF</a>
                 </div>
             </div>
         </section>
     </main>
 
-    <footer class="site-footer">
-        <div class="section-inner footer-inner">
-            <p>&copy; <span id="year"></span> Ajeenckya Mahadik. AI/ML Engineer.</p>
-        </div>
+    <footer class="site-footer mono">
+        <p>© 2026 Ajeenckya Mahadik · Every chart on this page is generated in your browser from real outputs of models I built. No screenshots, no mockups.</p>
     </footer>
 
+    <script src="js/data.js"></script>
+    <script src="js/results.js"></script>
+    <script src="js/demos.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>
