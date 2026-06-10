@@ -218,20 +218,105 @@ a:hover { text-decoration: underline; }
   filter: saturate(0.92);
   box-shadow: var(--shadow);
 }
-.photo-badge {
-  position: absolute;
-  left: -26px;
-  bottom: 22px;
-  background: var(--panel);
+/* prompt inputs (agent race + docgraph) */
+.prompt-row { display: flex; gap: 10px; }
+.prompt-input {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg-soft);
+  color: var(--ink);
   border: 1px solid var(--line-bright);
-  border-left: 3px solid var(--green);
-  padding: 10px 14px;
   border-radius: 10px;
-  font-size: 0.72rem;
-  color: var(--muted);
-  line-height: 1.5;
-  box-shadow: var(--shadow);
+  padding: 12px 14px;
+  font-size: 0.85rem;
 }
+.prompt-input:focus { outline: none; border-color: var(--accent); }
+.prompt-input::placeholder { color: #4a5670; }
+.chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 6px 13px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.repo-link { font-size: 0.74rem; color: #5b6880; }
+.repo-link a { color: var(--accent); }
+
+/* agent race lanes */
+.race { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.lane {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.lane.mine { border-color: rgba(74, 222, 128, 0.35); }
+.lane.langchain { border-color: rgba(248, 113, 113, 0.3); }
+.lane-head {
+  padding: 10px 14px;
+  font-size: 0.72rem;
+  color: var(--ink);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.lane.mine .lane-head { background: rgba(74, 222, 128, 0.07); }
+.lane.langchain .lane-head { background: rgba(248, 113, 113, 0.06); }
+.lane-timer { color: var(--accent); font-weight: 700; }
+.lane.langchain .lane-timer { color: var(--red); }
+.lane-steps {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-height: 360px;
+  max-height: 420px;
+  overflow-y: auto;
+}
+.race-step {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 8px 10px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: all 0.25s ease;
+}
+.race-step.show { opacity: 1; transform: none; }
+.race-step .rs-icon { font-size: 0.85rem; line-height: 1.4; }
+.race-step .rs-title { font-size: 0.68rem; color: var(--accent); }
+.race-step .rs-text { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+.race-step.req .rs-title { color: var(--ink); }
+.race-step.ok { border-color: rgba(74, 222, 128, 0.4); }
+.race-step.ok .rs-title { color: var(--green); }
+.race-step.ov { border-color: rgba(248, 113, 113, 0.25); background: rgba(248, 113, 113, 0.05); }
+.race-step.ov .rs-title { color: var(--red); }
+.race-step.slowdone .rs-title { color: var(--amber); }
+
+/* domain transfer grid */
+.domain-wrap { margin-top: 26px; }
+.domain-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.domain-card {
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px 18px;
+}
+.domain-card h4 { font-size: 0.78rem; color: var(--accent); margin-bottom: 7px; }
+.domain-card p { font-size: 0.82rem; color: var(--muted); }
+.domain-card p em { color: var(--ink); font-style: normal; font-weight: 600; }
 
 /* stat strip */
 .stat-strip {
@@ -591,6 +676,8 @@ a:hover { text-decoration: underline; }
 .wc-champion h4 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.01em; }
 .wc-champion h4 span { color: var(--amber); }
 .wc-champion p { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); margin-top: 6px; }
+.wc-champion .champ-context { color: var(--amber); max-width: 560px; margin: 8px auto 0; }
+.wc-champion .champ-context.dim { color: #5b6880; font-size: 0.68rem; }
 @keyframes champPop { 0% { transform: scale(0.2); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
 .champ-board-wrap {
@@ -957,7 +1044,9 @@ a:hover { text-decoration: underline; }
   .stat-strip { grid-template-columns: 1fr 1fr; }
   .stat strong { font-size: 1.2rem; }
   .hero-photo { width: 100%; max-width: 320px; height: auto; }
-  .photo-badge { left: 10px; }
   .uncertainty-row { grid-template-columns: 1fr; }
+  .race { grid-template-columns: 1fr; }
+  .lane-steps { min-height: 0; max-height: 300px; }
+  .domain-grid { grid-template-columns: 1fr; }
   .terminal-body { min-height: 320px; max-height: 320px; }
 }
