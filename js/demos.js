@@ -56,20 +56,21 @@ function sample3(p) {
   const r = Math.random() * (p[0] + p[1] + p[2]);
   return r < p[0] ? 0 : r < p[0] + p[1] ? 1 : 2;
 }
+const argmax3 = (p) => p.indexOf(Math.max(...p));
 
-function simulateGroupStage() {
+function simulateGroupStage(det) {
   const tables = {};
   GROUP_KEYS.forEach((g) => {
     const tbl = {};
     WC_GROUPS[g].forEach((t) => (tbl[t] = { team: t, pts: 0, gd: 0 }));
     GROUP_MATCHES[g].forEach((m) => {
-      const o = sample3(m.ens);
+      const o = det ? argmax3(m.ens) : sample3(m.ens);
       if (o === 0) { tbl[m.h].pts += 3; tbl[m.h].gd += 1; tbl[m.a].gd -= 1; }
       else if (o === 2) { tbl[m.a].pts += 3; tbl[m.a].gd += 1; tbl[m.h].gd -= 1; }
       else { tbl[m.h].pts += 1; tbl[m.a].pts += 1; }
     });
     tables[g] = Object.values(tbl).sort(
-      (x, y) => y.pts - x.pts || y.gd - x.gd || STR[y.team] - STR[x.team] || Math.random() - 0.5
+      (x, y) => y.pts - x.pts || y.gd - x.gd || STR[y.team] - STR[x.team] || (det ? 0 : Math.random() - 0.5)
     );
   });
   return tables;
@@ -87,8 +88,8 @@ function bracketSeedOrder(n) {
 }
 const SEED32 = bracketSeedOrder(32);
 
-function simulateTournament() {
-  const tables = simulateGroupStage();
+function simulateTournament(det) {
+  const tables = simulateGroupStage(det);
   const winners = [], runners = [], thirds = [];
   GROUP_KEYS.forEach((g) => {
     winners.push(tables[g][0]);
@@ -96,7 +97,7 @@ function simulateTournament() {
     thirds.push(tables[g][2]);
   });
   const bySeed = (arr) => arr.slice().sort((x, y) => y.pts - x.pts || y.gd - x.gd || STR[y.team] - STR[x.team]);
-  thirds.sort((x, y) => y.pts - x.pts || y.gd - x.gd || Math.random() - 0.5);
+  thirds.sort((x, y) => y.pts - x.pts || y.gd - x.gd || STR[y.team] - STR[x.team] || (det ? 0 : Math.random() - 0.5));
   const qualified = bySeed(winners).concat(bySeed(runners), bySeed(thirds.slice(0, 8)));
   const seeds = qualified.map((q) => q.team); // index 0 = seed 1
 
@@ -106,7 +107,7 @@ function simulateTournament() {
     const ties = [], next = [];
     for (let i = 0; i < field.length; i += 2) {
       const a = field[i], b = field[i + 1];
-      const w = Math.random() < koWin(a, b) ? a : b;
+      const w = det ? (koWin(a, b) >= 0.5 ? a : b) : (Math.random() < koWin(a, b) ? a : b);
       ties.push({ a, b, w });
       next.push(w);
     }
@@ -200,13 +201,13 @@ function renderBracket(rounds, upTo) {
 /* ----- animated single tournament ----- */
 let cupBusy = false;
 
-async function kickoff() {
+async function kickoff(det) {
   if (cupBusy) return;
   cupBusy = true;
   setCupButtons(true);
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-  const result = simulateTournament();
+  const result = simulateTournament(det);
 
   // phase 1: groups
   renderGroupsIdle();
@@ -221,7 +222,7 @@ async function kickoff() {
   $("wcGroups").style.display = "none";
   $("wcBracketWrap").hidden = false;
   for (let ri = 0; ri < result.rounds.length; ri++) {
-    $("wcPhase").textContent = ROUND_NAMES[ri] + " · knockout via model-fitted team strengths";
+    $("wcPhase").textContent = ROUND_NAMES[ri] + (det ? " · deterministic: stronger team advances" : " · knockout sampled from model-fitted strengths");
     result.rounds[ri].forEach((t) => (t._done = false));
     renderBracket(result.rounds, ri);
     for (const t of result.rounds[ri]) {
@@ -233,9 +234,11 @@ async function kickoff() {
   }
 
   // phase 3: champion
-  $("wcPhase").textContent = "full time · we have a world champion";
+  $("wcPhase").textContent = det ? "full time · the model's most likely World Cup" : "full time · we have a world champion";
   const odds = CHAMP_P[result.champion] || 0;
-  const tag = odds >= 0.08
+  const tag = det
+    ? `this is THE prediction: highest-probability outcome in all 72 fixtures, stronger team through every knockout. Title odds ${pct(odds)} — click again, you'll get exactly the same Cup.`
+    : odds >= 0.08
     ? `the favorite delivered — my model gave them a ${pct(odds)} title chance, the field's best`
     : odds >= 0.03
     ? `a genuine contender — my model gave them a ${pct(odds)} title chance`
@@ -245,15 +248,19 @@ async function kickoff() {
   ch.innerHTML = `
     <span class="champ-flag">${flag(result.champion)}</span>
     <h4>🏆 <span>${result.champion}</span> win the 2026 World Cup</h4>
-    <p>beat ${flag(result.finalLoser)} ${result.finalLoser} in the final · simulation #${totalSims + 1}</p>
+    <p>beat ${flag(result.finalLoser)} ${result.finalLoser} in the final · ${det ? "deterministic run" : "random future #" + (totalSims + 1)}</p>
     <p class="champ-context">${tag}</p>
-    <p class="champ-context dim">a different champion each run is correct — every kickoff samples ONE future from the model's fixed probabilities. Run 5,000 and watch the true odds emerge below ▾</p>`;
+    <p class="champ-context dim">${det
+      ? "the prediction never changes — only 🎲 random futures do, because they roll dice weighted by these same probabilities (not tallied below)."
+      : "a different champion each 🎲 run is correct — it samples ONE future from fixed probabilities. ▶ Most likely Cup gives the stable answer; ⚡ 5,000 runs give the odds below ▾"}</p>`;
 
-  counts[result.champion] = (counts[result.champion] || 0) + 1;
-  totalSims += 1;
-  $("cupCount").textContent = totalSims.toLocaleString();
-  $("cupLast").textContent = `${flag(result.champion)} ${result.champion}`;
-  renderBoard();
+  if (!det) {
+    counts[result.champion] = (counts[result.champion] || 0) + 1;
+    totalSims += 1;
+    $("cupCount").textContent = totalSims.toLocaleString();
+    $("cupLast").textContent = `${flag(result.champion)} ${result.champion}`;
+    renderBoard();
+  }
 
   cupBusy = false;
   setCupButtons(false);
@@ -295,7 +302,7 @@ function runMonteCarlo(n) {
 }
 
 function setCupButtons(dis) {
-  ["cupKickoffBtn", "cupMcBtn", "cupResetBtn"].forEach((id) => ($(id).disabled = dis));
+  ["cupDetBtn", "cupKickoffBtn", "cupMcBtn", "cupResetBtn"].forEach((id) => { if ($(id)) $(id).disabled = dis; });
 }
 
 function resetCup() {
@@ -309,7 +316,8 @@ function resetCup() {
 }
 
 if ($("cupKickoffBtn")) {
-  $("cupKickoffBtn").addEventListener("click", kickoff);
+  $("cupDetBtn").addEventListener("click", () => kickoff(true));
+  $("cupKickoffBtn").addEventListener("click", () => kickoff(false));
   $("cupMcBtn").addEventListener("click", () => runMonteCarlo(5000));
   $("cupResetBtn").addEventListener("click", resetCup);
   renderGroupsIdle();
@@ -359,8 +367,8 @@ function renderMatch() {
         <div class="mc-prob">win ${pct(ens[0])}</div>
       </div>
       <div class="mc-score">
-        <div class="mc-pred">${pct(ens[1], 0)}</div>
-        <span class="mc-pred-label">draw probability</span>
+        <div class="mc-pred">${m.score[0]} – ${m.score[1]}</div>
+        <span class="mc-pred-label">most likely scoreline · Poisson layer</span>
         <span class="mc-pick">model pick: ${pick} · ${pct(Math.max(...ens), 0)}</span>
       </div>
       <div class="mc-side">
@@ -369,6 +377,7 @@ function renderMatch() {
         <div class="mc-prob">win ${pct(ens[2])}</div>
       </div>
     </div>
+    <div class="mc-sl3 mono">scoreline candidates (given the pick): ${m.sl3 || "—"}</div>
     <div class="mc-wx">
       <span class="wx-chip">🌡 ${m.wx.t}°C</span>
       <span class="wx-chip">💧 ${m.wx.hum}% humidity</span>
