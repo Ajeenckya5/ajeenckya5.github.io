@@ -72,7 +72,6 @@
                 </div>
                 <div class="hero-photo-wrap">
                     <img src="assets/profile.jpg" alt="Ajeenckya Mahadik" class="hero-photo" />
-                    <div class="photo-badge mono">currently: GRA @ UW–Madison<br/>building probabilistic forecasting</div>
                 </div>
             </div>
 
@@ -129,7 +128,9 @@
                         <p class="pane-explain cup-note">
                             One click = one complete World Cup. All 72 group fixtures are decided by sampling my model's
                             <strong>real published probabilities</strong>, then the knockout bracket plays out round of 32 → final.
-                            Run it 5,000 times and watch the title odds converge to my official Monte Carlo distribution.
+                            Getting a <strong>different champion almost every run is the point</strong>: my model gives even the
+                            favorite (Argentina) only a 12.9% title chance, so roughly half of all simulated tournaments end in a surprise.
+                            That's honest probabilistic forecasting — one click is one possible future, 5,000 clicks are the odds.
                         </p>
 
                         <div class="wc-stage">
@@ -223,6 +224,18 @@
                         </p>
                     </div>
 
+                    <div class="domain-wrap">
+                        <p class="mono bench-title">the football is the demo — the same model ports directly to these domains</p>
+                        <div class="domain-grid">
+                            <div class="domain-card"><h4 class="mono">📦 Demand forecasting</h4><p>Slow-moving SKUs are low-count events, exactly like goals. Calibrated outcome probabilities + the Monte Carlo layer = inventory scenario planning with honest service-level estimates instead of point forecasts.</p></div>
+                            <div class="domain-card"><h4 class="mono">🏦 Credit risk</h4><p>Default / cure / prepay is the same 3-way classification as win / draw / loss. Banks are <em>required</em> to prove calibration (Basel) — reliability diagrams, Brier decomposition and temperature scaling are the exact validation toolkit.</p></div>
+                            <div class="domain-card"><h4 class="mono">🛡 Insurance pricing</h4><p>Claim frequency is count modeling under exogenous conditions. The XGBoost weather sub-model is literally a catastrophe-covariate block; calibrated probabilities are the difference between profitable and mispriced premiums.</p></div>
+                            <div class="domain-card"><h4 class="mono">🏭 Predictive maintenance</h4><p>P(failure within 30 days) with epistemic uncertainty tells you not just <em>what</em> will break but <em>when the model doesn't know</em> — inspect exactly those assets. I shipped this pattern in production at Powertrac and Tata Motors.</p></div>
+                            <div class="domain-card"><h4 class="mono">🩺 Clinical risk scores</h4><p>Readmission and complication models are only useful if 70% means 70% — miscalibrated scores erode clinician trust. The BNN spread flags the patients where the model should defer to humans.</p></div>
+                            <div class="domain-card"><h4 class="mono">⚡ Energy &amp; finance</h4><p>The time-decay feature weighting is EWMA from volatility modeling; Monte Carlo propagation of match uncertainty to title odds is the same machinery as load forecasting bands and portfolio scenario analysis.</p></div>
+                        </div>
+                    </div>
+
                     <details class="deep-dive">
                         <summary>📘 Model deep dive — architecture, features, training, calibration, serving</summary>
                         <div class="dd-body">
@@ -267,18 +280,30 @@
 
                     <div class="pane-grid">
                         <div class="pane-controls">
-                            <p class="pane-explain">Pick a task and watch a live run of the agent loop — <strong>how it works</strong> on the right, <strong>how it performs</strong> below. Each card is one step of the real loop: <span class="mono">plan → tool call → observe → repeat</span>.</p>
-                            <div class="task-buttons" id="agentTasks"></div>
-                            <div class="bench-mini">
-                                <p class="mono bench-title">how it performs · 15 identical tool-calling tasks</p>
-                                <div class="bench-row"><span class="bench-label mono">CodeCraft</span><div class="bench-bar"><div class="bench-fill fast" style="width:13%"></div></div><span class="bench-val mono">1.0× latency · 15/15 ✓</span></div>
-                                <div class="bench-row"><span class="bench-label mono">LangChain</span><div class="bench-bar"><div class="bench-fill slow" style="width:98%"></div></div><span class="bench-val mono">7.5× latency</span></div>
-                                <p class="fine-print bench-foot">Same model, same 15 tasks, same tools — the only variable is the orchestration layer. Raw API loops beat framework overhead.</p>
+                            <p class="pane-explain"><strong>Type any coding task</strong> and race the two agents on it: my raw API loop in one lane, the identical task routed through LangChain's framework stack in the other. Watch where the time goes.</p>
+                            <div class="prompt-row">
+                                <input id="agentPrompt" class="prompt-input mono" maxlength="140" placeholder="e.g. fix the failing auth test" />
+                                <button class="btn primary" id="agentRunBtn">▶ Race</button>
                             </div>
+                            <div class="chip-row" id="agentChips"></div>
+                            <div class="bench-mini">
+                                <p class="mono bench-title">measured · 15 identical tool-calling tasks, same model &amp; tools</p>
+                                <div class="bench-row"><span class="bench-label mono">CodeCraft</span><div class="bench-bar"><div class="bench-fill fast" style="width:13%"></div></div><span class="bench-val mono">1.0× · 15/15 ✓</span></div>
+                                <div class="bench-row"><span class="bench-label mono">LangChain</span><div class="bench-bar"><div class="bench-fill slow" style="width:98%"></div></div><span class="bench-val mono">7.5× latency</span></div>
+                                <p class="fine-print bench-foot">Why LangChain is slow: it rebuilds an AgentExecutor chain per task, dispatches a CallbackManager event on every step, renders prompt templates through serialization layers, and re-validates tool output with parser retries. A raw loop does one thing — send messages, execute tools. The on-screen race trace is simulated from your prompt; the latency ratio is my measured benchmark.</p>
+                            </div>
+                            <p class="repo-link mono">⚙ run the real agent: <a href="https://github.com/Ajeenckya5/CLI_AI_Agent" target="_blank" rel="noopener">github.com/Ajeenckya5/CLI_AI_Agent</a></p>
                         </div>
                         <div class="pane-viz">
-                            <div class="pipeline" id="agentPipeline">
-                                <p class="pipeline-empty mono">⌥ pick a task on the left to watch the agent work</p>
+                            <div class="race">
+                                <div class="lane mine">
+                                    <div class="lane-head mono">⚡ CodeCraft · raw loop <span class="lane-timer" id="timerMine">0.0s</span></div>
+                                    <div class="lane-steps" id="stepsMine"><p class="pipeline-empty mono">type a task → ▶ Race</p></div>
+                                </div>
+                                <div class="lane langchain">
+                                    <div class="lane-head mono">🐢 LangChain · framework <span class="lane-timer" id="timerLC">0.0s</span></div>
+                                    <div class="lane-steps" id="stepsLC"></div>
+                                </div>
                             </div>
                             <div class="run-summary mono" id="agentSummary" hidden></div>
                         </div>
@@ -334,6 +359,7 @@
                                 <p class="mono bench-title">strategy memory (ChromaDB)</p>
                                 <div id="memoryCards"><p class="memory-empty mono">∅ empty — no strategies learned yet</p></div>
                             </div>
+                            <p class="repo-link mono">⚙ code &amp; experiments: <a href="https://github.com/Ajeenckya5/opticode-agentr" target="_blank" rel="noopener">github.com/Ajeenckya5/opticode-agentr</a></p>
                         </div>
                         <div class="pane-viz">
                             <div class="attempt-lane" id="attemptLane"></div>
@@ -381,10 +407,16 @@
                     <div class="pane-grid">
                         <div class="pane-controls">
                             <p class="pane-explain">
-                                Ask a multi-hop question. Flat vector search retrieves chunks that <em>look similar</em> to the query —
-                                graph RAG <em>walks entity links</em> to connect facts that never appear in the same document.
+                                <strong>Ask the demo inbox anything</strong> — real entity detection and breadth-first graph traversal run in your browser.
+                                Flat vector search retrieves chunks that <em>look similar</em>; graph RAG <em>walks entity links</em>
+                                to connect facts that never appear in the same document.
                             </p>
+                            <div class="prompt-row">
+                                <input id="kgPrompt" class="prompt-input mono" maxlength="140" placeholder='try "who approved the invoice Sarah flagged?"' />
+                                <button class="btn primary" id="kgAskBtn">Ask</button>
+                            </div>
                             <div class="task-buttons" id="kgQueries"></div>
+                            <p class="repo-link mono">⚙ full system (10K emails · Mistral 7B): <a href="https://github.com/Ajeenckya5/LLM_RAG" target="_blank" rel="noopener">github.com/Ajeenckya5/LLM_RAG</a></p>
                             <div class="kg-answer" id="kgAnswer" hidden>
                                 <p class="mono kg-answer-label">answer · via graph traversal</p>
                                 <p id="kgAnswerText"></p>
