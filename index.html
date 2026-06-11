@@ -371,14 +371,19 @@
                     <div class="pane-grid">
                         <div class="pane-controls">
                             <p class="pane-explain">
-                                The hypothesis: <strong>failure memory compounds</strong>. Watch the same task attempted three times —
-                                each failure becomes a strategy, and each strategy makes the next attempt smarter.
+                                The hypothesis: <strong>failure memory compounds</strong>. <strong>Give it any coding task</strong> —
+                                the agent first writes a hidden verifier for it, then attempts a solution, learns a strategy from every
+                                real failure, and retries with memory injected.
                             </p>
+                            <div class="prompt-row">
+                                <input id="siPrompt" class="prompt-input mono" maxlength="160" placeholder="e.g. convert roman numerals to int (handle IV, IX, XL…)" />
+                            </div>
+                            <div class="chip-row" id="siChips"></div>
                             <div class="control-row">
                                 <button class="btn primary" id="siRunBtn">▶ Watch it learn</button>
                                 <button class="btn ghost" id="siResetBtn">Reset</button>
                             </div>
-                            <p class="fine-print">🔑 with a key saved in the CodeCraft panel above, this becomes a LIVE run: your LLM writes the code, real Python verifies it against hidden tests, and the strategies in memory are written by the LLM from its own failures. Without a key it plays a recorded demo.</p>
+                            <p class="fine-print">🔑 with a key saved in the CodeCraft panel above, this is a LIVE run on <em>your</em> task: your LLM writes the verifier and the solutions, real Python (Pyodide) judges every attempt, and the strategies in memory are written by the LLM from its own real failures. Without a key it plays a recorded demo.</p>
                             <div class="memory-stack">
                                 <p class="mono bench-title">strategy memory (ChromaDB)</p>
                                 <div id="memoryCards"><p class="memory-empty mono">∅ empty — no strategies learned yet</p></div>
@@ -431,32 +436,37 @@
                     <div class="pane-grid">
                         <div class="pane-controls">
                             <p class="pane-explain">
-                                <strong>Ask the demo inbox anything</strong> — real entity detection and breadth-first graph traversal run in your browser.
-                                Flat vector search retrieves chunks that <em>look similar</em>; graph RAG <em>walks entity links</em>
-                                to connect facts that never appear in the same document.
+                                <strong>Real RAG, running in your browser.</strong> Ask anything about the inbox on the right —
+                                BM25 retrieval ranks the actual emails, sentence extraction builds the answer from their text,
+                                and the knowledge graph lights up the linked entities. 🔑 With a key saved above, the answer is
+                                instead <em>generated</em> by your LLM from the retrieved emails, with citations. You can also
+                                add your own text to the corpus — it never leaves this browser.
                             </p>
                             <div class="prompt-row">
-                                <input id="kgPrompt" class="prompt-input mono" maxlength="140" placeholder='try "who approved the invoice Sarah flagged?"' />
+                                <input id="kgPrompt" class="prompt-input mono" maxlength="160" placeholder='ask the inbox… e.g. "what is Atlas Migration?"' />
                                 <button class="btn primary" id="kgAskBtn">Ask</button>
                             </div>
-                            <div class="task-buttons" id="kgQueries"></div>
-                            <p class="repo-link mono">⚙ full system (10K emails · Mistral 7B): <a href="https://github.com/Ajeenckya5/LLM_RAG" target="_blank" rel="noopener">github.com/Ajeenckya5/LLM_RAG</a></p>
-                            <p class="fine-print">entity detection + BFS always run for real in your browser; 🔑 with a key saved above, the final answer is also phrased live by your LLM from the traversed path.</p>
+                            <div class="chip-row" id="kgChips"></div>
                             <div class="kg-answer" id="kgAnswer" hidden>
-                                <p class="mono kg-answer-label">answer · via graph traversal</p>
+                                <p class="mono kg-answer-label">answer</p>
                                 <p id="kgAnswerText"></p>
                                 <p class="mono kg-hops" id="kgHops"></p>
                             </div>
-                            <div class="rag-compare" id="ragCompare" hidden>
-                                <p class="mono bench-title">how it performs · same question, two retrieval strategies</p>
-                                <div class="rag-row bad"><span class="mono rag-name">flat vector search</span><span class="rag-result" id="ragVec"></span></div>
-                                <div class="rag-row good"><span class="mono rag-name">DocGraph (KG-RAG)</span><span class="rag-result" id="ragKg"></span></div>
-                                <div class="bench-row lat"><span class="bench-label mono">cold retrieval</span><div class="bench-bar"><div class="bench-fill slow" style="width:90%"></div></div><span class="bench-val mono">1.8s</span></div>
-                                <div class="bench-row lat"><span class="bench-label mono">E5 cache hit</span><div class="bench-bar"><div class="bench-fill fast" style="width:50%"></div></div><span class="bench-val mono">1.0s · −44%</span></div>
-                            </div>
+                            <div class="kg-sources" id="kgSources" hidden></div>
+                            <details class="key-panel">
+                                <summary>➕ add your own emails / notes to the corpus</summary>
+                                <div class="kp-body">
+                                    <p class="fine-print">Paste anything (one document per blank-line-separated block; first line becomes the subject). It is indexed locally in your browser only — refresh and it's gone.</p>
+                                    <textarea id="kgUserDocs" class="prompt-input mono" rows="4" placeholder="Project Phoenix status&#10;Phoenix is our warehouse robotics pilot, owner Dana Cole, go-live in March…"></textarea>
+                                    <div class="control-row" style="margin-top:8px"><button class="btn secondary" id="kgAddDocs">Index it</button></div>
+                                </div>
+                            </details>
+                            <p class="repo-link mono">⚙ full system (10K emails · Mistral 7B · pgvector): <a href="https://github.com/Ajeenckya5/LLM_RAG" target="_blank" rel="noopener">github.com/Ajeenckya5/LLM_RAG</a></p>
+                            <p class="fine-print">production metrics from that system: multi-hop answers flat vector search misses, retrieval latency 1.8s → 1.0s (−44%) via E5 embedding caching, JWT isolation at the SQL layer.</p>
                         </div>
                         <div class="pane-viz">
-                            <canvas id="kgCanvas" height="430"></canvas>
+                            <canvas id="kgCanvas" height="320"></canvas>
+                            <div class="inbox" id="kgInbox"></div>
                         </div>
                     </div>
 
@@ -605,6 +615,7 @@
 
     <script src="js/data.js"></script>
     <script src="js/results.js"></script>
+    <script src="js/emails.js"></script>
     <script src="js/llm.js"></script>
     <script src="js/demos.js"></script>
     <script src="js/main.js"></script>
