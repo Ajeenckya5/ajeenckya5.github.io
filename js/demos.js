@@ -12,6 +12,11 @@ const pct = (x, d = 1) => (100 * x).toFixed(d) + "%";
 const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const hasLLM = () => window.LLM && window.LLM.configured();
+function autoGrow(e) {
+  const el = e.target || e;
+  el.style.height = "auto";
+  el.style.height = Math.min(el.scrollHeight + 2, 220) + "px";
+}
 
 const FLAGS = {
   "Algeria":"🇩🇿","Argentina":"🇦🇷","Australia":"🇦🇺","Austria":"🇦🇹","Belgium":"🇧🇪",
@@ -850,7 +855,12 @@ if ($("agentRunBtn")) {
   document.querySelectorAll("#agentChips .chip").forEach((b) =>
     b.addEventListener("click", () => { $("agentPrompt").value = b.textContent; runRace(); }));
   $("agentRunBtn").addEventListener("click", runRace);
-  $("agentPrompt").addEventListener("keydown", (e) => { if (e.key === "Enter") runRace(); });
+  $("agentPrompt").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); runRace(); } });
+  $("agentPrompt").addEventListener("input", autoGrow);
+  if ($("siPrompt")) {
+    $("siPrompt").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("siRunBtn").click(); } });
+    $("siPrompt").addEventListener("input", autoGrow);
+  }
   wireKeyPanel();
   refreshAgentMode();
 }
@@ -1086,176 +1096,285 @@ if ($("siRunBtn")) {
    6. DOCGRAPH — knowledge-graph traversal
    ============================================================ */
 
-const KG_NODES = [
-  { id: "sarah",  label: "Sarah Chen",      type: "person" },
-  { id: "marco",  label: "Marco Diaz",      type: "person" },
-  { id: "priya",  label: "Priya Nair",      type: "person" },
-  { id: "helios", label: "Helios GmbH",     type: "vendor" },
-  { id: "north",  label: "Northwind Supply",type: "vendor" },
-  { id: "inv",    label: "INV-2291 · €48.2K", type: "doc" },
-  { id: "c114",   label: "Contract C-114",  type: "doc" },
-  { id: "atlas",  label: "Atlas Migration", type: "project" },
-  { id: "e1",     label: "✉ kickoff thread", type: "email" },
-  { id: "e3",     label: "✉ invoice flagged", type: "email" },
-  { id: "e6",     label: "✉ approval",       type: "email" },
-  { id: "e7",     label: "✉ delivery delay",  type: "email" },
-  { id: "e2",     label: "✉ budget review",   type: "email" },
-  { id: "e4",     label: "✉ legal redlines",  type: "email" },
-  { id: "e5",     label: "✉ standup notes",   type: "email" },
-  { id: "e8",     label: "✉ vendor intro",    type: "email" }
-];
+/* ============================================================
+   DYNAMIC knowledge graph — built from the corpus at runtime.
+   Entities are extracted from the emails (and anything you add),
+   edges are document co-occurrences, layout is live physics,
+   nodes are draggable. Nothing about this graph is hardcoded.
+   ============================================================ */
 
-const KG_EDGES = [
-  ["sarah", "e3"], ["e3", "inv"], ["inv", "e6"], ["e6", "marco"],
-  ["atlas", "e1"], ["e1", "helios"], ["helios", "c114"], ["c114", "priya"],
-  ["north", "e7"], ["e7", "atlas"], ["atlas", "sarah"],
-  ["helios", "inv"], ["marco", "e2"], ["e2", "atlas"],
-  ["priya", "e4"], ["e4", "c114"], ["sarah", "e5"], ["e5", "atlas"],
-  ["e8", "north"], ["marco", "e8"]
-];
-/* kept: colors, layout, canvas renderer */
-const KG_COLORS = { person: "#a78bfa", vendor: "#fbbf24", doc: "#22d3ee", project: "#4ade80", email: "#64748b" };
+const KG_COLORS = { person: "#a78bfa", vendor: "#fbbf24", doc: "#22d3ee", project: "#4ade80", topic: "#64748b" };
+let GNODES = [];           // {id,label,type,count,docs:Set,x,y,vx,vy}
+let GEDGES = [];           // {a,b,w,docs:Set}
+let GADJ = {};
+let kgActive = { nodes: new Set(), edges: new Set() };
+let kgDrag = null;
+let kgLoopOn = false;
+let kgW = 600, kgH = 320;
 
-let kgPos = {};
-let kgActive = { nodes: new Set(), edges: new Set(), progress: 0 };
-let kgAnimId = null;
+const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
 
-function kgLayout(w, h) {
-  // deterministic seeded positions + a few relaxation passes
-  let seed = 42;
-  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  KG_NODES.forEach((n) => (kgPos[n.id] = { x: 60 + rnd() * (w - 120), y: 50 + rnd() * (h - 100) }));
-  for (let it = 0; it < 260; it++) {
-    // repulsion
-    KG_NODES.forEach((a) => KG_NODES.forEach((b) => {
-      if (a === b) return;
-      const pa = kgPos[a.id], pb = kgPos[b.id];
-      let dx = pa.x - pb.x, dy = pa.y - pb.y;
-      const d2 = Math.max(dx * dx + dy * dy, 60);
-      const f = 5200 / d2;
-      pa.x += (dx / Math.sqrt(d2)) * f;
-      pa.y += (dy / Math.sqrt(d2)) * f;
-    }));
-    // attraction along edges
-    KG_EDGES.forEach(([a, b]) => {
-      const pa = kgPos[a], pb = kgPos[b];
-      const dx = pb.x - pa.x, dy = pb.y - pa.y;
-      const d = Math.sqrt(dx * dx + dy * dy) || 1;
-      const f = (d - 110) * 0.015;
-      pa.x += (dx / d) * f; pa.y += (dy / d) * f;
-      pb.x -= (dx / d) * f; pb.y -= (dy / d) * f;
-    });
-    KG_NODES.forEach((n) => {
-      kgPos[n.id].x = clamp(kgPos[n.id].x, 70, w - 70);
-      kgPos[n.id].y = clamp(kgPos[n.id].y, 36, h - 30);
-    });
-  }
+const ENT_STOP = new Set(["The","This","That","Then","There","These","Those","From","Subject","Team","Please","Thanks","Phase","Reminder","Starting","Weekly","Due","Two","Four","New","Lead","Re","All","Our","She","He","They","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday","January","February","March","April","May","June","July","August","September","October","November","December","Jun","Jul","Q3","Q4","Eur","Usd"]);
+
+function extractDocEntities(doc) {
+  const found = new Map(); // label -> {type, n}
+  const bump = (label, type, n = 1) => {
+    label = label.trim();
+    if (!label || label.length < 3) return;
+    const cur = found.get(label);
+    if (cur) cur.n += n;
+    else found.set(label, { type, n });
+  };
+  // sender = person
+  const sender = String(doc.from || "").split("<")[0].trim();
+  if (/^[A-Z][a-z]+(?: [A-Z][A-Za-z]+)+$/.test(sender)) bump(sender, "person", 2);
+  const text = doc.subject + ". " + doc.body;
+  // document ids: INV-2291, C-114, NW-2207 …
+  (text.match(/\b[A-Z]{1,4}-\d{2,5}(?:-R)?\b/g) || []).forEach((m) => bump(m, "doc"));
+  // multi-word proper-noun phrases: "Atlas Migration", "Helios GmbH", "Dana Cole" …
+  (text.match(/\b[A-Z][a-z]{2,}(?: [A-Z][A-Za-z]+)+\b/g) || []).forEach((m) => {
+    const first = m.split(" ")[0];
+    if (ENT_STOP.has(first)) return;
+    let type = "topic";
+    if (/GmbH|Supply|Inc\b|Ltd\b|Corp\b|Desk\b/i.test(m)) type = "vendor";
+    else if (/Migration|Project|Program|Pilot|Phoenix|Atlas/i.test(m)) type = "project";
+    else if (/^[A-Z][a-z]+ [A-Z][a-z]+$/.test(m)) type = "person"; // name-shaped
+    bump(m, type);
+  });
+  return found;
 }
 
-function drawKg() {
-  const cv = $("kgCanvas");
-  if (!cv || !cv.clientWidth) return;
-  const { ctx, w, h } = setupCanvas(cv, 430);
-  if (!Object.keys(kgPos).length) kgLayout(w, h);
-  ctx.clearRect(0, 0, w, h);
+function buildGraph() {
+  const prev = {};
+  GNODES.forEach((n) => (prev[n.id] = n));
+  const nodeMap = new Map(); // id -> node
+  const edgeMap = new Map(); // "a|b" -> edge
+  const docs = allDocs();
+  const corpusCount = new Map();
 
-  // edges
-  KG_EDGES.forEach(([a, b]) => {
-    const key = a + "→" + b;
-    const hot = kgActive.edges.has(key);
-    ctx.strokeStyle = hot ? "#22d3ee" : "#1d2840";
-    ctx.lineWidth = hot ? 2.2 : 1;
-    ctx.beginPath();
-    ctx.moveTo(kgPos[a].x, kgPos[a].y);
-    ctx.lineTo(kgPos[b].x, kgPos[b].y);
-    ctx.stroke();
+  const perDoc = docs.map((doc) => {
+    const ents = extractDocEntities(doc);
+    ents.forEach((v, label) => corpusCount.set(label, (corpusCount.get(label) || 0) + v.n));
+    return { doc, ents };
   });
 
-  // nodes
-  ctx.font = "10px JetBrains Mono, monospace";
-  ctx.textAlign = "center";
-  KG_NODES.forEach((n) => {
-    const p = kgPos[n.id];
-    const hot = kgActive.nodes.has(n.id);
-    const dim = kgActive.nodes.size && !hot;
-    const r = n.type === "email" ? 7 : 10;
-    ctx.globalAlpha = dim ? 0.3 : 1;
-    if (hot) {
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, r + 6, 0, 7);
-      ctx.fillStyle = "rgba(34,211,238,0.18)";
-      ctx.fill();
+  perDoc.forEach(({ doc, ents }) => {
+    const ids = [];
+    ents.forEach((v, label) => {
+      // keep: repeated across corpus, or strongly typed
+      if ((corpusCount.get(label) || 0) < 2 && v.type === "topic") return;
+      const id = slugify(label);
+      let node = nodeMap.get(id);
+      if (!node) {
+        const old = prev[id];
+        node = {
+          id, label, type: v.type, count: 0, docs: new Set(),
+          x: old ? old.x : kgW / 2 + (Math.random() - 0.5) * 120,
+          y: old ? old.y : kgH / 2 + (Math.random() - 0.5) * 80,
+          vx: 0, vy: 0
+        };
+        nodeMap.set(id, node);
+      }
+      if (v.type === "person" && node.type === "topic") node.type = "person";
+      node.count += v.n;
+      node.docs.add(doc.id);
+      ids.push(id);
+    });
+    // co-occurrence edges within this document
+    for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) {
+      const [a, b] = [ids[i], ids[j]].sort();
+      if (a === b) continue;
+      const key = a + "|" + b;
+      let e = edgeMap.get(key);
+      if (!e) { e = { a, b, w: 0, docs: new Set() }; edgeMap.set(key, e); }
+      e.w += 1;
+      e.docs.add(doc.id);
     }
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, r, 0, 7);
-    ctx.fillStyle = KG_COLORS[n.type];
-    ctx.fill();
-    if (hot) { ctx.strokeStyle = "#22d3ee"; ctx.lineWidth = 2; ctx.stroke(); }
-    ctx.fillStyle = hot ? "#e7edf7" : "#8a96ad";
-    ctx.fillText(n.label, p.x, p.y + r + 13);
-    ctx.globalAlpha = 1;
   });
 
-  // legend
-  ctx.textAlign = "left";
-  let lx = 12;
-  Object.entries({ person: "person", vendor: "vendor", doc: "document", project: "project", email: "email" }).forEach(([t, lbl]) => {
-    ctx.fillStyle = KG_COLORS[t];
-    ctx.beginPath(); ctx.arc(lx + 4, 14, 4, 0, 7); ctx.fill();
-    ctx.fillStyle = "#5b6880";
-    ctx.fillText(lbl, lx + 12, 17);
-    lx += 14 + lbl.length * 6.2 + 16;
+  GNODES = [...nodeMap.values()];
+  // cap for readability: keep the most-mentioned 36 nodes
+  if (GNODES.length > 36) {
+    GNODES.sort((x, y) => y.count - x.count);
+    const keep = new Set(GNODES.slice(0, 36).map((n) => n.id));
+    GNODES = GNODES.filter((n) => keep.has(n.id));
+    GEDGES = [...edgeMap.values()].filter((e) => keep.has(e.a) && keep.has(e.b));
+  } else {
+    GEDGES = [...edgeMap.values()];
+  }
+  GADJ = {};
+  GEDGES.forEach((e) => {
+    (GADJ[e.a] = GADJ[e.a] || []).push(e.b);
+    (GADJ[e.b] = GADJ[e.b] || []).push(e.a);
   });
 }
-
-
-/* --- entity helpers (graph highlight) --- */
-const NODE_BY_ID = {};
-KG_NODES.forEach((n) => (NODE_BY_ID[n.id] = n));
-const KG_ADJ = {};
-KG_EDGES.forEach(([a, b]) => {
-  (KG_ADJ[a] = KG_ADJ[a] || []).push(b);
-  (KG_ADJ[b] = KG_ADJ[b] || []).push(a);
-});
-const KG_ALIASES = {
-  sarah: ["sarah", "chen"], marco: ["marco", "diaz"], priya: ["priya", "nair"],
-  helios: ["helios", "brandt", "lukas"], north: ["northwind", "supply", "nw-2207"],
-  inv: ["invoice", "inv-2291", "2291", "48,200", "48200", "41,300"],
-  c114: ["contract", "c-114", "c114", "redline"], atlas: ["atlas", "migration", "cutover", "erp"],
-  e1: ["kickoff"], e3: ["flag"], e6: ["approval", "approve"],
-  e7: ["delay", "delivery", "server"], e2: ["budget", "240"], e4: ["legal"], e5: ["standup"], e8: ["intro"]
-};
 
 function kgBfs(src, dst) {
   if (src === dst) return [src];
   const prev = { [src]: null };
-  const queue = [src];
-  while (queue.length) {
-    const cur = queue.shift();
-    for (const nb of KG_ADJ[cur] || []) {
+  const q = [src];
+  while (q.length) {
+    const cur = q.shift();
+    for (const nb of GADJ[cur] || []) {
       if (nb in prev) continue;
       prev[nb] = cur;
       if (nb === dst) {
-        const path = [dst];
-        let p = cur;
+        const path = [dst]; let p = cur;
         while (p !== null) { path.unshift(p); p = prev[p]; }
         return path;
       }
-      queue.push(nb);
+      q.push(nb);
     }
   }
   return null;
 }
 
-function detectEntities(text) {
-  const t = " " + text.toLowerCase() + " ";
-  const found = [];
-  Object.entries(KG_ALIASES).forEach(([id, aliases]) => {
-    let pos = Infinity;
-    aliases.forEach((a) => { const i = t.indexOf(a); if (i >= 0 && i < pos) pos = i; });
-    if (pos < Infinity) found.push([pos, id]);
+/* --- live physics --- */
+function kgTick() {
+  const n = GNODES.length;
+  for (let i = 0; i < n; i++) {
+    const a = GNODES[i];
+    for (let j = i + 1; j < n; j++) {
+      const b = GNODES[j];
+      let dx = a.x - b.x, dy = a.y - b.y;
+      let d2 = dx * dx + dy * dy;
+      if (d2 < 1) { dx = Math.random() - 0.5; dy = Math.random() - 0.5; d2 = 1; }
+      const f = 1400 / d2;
+      const d = Math.sqrt(d2);
+      a.vx += (dx / d) * f; a.vy += (dy / d) * f;
+      b.vx -= (dx / d) * f; b.vy -= (dy / d) * f;
+    }
+  }
+  GEDGES.forEach((e) => {
+    const a = GNODES.find((x) => x.id === e.a), b = GNODES.find((x) => x.id === e.b);
+    if (!a || !b) return;
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const d = Math.sqrt(dx * dx + dy * dy) || 1;
+    const f = (d - 95) * 0.004 * Math.min(e.w, 4);
+    a.vx += (dx / d) * f; a.vy += (dy / d) * f;
+    b.vx -= (dx / d) * f; b.vy -= (dy / d) * f;
   });
-  return found.sort((a, b) => a[0] - b[0]).map((f) => f[1]);
+  GNODES.forEach((p) => {
+    // gentle pull to center
+    p.vx += (kgW / 2 - p.x) * 0.0012;
+    p.vy += (kgH / 2 - p.y) * 0.0015;
+    p.vx *= 0.82; p.vy *= 0.82;
+    if (kgDrag && kgDrag.node === p) return; // pinned to cursor
+    p.x += Math.max(-4, Math.min(4, p.vx));
+    p.y += Math.max(-4, Math.min(4, p.vy));
+    p.x = clamp(p.x, 60, kgW - 60);
+    p.y = clamp(p.y, 30, kgH - 24);
+  });
+}
+
+function kgRender() {
+  const cv = $("kgCanvas");
+  if (!cv || !cv.clientWidth) return;
+  const { ctx, w, h } = setupCanvas(cv, 320);
+  kgW = w; kgH = h;
+  ctx.clearRect(0, 0, w, h);
+  const byId = {};
+  GNODES.forEach((nd) => (byId[nd.id] = nd));
+
+  GEDGES.forEach((e) => {
+    const a = byId[e.a], b = byId[e.b];
+    if (!a || !b) return;
+    const hot = kgActive.edges.has(e.a + "→" + e.b) || kgActive.edges.has(e.b + "→" + e.a);
+    ctx.strokeStyle = hot ? "#22d3ee" : "#1d2840";
+    ctx.lineWidth = hot ? 2.2 : Math.min(1 + Math.log2(e.w), 2.5) * 0.8;
+    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+  });
+
+  ctx.font = "10px JetBrains Mono, monospace";
+  ctx.textAlign = "center";
+  GNODES.forEach((nd) => {
+    const hot = kgActive.nodes.has(nd.id);
+    const dim = kgActive.nodes.size && !hot;
+    const r = 5 + Math.min(Math.log2(nd.count + 1) * 2.2, 8);
+    ctx.globalAlpha = dim ? 0.25 : 1;
+    if (hot) {
+      ctx.beginPath(); ctx.arc(nd.x, nd.y, r + 6, 0, 7);
+      ctx.fillStyle = "rgba(34,211,238,0.18)"; ctx.fill();
+    }
+    ctx.beginPath(); ctx.arc(nd.x, nd.y, r, 0, 7);
+    ctx.fillStyle = KG_COLORS[nd.type] || KG_COLORS.topic;
+    ctx.fill();
+    if (hot) { ctx.strokeStyle = "#22d3ee"; ctx.lineWidth = 2; ctx.stroke(); }
+    ctx.fillStyle = hot ? "#e7edf7" : "#8a96ad";
+    ctx.fillText(nd.label, nd.x, nd.y + r + 12);
+    ctx.globalAlpha = 1;
+  });
+
+  ctx.textAlign = "left";
+  let lx = 12;
+  Object.entries({ person: "person", vendor: "vendor", doc: "document", project: "project", topic: "topic" }).forEach(([t, lbl]) => {
+    ctx.fillStyle = KG_COLORS[t];
+    ctx.beginPath(); ctx.arc(lx + 4, 14, 4, 0, 7); ctx.fill();
+    ctx.fillStyle = "#5b6880";
+    ctx.fillText(lbl, lx + 12, 17);
+    lx += 14 + lbl.length * 6.2 + 14;
+  });
+  ctx.fillStyle = "#3d4a66";
+  ctx.fillText("● live graph — built from the corpus · drag nodes", 12, h - 8);
+}
+
+function startKgLoop() {
+  if (kgLoopOn) return;
+  kgLoopOn = true;
+  (function frame() {
+    kgTick();
+    kgRender();
+    requestAnimationFrame(frame);
+  })();
+}
+
+/* --- drag interaction --- */
+function kgWireMouse() {
+  const cv = $("kgCanvas");
+  if (!cv || !cv.addEventListener) return;
+  const pos = (ev) => {
+    const r = cv.getBoundingClientRect();
+    return { x: ev.clientX - r.left, y: ev.clientY - r.top };
+  };
+  cv.addEventListener("mousedown", (ev) => {
+    const { x, y } = pos(ev);
+    const hit = GNODES.find((n) => (n.x - x) ** 2 + (n.y - y) ** 2 < 196);
+    if (hit) { kgDrag = { node: hit }; cv.style.cursor = "grabbing"; }
+  });
+  cv.addEventListener("mousemove", (ev) => {
+    if (!kgDrag) return;
+    const { x, y } = pos(ev);
+    kgDrag.node.x = clamp(x, 60, kgW - 60);
+    kgDrag.node.y = clamp(y, 30, kgH - 24);
+    kgDrag.node.vx = kgDrag.node.vy = 0;
+  });
+  ["mouseup", "mouseleave"].forEach((t) =>
+    cv.addEventListener(t, () => { kgDrag = null; cv.style.cursor = "default"; }));
+}
+
+/* --- query → highlight --- */
+function queryHighlight(q, hits) {
+  const qTok = new Set(terms(q));
+  const hitIds = new Set(hits.slice(0, 3).map((h) => h.doc.id));
+  kgActive = { nodes: new Set(), edges: new Set() };
+  const named = [];
+  GNODES.forEach((nd) => {
+    const nameHit = terms(nd.label).some((t) => qTok.has(t));
+    const docHit = [...nd.docs].some((d) => hitIds.has(d));
+    if (nameHit) named.push(nd.id);
+    if (nameHit || docHit) kgActive.nodes.add(nd.id);
+  });
+  if (named.length >= 2) {
+    const path = kgBfs(named[0], named[1]);
+    if (path) path.forEach((id, i) => {
+      kgActive.nodes.add(id);
+      if (i) { kgActive.edges.add(path[i - 1] + "→" + id); }
+    });
+  }
+  GEDGES.forEach((e) => {
+    if (kgActive.nodes.has(e.a) && kgActive.nodes.has(e.b) && [...e.docs].some((d) => hitIds.has(d)))
+      kgActive.edges.add(e.a + "→" + e.b);
+  });
 }
 
 /* ============================================================
@@ -1363,31 +1482,16 @@ function addUserDocs() {
   });
   ta.value = "";
   buildIndex();
+  buildGraph();
   renderInbox();
   $("kgHops").textContent = "added to the index — ask about it";
   $("kgAnswer").hidden = false;
   $("kgAnswerText").textContent = "Your text is now part of the retrieval corpus (it never leaves this browser). Ask a question about it.";
 }
 
-/* --- graph highlight from a query --- */
+/* --- graph highlight from a query (dynamic graph) --- */
 function highlightFromQuery(q, hits) {
-  const ents = detectEntities(q + " " + hits.slice(0, 2).map((h) => h.doc.subject).join(" "));
-  kgActive = { nodes: new Set(), edges: new Set() };
-  if (ents.length >= 2) {
-    const path = kgBfs(ents[0], ents[1]);
-    if (path) path.forEach((id, i) => {
-      kgActive.nodes.add(id);
-      if (i) { kgActive.edges.add(path[i - 1] + "→" + id); kgActive.edges.add(id + "→" + path[i - 1]); }
-    });
-  } else if (ents.length === 1) {
-    kgActive.nodes.add(ents[0]);
-    (KG_ADJ[ents[0]] || []).forEach((nb) => {
-      kgActive.nodes.add(nb);
-      kgActive.edges.add(ents[0] + "→" + nb);
-      kgActive.edges.add(nb + "→" + ents[0]);
-    });
-  }
-  drawKg();
+  queryHighlight(q, hits);
 }
 
 /* --- ask --- */
@@ -1443,7 +1547,8 @@ const KG_CHIPS = ["what is Atlas Migration?", "why was invoice INV-2291 flagged 
 
 if ($("kgAskBtn")) {
   $("kgAskBtn").addEventListener("click", ask);
-  $("kgPrompt").addEventListener("keydown", (e) => { if (e.key === "Enter") ask(); });
+  $("kgPrompt").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); ask(); } });
+  $("kgPrompt").addEventListener("input", autoGrow);
   if ($("kgChips")) {
     $("kgChips").innerHTML = KG_CHIPS.map((c) => `<button class="chip mono">${c}</button>`).join("");
     $("kgChips").querySelectorAll(".chip").forEach((b) =>
@@ -1452,6 +1557,9 @@ if ($("kgAskBtn")) {
   if ($("kgAddDocs")) $("kgAddDocs").addEventListener("click", addUserDocs);
   buildIndex();
   renderInbox();
+  buildGraph();
+  kgWireMouse();
+  startKgLoop();
 }
 
 /* ============================================================
@@ -1467,17 +1575,76 @@ WC_MATCHES.forEach((m, i) => {
   PRED_BY_PAIR[matchKey(m.a, m.h)] = { i, flip: true };
 });
 
+
+/* --- live results: fetch the source feed directly in the visitor's browser,
+       so the scoreboard updates the moment the feed does (no redeploy).
+       Falls back to js/results.js (GitHub-Action cache) if blocked. --- */
+const FEED_URL = "https://fixturedownload.com/feed/json/fifa-world-cup-2026";
+const FEED_NAME_MAP = { "USA": "United States", "Korea Republic": "South Korea", "Türkiye": "Turkey",
+  "Côte d'Ivoire": "Ivory Coast", "Côte d’Ivoire": "Ivory Coast", "Cabo Verde": "Cape Verde",
+  "Curaçao": "Curacao", "IR Iran": "Iran", "Congo DR": "DR Congo", "Bosnia-Herzegovina": "Bosnia and Herzegovina" };
+let LIVE_RESULTS = null;   // null = not checked / blocked; [] = checked, none finished
+let LIVE_AT = null;
+let liveTried = false;
+
+async function fetchLiveResults() {
+  const ctl = typeof AbortController !== "undefined" ? new AbortController() : null;
+  const timer = ctl ? setTimeout(() => ctl.abort(), 5000) : null;
+  try {
+    const r = await fetch(FEED_URL, ctl ? { signal: ctl.signal } : undefined);
+    if (!r.ok) return null;
+    const feed = await r.json();
+    return feed
+      .filter((m) => m.HomeTeamScore != null && m.AwayTeamScore != null && !String(m.HomeTeam).toLowerCase().includes("announced"))
+      .map((m) => ({
+        n: m.MatchNumber, r: m.RoundNumber, date: String(m.DateUtc || "").slice(0, 10),
+        h: FEED_NAME_MAP[m.HomeTeam] || m.HomeTeam, a: FEED_NAME_MAP[m.AwayTeam] || m.AwayTeam,
+        hs: +m.HomeTeamScore, as: +m.AwayTeamScore
+      }));
+  } catch (e) {
+    return null;
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+function currentResults() {
+  const cached = (typeof WC_RESULTS !== "undefined" ? WC_RESULTS : []) || [];
+  if (LIVE_RESULTS && LIVE_RESULTS.length >= cached.length) return LIVE_RESULTS;
+  return cached;
+}
+
+function realitySrcLine() {
+  const el = $("realitySrc");
+  if (!el) return;
+  const t = LIVE_AT ? LIVE_AT.toTimeString().slice(0, 5) : "";
+  if (LIVE_RESULTS !== null) {
+    el.textContent = `data source: live feed (fixturedownload.com), checked at ${t} in your browser · ${LIVE_RESULTS.length} finished match${LIVE_RESULTS.length === 1 ? "" : "es"} published so far · GitHub Action keeps a 2-hourly cache as fallback`;
+  } else if (liveTried) {
+    el.textContent = "data source: GitHub-Action cache (the browser's live check was blocked) · the Action re-syncs every 2 hours";
+  } else {
+    el.textContent = "checking the live results feed…";
+  }
+}
+
 function renderReality() {
   const statsEl = $("realityStats"), board = $("scoreboard"), ko = $("koTracker");
   if (!statsEl) return;
-  const results = (typeof WC_RESULTS !== "undefined" ? WC_RESULTS : []) || [];
+  if (!liveTried && typeof fetch === "function") {
+    liveTried = true;
+    fetchLiveResults().then((rows) => { LIVE_RESULTS = rows; LIVE_AT = new Date(); renderReality(); });
+  }
+  realitySrcLine();
+  const results = currentResults();
   const group = results.filter((r) => r.r <= 3 && PRED_BY_PAIR[matchKey(r.h, r.a)]);
   const kos = results.filter((r) => r.r >= 4);
 
   if (!group.length && !kos.length) {
     statsEl.innerHTML = "";
-    board.innerHTML = `<div class="sb-empty">⏳ No completed matches yet — the tournament kicks off June 11, 2026.<br/>
-      <span class="mono" style="font-size:.72rem;color:#5b6880">This page grades itself automatically once results land. Predictions are already locked.</span></div>`;
+    board.innerHTML = `<div class="sb-empty">⏳ No final scores published yet.<br/>
+      <span class="mono" style="font-size:.72rem;color:#5b6880">${LIVE_RESULTS !== null
+        ? "The live feed is reachable but hasn't published a finished match yet — community feeds often lag a few hours after full time. This page re-checks on every load; nothing for you to do."
+        : "Results land here automatically — checked live on every page load, plus a 2-hourly GitHub-Action sync. Predictions are already locked."}</span></div>`;
     ko.innerHTML = "";
     return;
   }
@@ -1534,6 +1701,10 @@ window.__paneHooks = {
 };
 
 // test/diagnostic hook: run one seeded tournament, return its result
+window.__kgStats = () => ({
+  nodes: GNODES.length, edges: GEDGES.length,
+  labels: GNODES.map((n) => n.label), active: kgActive.nodes.size
+});
 window.__simOnce = (seed) => {
   RNG = mulberry32(seed);
   const r = simulateTournament(false);
@@ -1543,7 +1714,6 @@ window.__simOnce = (seed) => {
 
 function firstPaint() {
   drawSiChart(0);
-  drawKg();
   drawBnn();
 }
 if (document.readyState === "complete") firstPaint();
@@ -1553,8 +1723,6 @@ let rsT;
 window.addEventListener("resize", () => {
   clearTimeout(rsT);
   rsT = setTimeout(() => {
-    kgPos = {};
-    drawKg();
     drawBnn();
     drawSiChart(1);
   }, 180);
