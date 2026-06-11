@@ -2,8 +2,8 @@ name: Update World Cup results
 
 on:
   schedule:
-    # every 6 hours during the tournament window (June-July 2026)
-    - cron: "0 */6 * 6,7 *"
+    # every 2 hours during the tournament window (June-July 2026)
+    - cron: "0 */2 * 6,7 *"
   workflow_dispatch: {}
 
 permissions:
