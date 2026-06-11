@@ -1108,6 +1108,7 @@ let GNODES = [];           // {id,label,type,count,docs:Set,x,y,vx,vy}
 let GEDGES = [];           // {a,b,w,docs:Set}
 let GADJ = {};
 let kgActive = { nodes: new Set(), edges: new Set() };
+let kgTrace = null;        // {hops: [[from,to],...], t0} — looping spark that traces the route
 let kgDrag = null;
 let kgLoopOn = false;
 let kgW = 600, kgH = 320;
@@ -1167,11 +1168,15 @@ function buildGraph() {
       let node = nodeMap.get(id);
       if (!node) {
         const old = prev[id];
+        const hash = [...id].reduce((acc, c) => acc + c.charCodeAt(0), 0);
         node = {
           id, label, type: v.type, count: 0, docs: new Set(),
           x: old ? old.x : kgW / 2 + (Math.random() - 0.5) * 120,
           y: old ? old.y : kgH / 2 + (Math.random() - 0.5) * 80,
-          vx: 0, vy: 0
+          vx: 0, vy: 0,
+          // perpetual idle drift, unique per node (deterministic from id)
+          bobF: 0.35 + (hash % 47) / 80,
+          bobP: (hash % 628) / 100
         };
         nodeMap.set(id, node);
       }
@@ -1232,6 +1237,14 @@ function kgBfs(src, dst) {
 /* --- live physics --- */
 function kgTick() {
   const n = GNODES.length;
+  // organic life: every few seconds a random node gets a gentle shove
+  // and the springs visibly ripple through its neighbourhood
+  if (n && !kgDrag && Math.random() < 0.006) {
+    const lucky = GNODES[Math.floor(Math.random() * n)];
+    const ang = Math.random() * Math.PI * 2;
+    lucky.vx += Math.cos(ang) * 7;
+    lucky.vy += Math.sin(ang) * 5;
+  }
   for (let i = 0; i < n; i++) {
     const a = GNODES[i];
     for (let j = i + 1; j < n; j++) {
@@ -1273,37 +1286,96 @@ function kgRender() {
   const { ctx, w, h } = setupCanvas(cv, 320);
   kgW = w; kgH = h;
   ctx.clearRect(0, 0, w, h);
-  const byId = {};
-  GNODES.forEach((nd) => (byId[nd.id] = nd));
+  const t = performance.now() / 1000;
+
+  // drawn position = physics position + perpetual floating drift
+  const pos = {};
+  GNODES.forEach((nd) => {
+    const bob = kgDrag && kgDrag.node === nd ? 0 : 1;
+    pos[nd.id] = {
+      x: nd.x + Math.sin(t * nd.bobF + nd.bobP) * 2.6 * bob,
+      y: nd.y + Math.cos(t * nd.bobF * 0.83 + nd.bobP * 1.7) * 2.2 * bob
+    };
+  });
 
   GEDGES.forEach((e) => {
-    const a = byId[e.a], b = byId[e.b];
+    const a = pos[e.a], b = pos[e.b];
     if (!a || !b) return;
     const hot = kgActive.edges.has(e.a + "→" + e.b) || kgActive.edges.has(e.b + "→" + e.a);
-    ctx.strokeStyle = hot ? "#22d3ee" : "#1d2840";
-    ctx.lineWidth = hot ? 2.2 : Math.min(1 + Math.log2(e.w), 2.5) * 0.8;
+    if (hot) {
+      ctx.strokeStyle = "#22d3ee";
+      ctx.lineWidth = 2.2;
+      ctx.setLineDash([7, 5]);
+      ctx.lineDashOffset = -t * 26; // energy flowing along the active path
+    } else {
+      ctx.strokeStyle = "#1d2840";
+      ctx.lineWidth = Math.min(1 + Math.log2(e.w), 2.5) * 0.8;
+      ctx.setLineDash([]);
+    }
     ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
   });
+  ctx.setLineDash([]);
 
   ctx.font = "10px JetBrains Mono, monospace";
   ctx.textAlign = "center";
   GNODES.forEach((nd) => {
+    const p = pos[nd.id];
     const hot = kgActive.nodes.has(nd.id);
     const dim = kgActive.nodes.size && !hot;
-    const r = 5 + Math.min(Math.log2(nd.count + 1) * 2.2, 8);
+    const pulse = hot ? Math.sin(t * 3.2 + nd.bobP) * 1.4 : 0;
+    const r = 5 + Math.min(Math.log2(nd.count + 1) * 2.2, 8) + pulse;
     ctx.globalAlpha = dim ? 0.25 : 1;
     if (hot) {
-      ctx.beginPath(); ctx.arc(nd.x, nd.y, r + 6, 0, 7);
+      ctx.beginPath(); ctx.arc(p.x, p.y, r + 7 + pulse, 0, 7);
       ctx.fillStyle = "rgba(34,211,238,0.18)"; ctx.fill();
     }
-    ctx.beginPath(); ctx.arc(nd.x, nd.y, r, 0, 7);
+    ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, 7);
     ctx.fillStyle = KG_COLORS[nd.type] || KG_COLORS.topic;
     ctx.fill();
     if (hot) { ctx.strokeStyle = "#22d3ee"; ctx.lineWidth = 2; ctx.stroke(); }
     ctx.fillStyle = hot ? "#e7edf7" : "#8a96ad";
-    ctx.fillText(nd.label, nd.x, nd.y + r + 12);
+    ctx.fillText(nd.label, p.x, p.y + r + 12);
     ctx.globalAlpha = 1;
   });
+
+  // ---- the trace: a spark runs the route hop by hop, forever, like a signal ----
+  if (kgTrace && kgTrace.hops.length) {
+    const hopDur = 520;
+    const total = kgTrace.hops.length * hopDur + 500; // small pause before looping
+    const el = (performance.now() - kgTrace.t0) % total;
+    const k = Math.min(Math.floor(el / hopDur), kgTrace.hops.length - 1);
+    const frac = clamp((el - k * hopDur) / hopDur, 0, 1);
+
+    // already-traced segments stay lit bright
+    for (let i = 0; i < k; i++) {
+      const a = pos[kgTrace.hops[i][0]], b = pos[kgTrace.hops[i][1]];
+      if (!a || !b) continue;
+      ctx.strokeStyle = "rgba(74,222,128,0.85)";
+      ctx.lineWidth = 2.6;
+      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      // arrival ring on reached node
+      ctx.beginPath(); ctx.arc(b.x, b.y, 13, 0, 7);
+      ctx.strokeStyle = "rgba(74,222,128,0.35)"; ctx.lineWidth = 1.5; ctx.stroke();
+    }
+    // current segment: bright line grows from A toward the spark
+    const [fa, fb] = kgTrace.hops[k];
+    const a = pos[fa], b = pos[fb];
+    if (a && b && el < kgTrace.hops.length * hopDur) {
+      const sx = a.x + (b.x - a.x) * frac, sy = a.y + (b.y - a.y) * frac;
+      ctx.strokeStyle = "rgba(74,222,128,0.9)";
+      ctx.lineWidth = 2.6;
+      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(sx, sy); ctx.stroke();
+      // the spark itself: glowing comet head
+      const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, 11);
+      g.addColorStop(0, "rgba(74,222,128,0.95)");
+      g.addColorStop(0.4, "rgba(74,222,128,0.45)");
+      g.addColorStop(1, "rgba(74,222,128,0)");
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(sx, sy, 11, 0, 7); ctx.fill();
+      ctx.fillStyle = "#eafff1";
+      ctx.beginPath(); ctx.arc(sx, sy, 2.6, 0, 7); ctx.fill();
+    }
+  }
 
   ctx.textAlign = "left";
   let lx = 12;
@@ -1357,6 +1429,7 @@ function queryHighlight(q, hits) {
   const qTok = new Set(terms(q));
   const hitIds = new Set(hits.slice(0, 3).map((h) => h.doc.id));
   kgActive = { nodes: new Set(), edges: new Set() };
+  kgTrace = null;
   const named = [];
   GNODES.forEach((nd) => {
     const nameHit = terms(nd.label).some((t) => qTok.has(t));
@@ -1364,17 +1437,34 @@ function queryHighlight(q, hits) {
     if (nameHit) named.push(nd.id);
     if (nameHit || docHit) kgActive.nodes.add(nd.id);
   });
+
+  const hops = [];
   if (named.length >= 2) {
     const path = kgBfs(named[0], named[1]);
     if (path) path.forEach((id, i) => {
       kgActive.nodes.add(id);
-      if (i) { kgActive.edges.add(path[i - 1] + "→" + id); }
+      if (i) { kgActive.edges.add(path[i - 1] + "→" + id); hops.push([path[i - 1], id]); }
     });
   }
   GEDGES.forEach((e) => {
     if (kgActive.nodes.has(e.a) && kgActive.nodes.has(e.b) && [...e.docs].some((d) => hitIds.has(d)))
       kgActive.edges.add(e.a + "→" + e.b);
   });
+
+  // no BFS path? trace outward from the strongest matched node through its active edges
+  if (!hops.length && kgActive.nodes.size) {
+    const center = named[0] || [...kgActive.nodes].sort((x, y) => {
+      const nx = GNODES.find((n) => n.id === x), ny = GNODES.find((n) => n.id === y);
+      return (ny ? ny.count : 0) - (nx ? nx.count : 0);
+    })[0];
+    (GADJ[center] || []).forEach((nb) => {
+      if (kgActive.nodes.has(nb)) {
+        hops.push([center, nb]);
+        kgActive.edges.add(center + "→" + nb);
+      }
+    });
+  }
+  if (hops.length) kgTrace = { hops, t0: performance.now() };
 }
 
 /* ============================================================
@@ -1703,7 +1793,8 @@ window.__paneHooks = {
 // test/diagnostic hook: run one seeded tournament, return its result
 window.__kgStats = () => ({
   nodes: GNODES.length, edges: GEDGES.length,
-  labels: GNODES.map((n) => n.label), active: kgActive.nodes.size
+  labels: GNODES.map((n) => n.label), active: kgActive.nodes.size,
+  traceHops: kgTrace ? kgTrace.hops.length : 0
 });
 window.__simOnce = (seed) => {
   RNG = mulberry32(seed);
