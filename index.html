@@ -219,6 +219,7 @@
                         <div class="reality-stats mono" id="realityStats"></div>
                         <div class="scoreboard" id="scoreboard"></div>
                         <div class="ko-tracker" id="koTracker"></div>
+                        <p class="fine-print mono" id="realitySrc"></p>
                         <p class="fine-print">
                             Brier score = mean squared error of the 3-way probabilities (lower is better; 0.667 = uniform guessing, my backtest = 0.176).
                             Knockout fixtures aren't in the locked group-stage prediction set, so they're tracked as results only.
@@ -284,7 +285,7 @@
                         <div class="pane-controls">
                             <p class="pane-explain"><strong>Type any coding task</strong> and race the two agents on it: my raw API loop in one lane, the identical task routed through LangChain's framework stack in the other. Watch where the time goes.</p>
                             <div class="prompt-row">
-                                <input id="agentPrompt" class="prompt-input mono" maxlength="140" placeholder="e.g. fix the failing auth test" />
+                                <textarea id="agentPrompt" class="prompt-input mono" rows="2" maxlength="2000" placeholder="describe any coding task — long, multi-step prompts welcome (Enter runs · Shift+Enter = new line)"></textarea>
                                 <button class="btn primary" id="agentRunBtn">▶ Race</button>
                             </div>
                             <div class="chip-row" id="agentChips"></div>
@@ -376,7 +377,7 @@
                                 real failure, and retries with memory injected.
                             </p>
                             <div class="prompt-row">
-                                <input id="siPrompt" class="prompt-input mono" maxlength="160" placeholder="e.g. convert roman numerals to int (handle IV, IX, XL…)" />
+                                <textarea id="siPrompt" class="prompt-input mono" rows="2" maxlength="2000" placeholder="describe the task in as much detail as you like — constraints, edge cases, formats (Enter runs · Shift+Enter = new line)"></textarea>
                             </div>
                             <div class="chip-row" id="siChips"></div>
                             <div class="control-row">
@@ -444,7 +445,7 @@
                                 <strong>Paste your own emails below</strong> and ask about those instead; nothing leaves your browser.
                             </p>
                             <div class="prompt-row">
-                                <input id="kgPrompt" class="prompt-input mono" maxlength="160" placeholder='ask the inbox… e.g. "what is Atlas Migration?"' />
+                                <textarea id="kgPrompt" class="prompt-input mono" rows="2" maxlength="2000" placeholder='ask the inbox anything — long questions welcome (Enter asks · Shift+Enter = new line)'></textarea>
                                 <button class="btn primary" id="kgAskBtn">Ask</button>
                             </div>
                             <div class="chip-row" id="kgChips"></div>
