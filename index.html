@@ -439,8 +439,9 @@
                                 <strong>Real RAG, running in your browser.</strong> Ask anything about the inbox on the right —
                                 BM25 retrieval ranks the actual emails, sentence extraction builds the answer from their text,
                                 and the knowledge graph lights up the linked entities. 🔑 With a key saved above, the answer is
-                                instead <em>generated</em> by your LLM from the retrieved emails, with citations. You can also
-                                add your own text to the corpus — it never leaves this browser.
+                                instead <em>generated</em> by your LLM from the retrieved emails, with citations.
+                                The demo inbox is <strong>entirely fictional</strong> — it exists only to show the mechanics.
+                                <strong>Paste your own emails below</strong> and ask about those instead; nothing leaves your browser.
                             </p>
                             <div class="prompt-row">
                                 <input id="kgPrompt" class="prompt-input mono" maxlength="160" placeholder='ask the inbox… e.g. "what is Atlas Migration?"' />
@@ -453,8 +454,8 @@
                                 <p class="mono kg-hops" id="kgHops"></p>
                             </div>
                             <div class="kg-sources" id="kgSources" hidden></div>
-                            <details class="key-panel">
-                                <summary>➕ add your own emails / notes to the corpus</summary>
+                            <details class="key-panel" open>
+                                <summary>➕ use your own emails — paste them here</summary>
                                 <div class="kp-body">
                                     <p class="fine-print">Paste anything (one document per blank-line-separated block; first line becomes the subject). It is indexed locally in your browser only — refresh and it's gone.</p>
                                     <textarea id="kgUserDocs" class="prompt-input mono" rows="4" placeholder="Project Phoenix status&#10;Phoenix is our warehouse robotics pilot, owner Dana Cole, go-live in March…"></textarea>
