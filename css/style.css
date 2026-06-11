@@ -219,7 +219,8 @@ a:hover { text-decoration: underline; }
   box-shadow: var(--shadow);
 }
 /* prompt inputs (agent race + docgraph) */
-.prompt-row { display: flex; gap: 10px; }
+.prompt-row { display: flex; gap: 10px; align-items: flex-start; }
+.prompt-row textarea.prompt-input { flex: 1; min-height: 52px; max-height: 220px; line-height: 1.5; overflow-y: auto; }
 .prompt-input {
   flex: 1;
   min-width: 0;
