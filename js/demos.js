@@ -1322,7 +1322,7 @@ function extractiveAnswer(query, hits) {
 function renderInbox() {
   const el = $("kgInbox");
   if (!el) return;
-  el.innerHTML = `<p class="mono inbox-title">📥 the inbox — this is the actual corpus (click to read, ask anything about it)</p>` +
+  el.innerHTML = `<p class="mono inbox-title">📥 the inbox — a completely fictional demo corpus, made up just to show the mechanics (click any email to read it). Add YOUR OWN emails/notes on the left and ask about those instead.</p>` +
     allDocs().map((e) => `
     <div class="mail" data-id="${e.id}">
       <div class="mail-head">
