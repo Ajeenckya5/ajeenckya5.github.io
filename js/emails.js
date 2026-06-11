@@ -1,0 +1,32 @@
+// Demo inbox — the actual corpus DocGraph retrieves from, in your browser.
+// Visitors can read every email below and add their own text to the index.
+const EMAILS = [
+  { id: "E01", from: "Sarah Chen <sarah.chen@corp.io>", date: "Jun 02", subject: "Atlas Migration — kickoff",
+    body: "Team, Atlas Migration is officially kicked off. Atlas Migration is our program to move all procurement, invoicing and vendor-master data from the legacy ERP onto the new cloud platform before the Q4 freeze. Phase 1 is data extraction and cleansing, phase 2 is the cutover of live purchasing. I am the project owner; Helios GmbH has been selected as the implementation vendor after the spring RFP. Weekly standups Thursdays 9am." },
+  { id: "E02", from: "Marco Diaz <marco.diaz@corp.io>", date: "Jun 03", subject: "Atlas budget review",
+    body: "Finance has reserved EUR 240,000 for Atlas Migration this fiscal year. Helios implementation fees are the largest block, followed by hardware for the staging environment. I'll review actuals against this envelope at the end of each month. Flag anything unusual to me directly." },
+  { id: "E03", from: "Marco Diaz <marco.diaz@corp.io>", date: "Jun 04", subject: "Intro: Northwind Supply",
+    body: "Connecting you with Northwind Supply, our hardware vendor for the Atlas staging environment. They are quoting four rack servers and networking gear for the phase-2 cutover environment. Lead time was promised at two weeks. Procurement reference goes through the Atlas cost center." },
+  { id: "E04", from: "Priya Nair <priya.nair@corp.io>", date: "Jun 05", subject: "C-114 redlines",
+    body: "Legal review of Contract C-114 with Helios GmbH is done. C-114 covers the Atlas implementation scope, SLA penalties for missed milestones, and the data-processing addendum required because supplier bank data moves through the new platform. Two redlines remain on liability caps; otherwise ready for signature." },
+  { id: "E05", from: "Sarah Chen <sarah.chen@corp.io>", date: "Jun 08", subject: "Atlas standup notes — week 2",
+    body: "Phase-1 extraction is roughly 80% complete; vendor-master cleansing started. Two risks this week: the Helios invoice dispute (see INV-2291) and possible hardware slippage from Northwind. Cutover rehearsal stays scheduled for July 8 unless the server delivery slips further." },
+  { id: "E06", from: "Sarah Chen <sarah.chen@corp.io>", date: "Jun 09", subject: "INV-2291 flagged — please hold payment",
+    body: "I am flagging Helios invoice INV-2291 (EUR 48,200). The data-migration workshop appears twice — line 4 and line 9 are the same engagement billed twice. Finance, please hold payment until Helios issues a corrected invoice. Everything else on the invoice matches the C-114 rate card." },
+  { id: "E07", from: "Northwind Supply <orders@northwind.example>", date: "Jun 10", subject: "Delivery update — order NW-2207",
+    body: "Due to a port strike affecting our distributor, the four rack servers on order NW-2207 are delayed by approximately three weeks, new ETA July 1. We apologise — the networking gear ships separately this week. Please confirm whether partial delivery is acceptable." },
+  { id: "E08", from: "Marco Diaz <marco.diaz@corp.io>", date: "Jun 11", subject: "Re: INV-2291 — approved",
+    body: "Helios issued corrected invoice INV-2291-R removing the duplicated workshop line; the new total is EUR 41,300. I have approved it for payment on the usual 30-day terms. Thanks Sarah for catching the duplicate — that is exactly why the review step exists." },
+  { id: "E09", from: "Lukas Brandt <l.brandt@helios.example>", date: "Jun 06", subject: "Helios delivery plan",
+    body: "From the Helios side: our migration engineers are assigned full-time to Atlas from this week. Deliverables are the extraction toolkit, the mapping workshop series, and cutover support. Invoicing follows the milestone plan in Contract C-114. Workshop dates to be confirmed with Sarah." },
+  { id: "E10", from: "IT Security <secops@corp.io>", date: "Jun 07", subject: "Platform security review",
+    body: "The security assessment of the new cloud platform is complete. Conditional approval: single sign-on is mandatory before any production data lands, and supplier bank details must use field-level encryption. These conditions are blocking items for the Atlas phase-2 cutover." },
+  { id: "E11", from: "Sarah Chen <sarah.chen@corp.io>", date: "Jun 10", subject: "Re: Delivery update — impact",
+    body: "The Northwind delay hits us directly: without the rack servers the phase-2 staging environment cannot be built, which blocks the July 8 cutover rehearsal for Atlas Migration. I am moving the rehearsal to July 22 and will escalate if the ETA slips again. Partial delivery accepted for the networking gear." },
+  { id: "E12", from: "HR <events@corp.io>", date: "Jun 03", subject: "Summer town hall",
+    body: "Reminder: the summer town hall takes place June 20 in the main auditorium, with a live stream for remote colleagues. Submit questions for leadership through the portal by June 16. Lunch will be provided afterwards on the terrace." },
+  { id: "E13", from: "Facilities <facilities@corp.io>", date: "Jun 05", subject: "Cafeteria menu changes",
+    body: "Starting next week the cafeteria moves to a seasonal menu with a daily vegetarian special and an extended salad bar. The coffee machines on floors 2 and 4 will be serviced Wednesday morning; please use the lobby machines meanwhile." },
+  { id: "E14", from: "Travel Desk <travel@corp.io>", date: "Jun 06", subject: "Updated travel policy",
+    body: "The travel policy was updated: economy class applies to all flights under six hours, and hotel caps rise by 10% in major cities. Bookings must go through the portal to be reimbursed. The old PDF forms are retired at the end of the month." }
+];

@@ -659,7 +659,8 @@ let raceBusy = false;
 /* ===== REAL MODE: live LLM tool-calling loop + genuine Python (Pyodide) ===== */
 const REAL_SYS = `You are CodeCraft, a precise coding agent working in a fresh virtual workspace.
 Tools: write_file(path, content) creates/overwrites a file; read_file(path) reads one; run_python(path) executes the file with REAL Python and returns its output.
-Method: plan briefly, write the code AND a test file (plain asserts + a final print), run the tests with run_python, fix any failure, and when tests pass reply with a 1-2 sentence completion summary and NO tool calls. Keep files small and dependency-free.`;
+Method: plan briefly, write the code AND a test file (plain asserts + a final print), run the tests with run_python, fix any failure, and when tests pass reply with a 1-2 sentence completion summary and NO tool calls. Keep files small.
+Environment: Python runs in the browser via Pyodide. Available: the standard library plus numpy and pandas (auto-loaded on import). NOT available: torch, tensorflow, network access, pip. For ML/neural-network tasks, implement from scratch with numpy (e.g. a small MLP with manual backprop) and keep training tiny (few epochs, tiny data) so it runs in seconds.`;
 
 const REAL_TOOLS = [
   { type: "function", function: { name: "write_file", description: "Create or overwrite a file in the workspace", parameters: { type: "object", properties: { path: { type: "string" }, content: { type: "string" } }, required: ["path", "content"] } } },
@@ -678,6 +679,7 @@ async function runReal() {
   $("agentSummary").hidden = true;
   $("timerLC").textContent = "—";
   laneStep(sl, "ℹ️", "framework lane idles in real mode", "the 7.5× figure is my offline 15-task benchmark; this lane only races in the simulated demo.", "ov");
+  if (LLM.isMock()) laneStep(sm, "ℹ️", "mock key active — fixed 2-sum script", "mock mode always replays the scripted two-sum demo regardless of your prompt (the Python execution is still real). Save a real key — free at console.groq.com — to run YOUR prompt live.", "ov");
   laneStep(sm, "📝", "request · REAL RUN", `$ codecraft "${esc(prompt)}"`, "req");
 
   const t0 = performance.now();
@@ -812,9 +814,11 @@ function runRace() { return hasLLM() ? runReal() : runSim(); }
 
 function refreshAgentMode() {
   const real = hasLLM();
+  const live = real && !LLM.isMock();
   if ($("agentRunBtn")) $("agentRunBtn").textContent = real ? "▶ Run for REAL" : "▶ Race (simulated)";
+  if ($("siRunBtn")) $("siRunBtn").textContent = live ? "▶ Learn on this task — LIVE" : "▶ Watch it learn (recorded)";
   if ($("llmStatus")) $("llmStatus").textContent = real
-    ? (LLM.isMock() ? "● mock mode active — full pipeline, scripted LLM, real Python" : "● real mode active — " + (LLM.getConfig().provider))
+    ? (LLM.isMock() ? "● mock mode — scripted 2-sum demo, real Python execution" : "● real mode active — " + (LLM.getConfig().provider))
     : "○ no key — demos run simulated";
 }
 
@@ -980,15 +984,14 @@ function siReset() {
   drawSiChart(0);
 }
 
-/* ===== REAL self-improvement: live attempts, real verification, real learned strategies ===== */
-const SI_SPEC = `Write a single Python file defining parse_total(lines) -> float.
-Each line looks like "Item; 12.30 USD". Sum all amounts and return the total as float.
-Edge cases exist in the hidden tests. Return ONLY raw Python code, no markdown fences, no explanations.`;
-const SI_HIDDEN_TESTS = `from parse_total import parse_total
-assert abs(parse_total(["a; 1.50 USD","b; 2.25 USD"]) - 3.75) < 1e-6, "basic sum failed"
-assert abs(parse_total(["a; 4,75 USD","b; 1.00 USD"]) - 5.75) < 1e-6, "comma-decimal failed: '4,75 USD' means 4.75"
-assert parse_total([]) == 0, "empty list should be 0"
-print("verifier: all hidden tests passed")`;
+/* ===== REAL self-improvement on YOUR task: the LLM writes a verifier,
+       then attempts solutions; real Python judges; failures become strategies ===== */
+const SI_DEFAULT_TASK = `Write parse_total(lines) -> float: each line looks like "Item; 12.30 USD" (decimal commas like "4,75 USD" may appear). Sum all amounts.`;
+const SI_CHIPS = [
+  "sum money amounts from lines like 'Item; 12.30 USD' (commas too)",
+  "convert roman numerals to int (handle IV, IX, XL)",
+  "validate IPv4 addresses strictly (no leading zeros)"
+];
 
 const stripFences = (s) => String(s || "").replace(/^```[a-z]*\n?/i, "").replace(/```\s*$/i, "").trim();
 
@@ -996,6 +999,7 @@ async function runRealSI() {
   if (siBusy) return;
   siBusy = true;
   $("siRunBtn").disabled = true;
+  const task = (($("siPrompt") && $("siPrompt").value) || "").trim() || SI_DEFAULT_TASK;
   const lane = $("attemptLane"), mem = $("memoryCards");
   lane.innerHTML = "";
   mem.innerHTML = '<p class="memory-empty mono">∅ empty — no strategies learned yet</p>';
@@ -1004,6 +1008,17 @@ async function runRealSI() {
   let passed = false;
 
   try {
+    // step 0: the LLM writes a hidden verifier for the user's task
+    const vCard = document.createElement("div");
+    vCard.className = "attempt-card show";
+    vCard.innerHTML = `<h4><span>step 0 · LIVE</span><span class="mono">writing verifier…</span></h4><p>your LLM is designing hidden tests for: “${esc(task.slice(0, 110))}”</p>`;
+    lane.appendChild(vCard);
+    const vMsg = await LLM.chat([{ role: "user", content: `Task for a solver: ${task}
+Write verify.py for it: plain Python (no pytest). Import from a module named solution; require the main function to be named solve. Cover normal cases AND at least one tricky edge case implied but not stated. 4-7 asserts with messages. Final line: print("verifier: all tests passed"). Return ONLY raw Python code, no fences.` }]);
+    const verifier = stripFences(vMsg.content);
+    const nAsserts = (verifier.match(/^\s*assert /gm) || []).length;
+    vCard.innerHTML = `<h4><span>step 0 · verifier ready</span><span class="verdict-pass mono">✓ ${nAsserts} hidden asserts</span></h4><p>the solver will NOT see these tests — only their pass/fail output.</p>`;
+
     for (let attempt = 1; attempt <= 3 && !passed; attempt++) {
       const card = document.createElement("div");
       card.className = "attempt-card";
@@ -1011,13 +1026,14 @@ async function runRealSI() {
       lane.appendChild(card);
       requestAnimationFrame(() => card.classList.add("show"));
 
-      const prompt = SI_SPEC + (strategies.length
-        ? "\n\nApply these strategies learned from earlier failures:\n- " + strategies.join("\n- ")
+      const prompt = `Task: ${task}
+Write solution.py exposing a function named solve(...) that fulfils the task. Return ONLY raw Python code, no fences, no explanations.` + (strategies.length
+        ? "\n\nApply these strategies learned from earlier failed attempts:\n- " + strategies.join("\n- ")
         : "");
       const msg = await LLM.chat([{ role: "user", content: prompt }]);
       const code = stripFences(msg.content);
-      const r = await PY.run({ "parse_total.py": code, "verify.py": SI_HIDDEN_TESTS }, "verify.py");
-      passed = r.ok && r.out.includes("all hidden tests passed");
+      const r = await PY.run({ "solution.py": code, "verify.py": verifier }, "verify.py");
+      passed = r.ok && r.out.includes("verifier: all tests passed");
 
       card.className = `attempt-card show ${passed ? "pass" : "fail"}`;
       card.innerHTML = `
@@ -1026,7 +1042,7 @@ async function runRealSI() {
       drawSiChart(passed ? 1 : attempt / 3.5);
 
       if (!passed && attempt < 3) {
-        const an = await LLM.chat([{ role: "user", content: `A Python solution for this task failed hidden tests.\nTask: ${SI_SPEC}\nVerifier output:\n${r.out.slice(0, 500)}\nWrite ONE short reusable strategy (a single sentence, no preamble) that would prevent this class of failure.` }]);
+        const an = await LLM.chat([{ role: "user", content: `A Python solution for this task failed hidden tests.\nTask: ${task}\nVerifier output:\n${r.out.slice(0, 500)}\nWrite ONE short reusable strategy (a single sentence, no preamble) that would prevent this class of failure.` }]);
         const strategy = stripFences(an.content).split("\n")[0].slice(0, 220);
         strategies.push(strategy);
         if (strategies.length === 1) mem.innerHTML = "";
@@ -1048,8 +1064,22 @@ async function runRealSI() {
 }
 
 if ($("siRunBtn")) {
-  $("siRunBtn").addEventListener("click", () => (hasLLM() && !LLM.isMock() ? runRealSI() : siRun()));
+  $("siRunBtn").addEventListener("click", () => {
+    if (hasLLM() && !LLM.isMock()) return runRealSI();
+    const typed = (($("siPrompt") && $("siPrompt").value) || "").trim();
+    if (typed) {
+      $("attemptLane").innerHTML = `<div class="attempt-card show"><h4><span>live runs need a key</span><span class="mono">ℹ</span></h4><p>custom tasks run live only with an API key saved in the 🔑 panel above (free: Groq). Playing the recorded demo instead.</p></div>`;
+      setTimeout(siRun, 900);
+      return;
+    }
+    siRun();
+  });
   $("siResetBtn").addEventListener("click", siReset);
+  if ($("siChips")) {
+    $("siChips").innerHTML = SI_CHIPS.map((c) => `<button class="chip mono">${c}</button>`).join("");
+    $("siChips").querySelectorAll(".chip").forEach((b) =>
+      b.addEventListener("click", () => { $("siPrompt").value = b.textContent; $("siRunBtn").click(); }));
+  }
 }
 
 /* ============================================================
@@ -1083,34 +1113,7 @@ const KG_EDGES = [
   ["priya", "e4"], ["e4", "c114"], ["sarah", "e5"], ["e5", "atlas"],
   ["e8", "north"], ["marco", "e8"]
 ];
-
-const KG_QUERIES = [
-  {
-    label: "who approved the Helios invoice Sarah flagged?",
-    path: ["sarah", "e3", "inv", "e6", "marco"],
-    answer: "Marco Diaz approved INV-2291 (€48,200) — two days after Sarah Chen flagged it for a duplicate line item.",
-    hops: "4 hops · sarah → flag email → invoice → approval email → marco · 1.0s (cache hit)",
-    vec: "5 chunks retrieved — the approval email never mentions Sarah, so similarity search misses it ✗",
-    kg: "walks flag → invoice → approval and lands on the answer ✓"
-  },
-  {
-    label: "which contract covers the Atlas kickoff vendor?",
-    path: ["atlas", "e1", "helios", "c114", "priya"],
-    answer: "Contract C-114, drafted by Priya Nair, covers Helios GmbH — the vendor introduced in the Atlas Migration kickoff thread.",
-    hops: "4 hops · project → kickoff email → vendor → contract → owner · 1.0s (cache hit)",
-    vec: "retrieves kickoff chunks — contract is never named in them, so the link is invisible ✗",
-    kg: "entity linking connects vendor mention → contract record ✓"
-  },
-  {
-    label: "who should I ask about the Northwind delay?",
-    path: ["north", "e7", "atlas", "sarah"],
-    answer: "Sarah Chen — she owns Atlas Migration, the project blocked by Northwind's delayed delivery.",
-    hops: "3 hops · vendor → delay email → blocked project → owner · 1.0s (cache hit)",
-    vec: "finds the delay email but can't tell who owns the affected project ✗",
-    kg: "traverses delay → project → owner relation ✓"
-  }
-];
-
+/* kept: colors, layout, canvas renderer */
 const KG_COLORS = { person: "#a78bfa", vendor: "#fbbf24", doc: "#22d3ee", project: "#4ade80", email: "#64748b" };
 
 let kgPos = {};
@@ -1205,7 +1208,8 @@ function drawKg() {
   });
 }
 
-/* --- free-question engine: alias detection + BFS shortest path --- */
+
+/* --- entity helpers (graph highlight) --- */
 const NODE_BY_ID = {};
 KG_NODES.forEach((n) => (NODE_BY_ID[n.id] = n));
 const KG_ADJ = {};
@@ -1215,11 +1219,11 @@ KG_EDGES.forEach(([a, b]) => {
 });
 const KG_ALIASES = {
   sarah: ["sarah", "chen"], marco: ["marco", "diaz"], priya: ["priya", "nair"],
-  helios: ["helios"], north: ["northwind", "supply"],
-  inv: ["invoice", "inv-2291", "2291", "48,200", "48200", "€48"],
-  c114: ["contract", "c-114", "c114"], atlas: ["atlas", "migration"],
-  e1: ["kickoff"], e3: ["flagged", "flag "], e6: ["approval", "approve"],
-  e7: ["delay", "delivery"], e2: ["budget"], e4: ["redline"], e5: ["standup"], e8: ["intro"]
+  helios: ["helios", "brandt", "lukas"], north: ["northwind", "supply", "nw-2207"],
+  inv: ["invoice", "inv-2291", "2291", "48,200", "48200", "41,300"],
+  c114: ["contract", "c-114", "c114", "redline"], atlas: ["atlas", "migration", "cutover", "erp"],
+  e1: ["kickoff"], e3: ["flag"], e6: ["approval", "approve"],
+  e7: ["delay", "delivery", "server"], e2: ["budget", "240"], e4: ["legal"], e5: ["standup"], e8: ["intro"]
 };
 
 function kgBfs(src, dst) {
@@ -1254,120 +1258,200 @@ function detectEntities(text) {
   return found.sort((a, b) => a[0] - b[0]).map((f) => f[1]);
 }
 
-function kgHint(msg) {
-  $("kgAnswer").hidden = false;
-  $("kgAnswerText").textContent = msg;
-  $("kgHops").textContent = "entities in the demo corpus: Sarah, Marco, Priya, Helios, Northwind, invoice, contract, Atlas, kickoff, approval, delay…";
-  $("ragCompare").hidden = true;
+/* ============================================================
+   REAL RAG over the inbox: BM25 retrieval + sentence extraction
+   run entirely in the browser. With a key, the answer is also
+   generated by the visitor's LLM from the retrieved emails.
+   ============================================================ */
+
+let USER_DOCS = [];
+const allDocs = () => USER_DOCS.concat(typeof EMAILS !== "undefined" ? EMAILS : []);
+
+const tok = (s) => (String(s).toLowerCase().match(/[a-z0-9][a-z0-9\-]{1,}/g) || []);
+const STOPW = new Set(["the","a","an","is","are","was","were","of","to","in","on","for","and","or","it","this","that","with","as","at","by","be","from","we","our","i","you","your","what","who","why","how","when","which","does","do","did","about","tell","me"]);
+const terms = (s) => tok(s).filter((w) => !STOPW.has(w));
+
+let IDX = null;
+function buildIndex() {
+  const docs = allDocs();
+  const df = {};
+  const docTf = docs.map((d) => {
+    const tf = {};
+    terms(d.subject + " " + d.subject + " " + d.body).forEach((w) => (tf[w] = (tf[w] || 0) + 1));
+    Object.keys(tf).forEach((w) => (df[w] = (df[w] || 0) + 1));
+    return tf;
+  });
+  const lens = docs.map((d) => terms(d.body).length + 4);
+  const avg = lens.reduce((a, b) => a + b, 0) / Math.max(lens.length, 1);
+  IDX = { docs, docTf, df, lens, avg, N: docs.length };
 }
 
-function freeAsk() {
-  const text = ($("kgPrompt").value || "").trim();
-  if (!text) return;
-  const ents = detectEntities(text);
-  if (!ents.length) return kgHint("No entities from the demo inbox found in that question — mention a person, vendor or document and I'll walk the graph.");
-
-  // chain through every mentioned entity in mention order
-  const push = (arr, n) => { if (arr[arr.length - 1] !== n) arr.push(n); };
-  let path = [ents[0]];
-  for (let i = 1; i < ents.length; i++) {
-    const seg = kgBfs(path[path.length - 1], ents[i]);
-    if (seg) seg.slice(1).forEach((n) => push(path, n));
-  }
-
-  // who-questions: extend to the nearest person NOT already mentioned
-  const wantsPerson = /\bwho\b|\bwhom\b|\bwhose\b/i.test(text);
-  const mentioned = new Set(ents);
-  const lastIsUnmentionedPerson = () => {
-    const last = NODE_BY_ID[path[path.length - 1]];
-    return last.type === "person" && !mentioned.has(last.id);
-  };
-  if ((wantsPerson && !lastIsUnmentionedPerson()) || (path.length === 1)) {
-    let best = null;
-    KG_NODES.filter((n) => n.type === "person" && !mentioned.has(n.id)).forEach((p) => {
-      path.forEach((start) => {
-        const sp = kgBfs(start, p.id);
-        if (sp && (!best || sp.length < best.length)) best = sp;
-      });
+function bm25(query) {
+  if (!IDX) buildIndex();
+  const k1 = 1.5, b = 0.75;
+  const q = [...new Set(terms(query))];
+  return IDX.docs.map((doc, i) => {
+    let score = 0;
+    q.forEach((w) => {
+      const f = IDX.docTf[i][w] || 0;
+      if (!f) return;
+      const idf = Math.log(1 + (IDX.N - IDX.df[w] + 0.5) / (IDX.df[w] + 0.5));
+      score += idf * (f * (k1 + 1)) / (f + k1 * (1 - b + b * IDX.lens[i] / IDX.avg));
     });
-    if (best) best.slice(1).forEach((n) => push(path, n));
-  }
-  if (path.length < 2) return kgHint("Found an entity but no connected path in the demo graph — try mentioning two things, like “Sarah” and “invoice”.");
-
-  const hops = path.length - 1;
-  const labels = path.map((id) => NODE_BY_ID[id].label);
-  const last = NODE_BY_ID[path[path.length - 1]];
-  const answer = last.type === "person"
-    ? `${last.label} — found by walking ${labels.join(" → ")}. In the full system, Mistral 7B phrases this path + its source chunks into a cited answer (/emails/{id}).`
-    : `Graph traversal connects ${labels[0]} → ${last.label}${labels.length > 2 ? " via " + labels.slice(1, -1).join(" → ") : ""}. In the full system, Mistral 7B turns this into a cited answer (/emails/{id}).`;
-  kgAnimate({
-    path,
-    answer,
-    hops: `${hops} hop${hops > 1 ? "s" : ""} · ${labels.join(" → ")} · 1.0s (cache hit)`,
-    vec: "similar-text chunks retrieved — this cross-document link never sits inside one chunk ✗",
-    kg: `BFS found an entity path in ${hops} hop${hops > 1 ? "s" : ""} ✓`
-  });
+    return { doc, score };
+  }).filter((s) => s.score > 0).sort((a, b2) => b2.score - a.score);
 }
 
-const kgRun = (qi) => kgAnimate(KG_QUERIES[qi], qi);
-
-async function kgAnimate(q, qi = -1) {
-  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-  document.querySelectorAll("#kgQueries .task-btn").forEach((b, bi) => {
-    b.disabled = true;
-    b.classList.toggle("active", bi === qi);
+function extractiveAnswer(query, hits) {
+  const q = new Set(terms(query));
+  const sents = [];
+  hits.slice(0, 3).forEach(({ doc }, di) => {
+    String(doc.body).split(/(?<=[.!?])\s+/).forEach((s) => {
+      let sc = 0;
+      terms(s).forEach((w) => { if (q.has(w)) sc += 1; });
+      if (sc > 0) sents.push({ s: s.trim(), sc: sc - di * 0.3, id: doc.id });
+    });
   });
-  if ($("kgAskBtn")) $("kgAskBtn").disabled = true;
-  $("kgAnswer").hidden = true;
-  $("ragCompare").hidden = true;
-  kgActive = { nodes: new Set(), edges: new Set() };
-  drawKg();
-  await sleep(300);
+  sents.sort((a, b) => b.sc - a.sc);
+  const top = sents.slice(0, 3);
+  if (!top.length) return null;
+  return top.map((t) => `${t.s} (${t.id})`).join(" ");
+}
 
-  for (let i = 0; i < q.path.length; i++) {
-    kgActive.nodes.add(q.path[i]);
-    if (i > 0) {
-      kgActive.edges.add(q.path[i - 1] + "→" + q.path[i]);
-      kgActive.edges.add(q.path[i] + "→" + q.path[i - 1]);
-    }
-    drawKg();
-    await sleep(520);
+/* --- inbox UI --- */
+function renderInbox() {
+  const el = $("kgInbox");
+  if (!el) return;
+  el.innerHTML = `<p class="mono inbox-title">📥 the inbox — this is the actual corpus (click to read, ask anything about it)</p>` +
+    allDocs().map((e) => `
+    <div class="mail" data-id="${e.id}">
+      <div class="mail-head">
+        <span class="mail-id mono">${e.id}</span>
+        <span class="mail-sub">${esc(e.subject)}</span>
+        <span class="mail-meta mono">${esc(String(e.from).split("<")[0].trim())} · ${esc(e.date)}</span>
+      </div>
+      <div class="mail-body" hidden>${esc(e.body)}</div>
+    </div>`).join("");
+  el.querySelectorAll(".mail-head").forEach((h) =>
+    h.addEventListener("click", () => {
+      const b = h.parentElement.querySelector(".mail-body");
+      b.hidden = !b.hidden;
+    }));
+}
+
+function openMail(id) {
+  const el = $("kgInbox");
+  const m = el && el.querySelector(`.mail[data-id="${id}"]`);
+  if (!m) return;
+  m.querySelector(".mail-body").hidden = false;
+  m.scrollIntoView({ block: "nearest", behavior: "smooth" });
+}
+
+function addUserDocs() {
+  const ta = $("kgUserDocs");
+  const text = (ta.value || "").trim();
+  if (!text) return;
+  text.split(/\n\s*\n/).forEach((block) => {
+    const lines = block.trim().split("\n");
+    USER_DOCS.unshift({
+      id: "U" + (USER_DOCS.length + 1),
+      from: "you",
+      date: "now",
+      subject: (lines[0] || "your note").slice(0, 60),
+      body: lines.join(" ").slice(0, 1200)
+    });
+  });
+  ta.value = "";
+  buildIndex();
+  renderInbox();
+  $("kgHops").textContent = "added to the index — ask about it";
+  $("kgAnswer").hidden = false;
+  $("kgAnswerText").textContent = "Your text is now part of the retrieval corpus (it never leaves this browser). Ask a question about it.";
+}
+
+/* --- graph highlight from a query --- */
+function highlightFromQuery(q, hits) {
+  const ents = detectEntities(q + " " + hits.slice(0, 2).map((h) => h.doc.subject).join(" "));
+  kgActive = { nodes: new Set(), edges: new Set() };
+  if (ents.length >= 2) {
+    const path = kgBfs(ents[0], ents[1]);
+    if (path) path.forEach((id, i) => {
+      kgActive.nodes.add(id);
+      if (i) { kgActive.edges.add(path[i - 1] + "→" + id); kgActive.edges.add(id + "→" + path[i - 1]); }
+    });
+  } else if (ents.length === 1) {
+    kgActive.nodes.add(ents[0]);
+    (KG_ADJ[ents[0]] || []).forEach((nb) => {
+      kgActive.nodes.add(nb);
+      kgActive.edges.add(ents[0] + "→" + nb);
+      kgActive.edges.add(nb + "→" + ents[0]);
+    });
   }
+  drawKg();
+}
+
+/* --- ask --- */
+async function ask() {
+  const q = ($("kgPrompt").value || "").trim();
+  if (!q) return;
+  $("kgAskBtn").disabled = true;
+  const t0 = performance.now();
+  const hits = bm25(q).slice(0, 3);
+  highlightFromQuery(q, hits);
+
+  const src = $("kgSources");
+  src.hidden = false;
+  src.innerHTML = `<p class="mono bench-title">retrieved · BM25 ran in your browser in ${(performance.now() - t0).toFixed(0)} ms</p>` +
+    (hits.length
+      ? hits.map((h) => `<button class="src-chip mono" data-id="${h.doc.id}">${h.doc.id} · ${esc(h.doc.subject)} · ${h.score.toFixed(2)}</button>`).join("")
+      : `<span class="mono" style="color:#5b6880;font-size:.72rem">no relevant emails found</span>`);
+  src.querySelectorAll(".src-chip").forEach((b) => b.addEventListener("click", () => openMail(b.dataset.id)));
 
   $("kgAnswer").hidden = false;
-  $("kgAnswerText").textContent = q.answer;
-  $("kgHops").textContent = q.hops;
-  $("ragCompare").hidden = false;
-  $("ragVec").textContent = q.vec;
-  $("ragKg").textContent = q.kg;
-
-  // with a key: phrase the real traversal result with a live LLM
-  if (hasLLM() && q.path && !LLM.isMock()) {
-    const base = q.answer;
-    $("kgAnswerText").textContent = "phrasing the graph path with your LLM…";
-    try {
-      const facts = q.path.map((id) => `${NODE_BY_ID[id].label} (${NODE_BY_ID[id].type})`).join(" -> ");
-      const msg = await LLM.chat([
-        { role: "system", content: "You answer questions about an email knowledge graph. Use ONLY the given path facts. One concise sentence." },
-        { role: "user", content: `Question: ${($("kgPrompt") && $("kgPrompt").value) || "connection?"}\nGraph path found by BFS: ${facts}` }
-      ]);
-      $("kgAnswerText").textContent = (msg.content || base).slice(0, 400);
-      $("kgHops").textContent += " · phrased live by your LLM";
-    } catch (e) {
-      $("kgAnswerText").textContent = base;
-    }
+  if (!hits.length) {
+    $("kgAnswerText").textContent = "Nothing relevant in the inbox for that — ask about what's actually in the emails below (Atlas Migration, the Helios invoice, the Northwind delay, contract C-114…) or add your own text and ask about it.";
+    $("kgHops").textContent = "0 documents retrieved";
+    $("kgAskBtn").disabled = false;
+    return;
   }
-  document.querySelectorAll("#kgQueries .task-btn").forEach((b) => (b.disabled = false));
-  if ($("kgAskBtn")) $("kgAskBtn").disabled = false;
+
+  const ids = hits.map((h) => h.doc.id).join(", ");
+  if (hasLLM() && !LLM.isMock()) {
+    $("kgAnswerText").textContent = "generating from the retrieved emails with your LLM…";
+    try {
+      const ctx = hits.map((h) => `[${h.doc.id}] From: ${h.doc.from} — Subject: ${h.doc.subject}\n${h.doc.body}`).join("\n\n");
+      const msg = await LLM.chat([
+        { role: "system", content: "Answer the question using ONLY the provided emails. Be specific and complete in 1-3 sentences. Cite email ids in parentheses like (E01). If the emails don't contain the answer, say so." },
+        { role: "user", content: "Emails:\n" + ctx + "\n\nQuestion: " + q }
+      ]);
+      $("kgAnswerText").textContent = (msg.content || "").slice(0, 600);
+      $("kgHops").textContent = `retrieved ${ids} → answer generated live by your LLM`;
+    } catch (e) {
+      const ex = extractiveAnswer(q, hits);
+      $("kgAnswerText").textContent = ex || "LLM call failed: " + e.message;
+      $("kgHops").textContent = `retrieved ${ids} → extractive fallback (${e.message})`;
+    }
+  } else {
+    const ex = extractiveAnswer(q, hits);
+    $("kgAnswerText").textContent = ex || "Found related emails (see sources) but no sentence directly answers that.";
+    $("kgHops").textContent = `retrieved ${ids} → extractive answer, no LLM involved · add a key in the CodeCraft panel for generated answers`;
+  }
+  $("kgAskBtn").disabled = false;
 }
 
-if ($("kgQueries")) {
-  $("kgQueries").innerHTML = KG_QUERIES.map((q, i) =>
-    `<button class="task-btn" data-i="${i}">? ${q.label}</button>`).join("");
-  document.querySelectorAll("#kgQueries .task-btn").forEach((b) =>
-    b.addEventListener("click", () => kgRun(+b.dataset.i)));
-  $("kgAskBtn").addEventListener("click", freeAsk);
-  $("kgPrompt").addEventListener("keydown", (e) => { if (e.key === "Enter") freeAsk(); });
+const KG_CHIPS = ["what is Atlas Migration?", "why was invoice INV-2291 flagged and who approved it?", "what is blocking the phase-2 cutover?"];
+
+if ($("kgAskBtn")) {
+  $("kgAskBtn").addEventListener("click", ask);
+  $("kgPrompt").addEventListener("keydown", (e) => { if (e.key === "Enter") ask(); });
+  if ($("kgChips")) {
+    $("kgChips").innerHTML = KG_CHIPS.map((c) => `<button class="chip mono">${c}</button>`).join("");
+    $("kgChips").querySelectorAll(".chip").forEach((b) =>
+      b.addEventListener("click", () => { $("kgPrompt").value = b.textContent; ask(); }));
+  }
+  if ($("kgAddDocs")) $("kgAddDocs").addEventListener("click", addUserDocs);
+  buildIndex();
+  renderInbox();
 }
 
 /* ============================================================

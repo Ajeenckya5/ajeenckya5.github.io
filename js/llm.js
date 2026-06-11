@@ -100,7 +100,11 @@ window.PY = (function () {
   async function run(files, entryPath, onStatus) {
     if (onStatus && !pyodide) onStatus("downloading Python runtime (Pyodide ~6 MB, once)…");
     const py = await load();
-    for (const [path, content] of Object.entries(files)) py.FS.writeFile(path, content);
+    for (const [path, content] of Object.entries(files)) {
+      py.FS.writeFile(path, content);
+      // auto-load scientific packages (numpy, pandas, …) referenced by the code
+      try { await py.loadPackagesFromImports(content); } catch (e) { /* unknown imports surface at runtime */ }
+    }
     const escaped = JSON.stringify(entryPath);
     const prog = `
 import sys, io, traceback
