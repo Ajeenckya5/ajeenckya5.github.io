@@ -673,6 +673,95 @@ const REAL_TOOLS = [
   { type: "function", function: { name: "run_python", description: "Execute a python file for real and return its stdout/stderr", parameters: { type: "object", properties: { path: { type: "string" } }, required: ["path"] } } }
 ];
 
+/* --- the real LangChain lane: the actual LangChain.js AgentExecutor,
+       loaded from CDN, same task / provider / key / tools, measured live --- */
+let LC_CACHE = null;
+async function loadLangChainJS() {
+  if (LC_CACHE) return LC_CACHE;
+  const deps = "?deps=@langchain/core@0.3.42";
+  const [openaiMod, toolsMod, zodMod, agentsMod, promptsMod] = await Promise.all([
+    import("https://esm.sh/@langchain/openai@0.4.4" + deps),
+    import("https://esm.sh/@langchain/core@0.3.42/tools"),
+    import("https://esm.sh/zod@3.24.2"),
+    import("https://esm.sh/langchain@0.3.19/agents" + deps),
+    import("https://esm.sh/@langchain/core@0.3.42/prompts")
+  ]);
+  LC_CACHE = {
+    ChatOpenAI: openaiMod.ChatOpenAI,
+    tool: toolsMod.tool,
+    z: zodMod.z || zodMod.default,
+    createToolCallingAgent: agentsMod.createToolCallingAgent,
+    AgentExecutor: agentsMod.AgentExecutor,
+    ChatPromptTemplate: promptsMod.ChatPromptTemplate
+  };
+  return LC_CACHE;
+}
+
+async function runLangChainLane(prompt) {
+  const sl = $("stepsLC");
+  sl.innerHTML = "";
+  const t0 = performance.now();
+  const tick = setInterval(() => { $("timerLC").textContent = ((performance.now() - t0) / 1000).toFixed(1) + "s"; }, 120);
+  const lcVfs = {};
+  try {
+    const loadCard = laneStep(sl, "📦", LC_CACHE ? "LangChain.js (cached)" : "loading LangChain.js from CDN…", LC_CACHE ? "" : "the framework itself has to arrive before any work can start", LC_CACHE ? "" : "ov");
+    const LC = await loadLangChainJS();
+    loadCard.querySelector(".rs-title").textContent = "LangChain.js ready";
+
+    const cfg = LLM.getConfig();
+    const prov = LLM.PROVIDERS[cfg.provider] || LLM.PROVIDERS.groq;
+    const model = new LC.ChatOpenAI({
+      model: cfg.model || prov.model,
+      apiKey: cfg.key,
+      temperature: 0.2,
+      configuration: { baseURL: prov.base, dangerouslyAllowBrowser: true }
+    });
+
+    const tools = [
+      LC.tool(async ({ path, content }) => {
+        lcVfs[path] = String(content);
+        laneStep(sl, "✏️", `tool (wrapped) · write_file("${esc(path)}")`, `<div class="pl-diff">${esc(String(content).slice(0, 400))}</div>`);
+        return "ok, written (" + String(content).length + " chars)";
+      }, { name: "write_file", description: "Create or overwrite a file in the workspace", schema: LC.z.object({ path: LC.z.string(), content: LC.z.string() }) }),
+      LC.tool(async ({ path }) => {
+        laneStep(sl, "🔧", `tool (wrapped) · read_file("${esc(path)}")`, "");
+        return lcVfs[path] !== undefined ? lcVfs[path] : "ERROR: no such file";
+      }, { name: "read_file", description: "Read a file from the workspace", schema: LC.z.object({ path: LC.z.string() }) }),
+      LC.tool(async ({ path }) => {
+        const st = laneStep(sl, "🐍", `tool (wrapped) · run_python("${esc(path)}") · executing…`, "");
+        let r;
+        try { r = await PY.run(lcVfs, path); } catch (e) { r = { ok: false, out: "Pyodide error: " + e.message }; }
+        st.remove();
+        laneStep(sl, r.ok ? "🧪" : "❌", `run_python("${esc(path)}") — real output`, `<div class="pl-diff">${esc(r.out)}</div>`, r.ok ? "ok" : "ov");
+        return (r.ok ? "EXIT OK\n" : "EXIT WITH ERROR\n") + r.out;
+      }, { name: "run_python", description: "Execute a python file for real and return its stdout/stderr", schema: LC.z.object({ path: LC.z.string() }) })
+    ];
+
+    laneStep(sl, "⛓", "createToolCallingAgent → AgentExecutor", "chain graph, callback manager, prompt templates, output parser — the stack the raw loop doesn't have");
+    const promptTpl = LC.ChatPromptTemplate.fromMessages([
+      ["system", REAL_SYS],
+      ["human", "{input}"],
+      ["placeholder", "{agent_scratchpad}"]
+    ]);
+    const agent = LC.createToolCallingAgent({ llm: model, tools, prompt: promptTpl });
+    const executor = new LC.AgentExecutor({ agent, tools, maxIterations: 8 });
+
+    const res = await executor.invoke({ input: prompt }, {
+      callbacks: [{ handleLLMStart: () => { laneStep(sl, "🛰", "LLM call — through the LangChain stack", "", ""); } }]
+    });
+    clearInterval(tick);
+    const secs = (performance.now() - t0) / 1000;
+    $("timerLC").textContent = secs.toFixed(1) + "s";
+    if (res && res.output) laneStep(sl, "🧠", "assistant", esc(String(res.output)).slice(0, 450));
+    laneStep(sl, "🏁", `LangChain run complete in ${secs.toFixed(1)}s`, "the REAL LangChain.js AgentExecutor — same task, same provider, same tools.", "slowdone");
+    return { ok: true, secs, files: Object.keys(lcVfs) };
+  } catch (e) {
+    clearInterval(tick);
+    laneStep(sl, "⚠️", "LangChain lane couldn't run", esc(String((e && e.message) || e)).slice(0, 280) + " — citing my offline benchmark instead (7.5× median, 15 tasks).", "ov");
+    return { ok: false };
+  }
+}
+
 async function runReal() {
   if (raceBusy) return;
   raceBusy = true;
@@ -683,7 +772,7 @@ async function runReal() {
   sm.innerHTML = ""; sl.innerHTML = "";
   $("agentSummary").hidden = true;
   $("timerLC").textContent = "—";
-  laneStep(sl, "ℹ️", "framework lane idles in real mode", "the 7.5× figure is my offline 15-task benchmark; this lane only races in the simulated demo.", "ov");
+  laneStep(sl, "⏳", "LangChain.js races second", "back-to-back on the identical task (not parallel) so both lanes get fair conditions — the Python runtime is shared.", "ov");
   if (LLM.isMock()) laneStep(sm, "ℹ️", "mock key active — fixed 2-sum script", "mock mode always replays the scripted two-sum demo regardless of your prompt (the Python execution is still real). Save a real key — free at console.groq.com — to run YOUR prompt live.", "ov");
   laneStep(sm, "📝", "request · REAL RUN", `$ codecraft "${esc(prompt)}"`, "req");
 
@@ -739,9 +828,25 @@ async function runReal() {
     laneStep(sm, "⚠️", "real run stopped", esc(e.message), "ov");
   }
   if (!failed) laneStep(sm, "✅", "REAL run complete in " + fmt(), "live LLM tool-calling loop + genuine Python execution, all in your browser.", "ok");
+  const mySecs = (performance.now() - t0) / 1000;
+
+  // now the SAME task through the real LangChain.js AgentExecutor
+  let lc = { ok: false };
+  if (!failed && !LLM.isMock()) {
+    lc = await runLangChainLane(prompt);
+  } else {
+    $("stepsLC").innerHTML = "";
+    laneStep($("stepsLC"), "ℹ️", "framework lane idle", LLM.isMock()
+      ? "mock mode races only the raw loop — save a real key (free at console.groq.com) to race the actual LangChain.js live."
+      : "raw-loop run failed, nothing to race.", "ov");
+  }
+
   const sum = $("agentSummary");
   sum.hidden = false;
-  sum.innerHTML = `<span>${failed ? "⚠ stopped" : "✓ REAL RUN"}</span><span>${toolCalls} tool calls · ${iters} loop turns</span><span>${fmt()} wall clock</span><span>workspace: ${esc(Object.keys(vfs).join(", ") || "—")}</span>`;
+  sum.innerHTML = `<span>${failed ? "⚠ stopped" : "✓ REAL RACE"}</span><span>⚡ raw loop ${mySecs.toFixed(1)}s · ${toolCalls} tool calls</span>` +
+    (lc.ok
+      ? `<span>🐢 LangChain.js ${lc.secs.toFixed(1)}s</span><span>${(lc.secs / Math.max(mySecs, 0.1)).toFixed(1)}× — measured live in YOUR browser (offline benchmark median: 7.5×)</span>`
+      : `<span>workspace: ${esc(Object.keys(vfs).join(", ") || "—")}</span><span>offline benchmark: 7.5× (15 tasks)</span>`);
   $("agentRunBtn").disabled = false;
   raceBusy = false;
 }
