@@ -676,25 +676,50 @@ const REAL_TOOLS = [
 /* --- the real LangChain lane: the actual LangChain.js AgentExecutor,
        loaded from CDN, same task / provider / key / tools, measured live --- */
 let LC_CACHE = null;
-async function loadLangChainJS() {
+async function loadLangChainJS(onStatus) {
   if (LC_CACHE) return LC_CACHE;
-  const deps = "?deps=@langchain/core@0.3.42";
-  const [openaiMod, toolsMod, zodMod, agentsMod, promptsMod] = await Promise.all([
-    import("https://esm.sh/@langchain/openai@0.4.4" + deps),
-    import("https://esm.sh/@langchain/core@0.3.42/tools"),
-    import("https://esm.sh/zod@3.24.2"),
-    import("https://esm.sh/langchain@0.3.19/agents" + deps),
-    import("https://esm.sh/@langchain/core@0.3.42/prompts")
-  ]);
-  LC_CACHE = {
+  const pack = ([openaiMod, toolsMod, zodMod, msgsMod], via) => ({
     ChatOpenAI: openaiMod.ChatOpenAI,
     tool: toolsMod.tool,
     z: zodMod.z || zodMod.default,
-    createToolCallingAgent: agentsMod.createToolCallingAgent,
-    AgentExecutor: agentsMod.AgentExecutor,
-    ChatPromptTemplate: promptsMod.ChatPromptTemplate
-  };
-  return LC_CACHE;
+    SystemMessage: msgsMod.SystemMessage,
+    HumanMessage: msgsMod.HumanMessage,
+    ToolMessage: msgsMod.ToolMessage,
+    via
+  });
+  // NOTE: langchain's AgentExecutor doesn't survive any CDN's browser build
+  // (broken internal exports) — so the lane races LangChain's real model
+  // wrapper + tool stack driven by its own bindTools loop instead.
+  const attempts = [
+    ["jsDelivr", [
+      "https://cdn.jsdelivr.net/npm/@langchain/openai@0.4.4/+esm",
+      "https://cdn.jsdelivr.net/npm/@langchain/core@0.3.42/tools/+esm",
+      "https://cdn.jsdelivr.net/npm/zod@3.24.2/+esm",
+      "https://cdn.jsdelivr.net/npm/@langchain/core@0.3.42/messages/+esm"
+    ]],
+    ["esm.sh (bundled)", [
+      "https://esm.sh/@langchain/openai@0.4.4?bundle-deps",
+      "https://esm.sh/@langchain/core@0.3.42/tools?bundle-deps",
+      "https://esm.sh/zod@3.24.2",
+      "https://esm.sh/@langchain/core@0.3.42/messages?bundle-deps"
+    ]]
+  ];
+  let lastErr = null;
+  for (const [via, urls] of attempts) {
+    try {
+      if (onStatus) onStatus("loading LangChain.js via " + via + "…");
+      const mods = await Promise.all(urls.map((u) => import(u)));
+      const lc = pack(mods, via);
+      if (!lc.ChatOpenAI || !lc.tool || !lc.SystemMessage || !lc.ToolMessage) {
+        throw new Error("exports missing from " + via + " build");
+      }
+      LC_CACHE = lc;
+      return lc;
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  throw lastErr || new Error("could not load LangChain.js");
 }
 
 async function runLangChainLane(prompt) {
@@ -705,8 +730,8 @@ async function runLangChainLane(prompt) {
   const lcVfs = {};
   try {
     const loadCard = laneStep(sl, "📦", LC_CACHE ? "LangChain.js (cached)" : "loading LangChain.js from CDN…", LC_CACHE ? "" : "the framework itself has to arrive before any work can start", LC_CACHE ? "" : "ov");
-    const LC = await loadLangChainJS();
-    loadCard.querySelector(".rs-title").textContent = "LangChain.js ready";
+    const LC = await loadLangChainJS((s) => { loadCard.querySelector(".rs-title").textContent = s; });
+    loadCard.querySelector(".rs-title").textContent = "LangChain.js ready (" + (LC.via || "CDN") + ")";
 
     const cfg = LLM.getConfig();
     const prov = LLM.PROVIDERS[cfg.provider] || LLM.PROVIDERS.groq;
@@ -737,23 +762,33 @@ async function runLangChainLane(prompt) {
       }, { name: "run_python", description: "Execute a python file for real and return its stdout/stderr", schema: LC.z.object({ path: LC.z.string() }) })
     ];
 
-    laneStep(sl, "⛓", "createToolCallingAgent → AgentExecutor", "chain graph, callback manager, prompt templates, output parser — the stack the raw loop doesn't have");
-    const promptTpl = LC.ChatPromptTemplate.fromMessages([
-      ["system", REAL_SYS],
-      ["human", "{input}"],
-      ["placeholder", "{agent_scratchpad}"]
-    ]);
-    const agent = LC.createToolCallingAgent({ llm: model, tools, prompt: promptTpl });
-    const executor = new LC.AgentExecutor({ agent, tools, maxIterations: 8 });
-
-    const res = await executor.invoke({ input: prompt }, {
-      callbacks: [{ handleLLMStart: () => { laneStep(sl, "🛰", "LLM call — through the LangChain stack", "", ""); } }]
-    });
+    laneStep(sl, "⛓", "ChatOpenAI.bindTools(tools) — LangChain's tool-calling stack", "zod→JSON-schema conversion, message classes, model-wrapper serialization. (AgentExecutor's browser build is broken on every CDN — framework fragility, exhibit A — so its own bound-tools loop drives the run.)", "ov");
+    const toolsByName = {};
+    tools.forEach((tl) => (toolsByName[tl.name] = tl));
+    const bound = model.bindTools(tools);
+    const msgs = [new LC.SystemMessage(REAL_SYS), new LC.HumanMessage(prompt)];
+    let finalText = "";
+    for (let i = 0; i < 8; i++) {
+      laneStep(sl, "🛰", "LLM call — through LangChain's model wrapper", "", "");
+      const ai = await bound.invoke(msgs);
+      msgs.push(ai);
+      const tcs = ai.tool_calls || [];
+      const content = typeof ai.content === "string" ? ai.content : JSON.stringify(ai.content);
+      if (content) { finalText = content; laneStep(sl, "🧠", "assistant", esc(content).slice(0, 450)); }
+      if (!tcs.length) break;
+      for (const tc of tcs) {
+        const tl = toolsByName[tc.name];
+        let out = "ERROR: unknown tool " + tc.name;
+        if (tl) {
+          try { out = await tl.invoke(tc.args); } catch (e) { out = "TOOL ERROR: " + e.message; }
+        }
+        msgs.push(new LC.ToolMessage({ content: String(out).slice(0, 1500), tool_call_id: tc.id || "call_" + i }));
+      }
+    }
     clearInterval(tick);
     const secs = (performance.now() - t0) / 1000;
     $("timerLC").textContent = secs.toFixed(1) + "s";
-    if (res && res.output) laneStep(sl, "🧠", "assistant", esc(String(res.output)).slice(0, 450));
-    laneStep(sl, "🏁", `LangChain run complete in ${secs.toFixed(1)}s`, "the REAL LangChain.js AgentExecutor — same task, same provider, same tools.", "slowdone");
+    laneStep(sl, "🏁", `LangChain run complete in ${secs.toFixed(1)}s`, "the real LangChain.js model + tool stack — same task, same provider, same tools.", "slowdone");
     return { ok: true, secs, files: Object.keys(lcVfs) };
   } catch (e) {
     clearInterval(tick);
