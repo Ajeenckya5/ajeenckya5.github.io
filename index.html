@@ -112,6 +112,7 @@
                         <button class="tab" data-tab="match" role="tab">⚽ Match center</button>
                         <button class="tab" data-tab="bnn" role="tab">🧠 Inside the model</button>
                         <button class="tab" data-tab="reality" role="tab">📡 Model vs reality</button>
+                        <button class="tab" data-tab="live" role="tab">🔴 Live Cup</button>
                     </div>
 
                     <!-- Tab: full World Cup simulation -->
@@ -225,6 +226,10 @@
                             Knockout fixtures aren't in the locked group-stage prediction set, so they're tracked as results only.
                             Results source: fixturedownload.com, synced by .github/workflows/update-results.yml.
                         </p>
+                    </div>
+
+                    <div class="tab-pane" id="pane-live">
+                        <div id="liveCupRoot"><p class="pane-explain">Loading live tournament data…</p></div>
                     </div>
 
                     <div class="domain-wrap">
@@ -620,6 +625,7 @@
     <script src="js/emails.js"></script>
     <script src="js/llm.js"></script>
     <script src="js/demos.js"></script>
+    <script src="js/live.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>
