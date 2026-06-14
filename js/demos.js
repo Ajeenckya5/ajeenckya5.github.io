@@ -218,10 +218,10 @@ function renderBracket(rounds, upTo) {
 }
 
 /* ----- animated tournament: the model's predicted World Cup ----- */
-/* Fixed seed chosen so the played-out bracket crowns the forecast's modal
-   champion — the animation is a representative high-probability future and
-   replays IDENTICALLY on every click. */
-const PLAY_SEED = 2;
+/* Deterministic bracket: every match (group stage and knockout) resolves to
+   its single most-likely outcome (argmax of ens / koWin >= 0.5). This means
+   the bracket only changes when an actual model pick flips — not on every
+   small daily probability nudge — and always replays IDENTICALLY. */
 let cupBusy = false;
 
 async function kickoff() {
@@ -230,9 +230,7 @@ async function kickoff() {
   setCupButtons(true);
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-  RNG = mulberry32(PLAY_SEED);
-  const result = simulateTournament(false);
-  RNG = Math.random;
+  const result = simulateTournament(true);
 
   // phase 1: groups
   renderGroupsIdle();
@@ -267,7 +265,7 @@ async function kickoff() {
     <span class="champ-flag">${flag(result.champion)}</span>
     <h4>🏆 <span>${result.champion}</span> win the 2026 World Cup</h4>
     <p>beat ${flag(result.finalLoser)} ${result.finalLoser} in the final · the model's predicted tournament</p>
-    <p class="champ-context">${result.champion} are the forecast's most likely champion (title odds ${pct(odds)}). This bracket is the model's representative future, fixed by seed — replay it as often as you like, it will not change.</p>
+    <p class="champ-context">${result.champion} are the forecast's most likely champion (title odds ${pct(odds)}). This is the model's single most-likely bracket — replay it as often as you like, it will not change.</p>
     <p class="champ-context dim">the full calibrated odds for every team: 📊 The model's forecast · or ⚡ Run 5,000 fresh futures and watch them converge to the same numbers ▾</p>`;
 
   cupBusy = false;
