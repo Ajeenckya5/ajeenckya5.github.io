@@ -511,7 +511,7 @@ function drawBnn() {
   ctx.clearRect(0, 0, w, h);
 
   // axes
-  ctx.strokeStyle = "#1d2840";
+  ctx.strokeStyle = "#e2e8f0";
   ctx.fillStyle = "#5b6880";
   ctx.font = "10px JetBrains Mono, monospace";
   ctx.textAlign = "center";
@@ -529,7 +529,7 @@ function drawBnn() {
   bnnSamples.forEach((s) => bins[clamp(Math.floor(s * 40), 0, 39)]++);
   const maxBin = Math.max(4, ...bins);
   const bw = (w - padL - padR) / 40;
-  ctx.fillStyle = "rgba(34,211,238,0.65)";
+  ctx.fillStyle = "rgba(8,145,178,0.65)";
   bins.forEach((b, i) => {
     if (!b) return;
     const bh = ((h - padB - padT) * b) / maxBin;
@@ -537,7 +537,7 @@ function drawBnn() {
   });
 
   // SNN single point estimate
-  ctx.fillStyle = "#a78bfa";
+  ctx.fillStyle = "#7c3aed";
   ctx.beginPath();
   const sx = X(t.point);
   ctx.moveTo(sx, padT + 2);
@@ -551,14 +551,14 @@ function drawBnn() {
   // mean of samples
   if (bnnSamples.length > 5) {
     const mean = bnnSamples.reduce((a, b) => a + b, 0) / bnnSamples.length;
-    ctx.strokeStyle = "#4ade80";
+    ctx.strokeStyle = "#16a34a";
     ctx.setLineDash([5, 4]);
     ctx.beginPath();
     ctx.moveTo(X(mean), padT);
     ctx.lineTo(X(mean), h - padB);
     ctx.stroke();
     ctx.setLineDash([]);
-    ctx.fillStyle = "#4ade80";
+    ctx.fillStyle = "#16a34a";
     ctx.textAlign = X(mean) > w - 120 ? "right" : "left";
     ctx.fillText("BNN mean " + pct(mean), X(mean) + (X(mean) > w - 120 ? -8 : 8), padT + 16);
   }
@@ -1042,7 +1042,7 @@ function drawSiChart(progress) {
   ctx.clearRect(0, 0, w, h);
   ctx.font = "9px JetBrains Mono, monospace";
   ctx.fillStyle = "#5b6880";
-  ctx.strokeStyle = "#1d2840";
+  ctx.strokeStyle = "#e2e8f0";
   ctx.textAlign = "right";
   [0, 50, 94].forEach((v) => {
     const y = h - padB - ((h - padB - padT) * v) / 100;
@@ -1051,11 +1051,11 @@ function drawSiChart(progress) {
   });
   // target line
   const yT = h - padB - ((h - padB - padT) * 94) / 100;
-  ctx.strokeStyle = "rgba(74,222,128,0.5)";
+  ctx.strokeStyle = "rgba(22,163,74,0.5)";
   ctx.setLineDash([4, 4]);
   ctx.beginPath(); ctx.moveTo(padL, yT); ctx.lineTo(w - padR, yT); ctx.stroke();
   ctx.setLineDash([]);
-  ctx.fillStyle = "#4ade80";
+  ctx.fillStyle = "#16a34a";
   ctx.textAlign = "left";
   ctx.fillText("94% · measured Tau Bench result", padL + 6, yT - 5);
 
@@ -1068,14 +1068,14 @@ function drawSiChart(progress) {
     pts.push([padL + x * (w - padL - padR), h - padB - ((h - padB - padT) * v) / 100]);
   }
   if (pts.length > 1) {
-    ctx.strokeStyle = "#22d3ee";
+    ctx.strokeStyle = "#0891b2";
     ctx.lineWidth = 2;
     ctx.beginPath();
     pts.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])));
     ctx.stroke();
     ctx.lineWidth = 1;
     const lp = pts[pts.length - 1];
-    ctx.fillStyle = "#22d3ee";
+    ctx.fillStyle = "#0891b2";
     ctx.beginPath(); ctx.arc(lp[0], lp[1], 3.5, 0, 7); ctx.fill();
   }
   ctx.fillStyle = "#5b6880";
@@ -1241,7 +1241,7 @@ if ($("siRunBtn")) {
    nodes are draggable. Nothing about this graph is hardcoded.
    ============================================================ */
 
-const KG_COLORS = { person: "#a78bfa", vendor: "#fbbf24", doc: "#22d3ee", project: "#4ade80", topic: "#64748b" };
+const KG_COLORS = { person: "#7c3aed", vendor: "#d97706", doc: "#0891b2", project: "#16a34a", topic: "#64748b" };
 let GNODES = [];           // {id,label,type,count,docs:Set,x,y,vx,vy}
 let GEDGES = [];           // {a,b,w,docs:Set}
 let GADJ = {};
@@ -1441,12 +1441,12 @@ function kgRender() {
     if (!a || !b) return;
     const hot = kgActive.edges.has(e.a + "→" + e.b) || kgActive.edges.has(e.b + "→" + e.a);
     if (hot) {
-      ctx.strokeStyle = "#22d3ee";
+      ctx.strokeStyle = "#0891b2";
       ctx.lineWidth = 2.2;
       ctx.setLineDash([7, 5]);
       ctx.lineDashOffset = -t * 26; // energy flowing along the active path
     } else {
-      ctx.strokeStyle = "#1d2840";
+      ctx.strokeStyle = "#e2e8f0";
       ctx.lineWidth = Math.min(1 + Math.log2(e.w), 2.5) * 0.8;
       ctx.setLineDash([]);
     }
@@ -1465,13 +1465,13 @@ function kgRender() {
     ctx.globalAlpha = dim ? 0.25 : 1;
     if (hot) {
       ctx.beginPath(); ctx.arc(p.x, p.y, r + 7 + pulse, 0, 7);
-      ctx.fillStyle = "rgba(34,211,238,0.18)"; ctx.fill();
+      ctx.fillStyle = "rgba(8,145,178,0.18)"; ctx.fill();
     }
     ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, 7);
     ctx.fillStyle = KG_COLORS[nd.type] || KG_COLORS.topic;
     ctx.fill();
-    if (hot) { ctx.strokeStyle = "#22d3ee"; ctx.lineWidth = 2; ctx.stroke(); }
-    ctx.fillStyle = hot ? "#e7edf7" : "#8a96ad";
+    if (hot) { ctx.strokeStyle = "#0891b2"; ctx.lineWidth = 2; ctx.stroke(); }
+    ctx.fillStyle = hot ? "#0f172a" : "#64748b";
     ctx.fillText(nd.label, p.x, p.y + r + 12);
     ctx.globalAlpha = 1;
   });
@@ -1488,26 +1488,26 @@ function kgRender() {
     for (let i = 0; i < k; i++) {
       const a = pos[kgTrace.hops[i][0]], b = pos[kgTrace.hops[i][1]];
       if (!a || !b) continue;
-      ctx.strokeStyle = "rgba(74,222,128,0.85)";
+      ctx.strokeStyle = "rgba(22,163,74,0.85)";
       ctx.lineWidth = 2.6;
       ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
       // arrival ring on reached node
       ctx.beginPath(); ctx.arc(b.x, b.y, 13, 0, 7);
-      ctx.strokeStyle = "rgba(74,222,128,0.35)"; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.strokeStyle = "rgba(22,163,74,0.35)"; ctx.lineWidth = 1.5; ctx.stroke();
     }
     // current segment: bright line grows from A toward the spark
     const [fa, fb] = kgTrace.hops[k];
     const a = pos[fa], b = pos[fb];
     if (a && b && el < kgTrace.hops.length * hopDur) {
       const sx = a.x + (b.x - a.x) * frac, sy = a.y + (b.y - a.y) * frac;
-      ctx.strokeStyle = "rgba(74,222,128,0.9)";
+      ctx.strokeStyle = "rgba(22,163,74,0.9)";
       ctx.lineWidth = 2.6;
       ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(sx, sy); ctx.stroke();
       // the spark itself: glowing comet head
       const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, 11);
-      g.addColorStop(0, "rgba(74,222,128,0.95)");
-      g.addColorStop(0.4, "rgba(74,222,128,0.45)");
-      g.addColorStop(1, "rgba(74,222,128,0)");
+      g.addColorStop(0, "rgba(22,163,74,0.95)");
+      g.addColorStop(0.4, "rgba(22,163,74,0.45)");
+      g.addColorStop(1, "rgba(22,163,74,0)");
       ctx.fillStyle = g;
       ctx.beginPath(); ctx.arc(sx, sy, 11, 0, 7); ctx.fill();
       ctx.fillStyle = "#eafff1";

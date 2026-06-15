@@ -68,7 +68,7 @@ if (cv && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       if (p.x < 0 || p.x > W) p.vx *= -1;
       if (p.y < 0 || p.y > H) p.vy *= -1;
     }
-    ctx.strokeStyle = "rgba(34, 211, 238, 0.07)";
+    ctx.strokeStyle = "rgba(14, 116, 144, 0.10)";
     for (let i = 0; i < pts.length; i++) {
       for (let j = i + 1; j < pts.length; j++) {
         const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y;
@@ -81,7 +81,7 @@ if (cv && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         }
       }
     }
-    ctx.fillStyle = "rgba(34, 211, 238, 0.35)";
+    ctx.fillStyle = "rgba(14, 116, 144, 0.30)";
     for (const p of pts) {
       ctx.beginPath();
       ctx.arc(p.x, p.y, 1.4, 0, 7);
