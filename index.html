@@ -21,67 +21,58 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
 </head>
 <body>
-    <header class="site-header" id="siteHeader">
-        <a href="#hero" class="logo" aria-label="Ajeenckya Mahadik home">
-            <span class="logo-mark">AM</span>
-            <span class="logo-text">ajeenckya<strong>.mahadik</strong></span>
-        </a>
-
-        <nav class="nav" id="siteNav" aria-label="Primary navigation">
-            <ul>
-                <li><a href="#lab">The Lab</a></li>
-                <li><a href="#experience">Experience</a></li>
-                <li><a href="#skills">Skills</a></li>
-                <li><a href="#education">Education</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-        </nav>
-
-        <a href="files/resume.pdf" class="btn btn-small header-cta" target="_blank" rel="noopener">Resume</a>
-
-        <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
-            <span></span><span></span><span></span>
-        </button>
-    </header>
-
-    <main>
-        <!-- ============ HERO ============ -->
-        <section id="hero" class="hero">
-            <canvas id="heroCanvas" aria-hidden="true"></canvas>
-            <div class="hero-inner">
-                <div class="hero-copy">
-                    <p class="eyebrow mono">AI/ML Engineer · M.S. AI/ML, UW–Madison · graduating May 2026</p>
-                    <h1>Ajeenckya Mahadik</h1>
-                    <p class="hero-subtitle">
-                        I build calibrated probabilistic models and LLM agent systems.
-                        Most portfolios tell you about the models — <strong>this one lets you run them.</strong>
-                        Every demo below is powered by my real model outputs.
-                    </p>
-
-                    <div class="hero-actions">
-                        <a href="#lab" class="btn primary">▶ Run my models</a>
-                        <a href="files/resume.pdf" class="btn secondary" target="_blank" rel="noopener">View Resume</a>
+    <div class="layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-inner">
+                <div class="brand">
+                    <img class="side-photo" src="assets/profile.jpg" alt="Ajeenckya Mahadik" />
+                    <div class="brand-text">
+                        <span class="brand-name">Ajeenckya Mahadik</span>
+                        <span class="brand-role">AI/ML Engineer</span>
                     </div>
+                </div>
+                <p class="side-tagline">Calibrated probabilistic models &amp; LLM agent systems — built to run, not just describe.</p>
+                <p class="side-status"><span class="dot"></span> Open to ML / applied-AI roles · May 2026</p>
 
-                    <div class="hero-contact mono" aria-label="Contact links">
-                        <span>Madison, WI</span>
-                        <a href="mailto:ajeenckyam@gmail.com">ajeenckyam@gmail.com</a>
+                <nav class="side-nav" id="sideNav" aria-label="Primary navigation">
+                    <a href="#lab" class="active"><span class="nav-line"></span><span>The Lab</span></a>
+                    <a href="#experience"><span class="nav-line"></span><span>Experience</span></a>
+                    <a href="#skills"><span class="nav-line"></span><span>Skills</span></a>
+                    <a href="#education"><span class="nav-line"></span><span>Education</span></a>
+                    <a href="#contact"><span class="nav-line"></span><span>Contact</span></a>
+                </nav>
+
+                <div class="side-foot">
+                    <div class="side-social" aria-label="Contact links">
+                        <a href="mailto:ajeenckyam@gmail.com">Email</a>
                         <a href="https://www.linkedin.com/in/ajeenckya-mahadik" target="_blank" rel="noopener">LinkedIn</a>
                         <a href="https://github.com/Ajeenckya5" target="_blank" rel="noopener">GitHub</a>
                     </div>
-                </div>
-                <div class="hero-photo-wrap">
-                    <img src="assets/profile.jpg" alt="Ajeenckya Mahadik" class="hero-photo" />
+                    <a href="files/resume.pdf" class="btn secondary side-resume" target="_blank" rel="noopener">Download résumé</a>
                 </div>
             </div>
+        </aside>
 
-            <div class="stat-strip" role="list">
-                <div class="stat" role="listitem"><strong>0.176</strong><span>Brier score (26.7% better than baseline)</span></div>
-                <div class="stat" role="listitem"><strong>7.5×</strong><span>lower latency than LangChain (own agent loop)</span></div>
-                <div class="stat" role="listitem"><strong>94%</strong><span>task completion, self-improving agent (Tau Bench)</span></div>
-                <div class="stat" role="listitem"><strong>−44%</strong><span>RAG retrieval latency via embedding caching</span></div>
-            </div>
-        </section>
+        <main class="content" id="top">
+            <!-- ============ INTRO ============ -->
+            <section id="intro" class="intro">
+                <canvas id="heroCanvas" aria-hidden="true"></canvas>
+                <div class="intro-inner">
+                    <p class="intro-eyebrow">M.S. AI/ML · UW–Madison · graduating May 2026</p>
+                    <h1>I build calibrated probabilistic models and LLM agent systems <span class="acc">you can actually run.</span></h1>
+                    <p class="intro-lead">Most portfolios tell you about the models. This one lets you run them — every demo below is powered by my real model outputs, live in your browser.</p>
+                    <div class="hero-actions">
+                        <a href="#lab" class="btn primary">Run my models</a>
+                        <a href="mailto:ajeenckyam@gmail.com" class="btn secondary">Get in touch</a>
+                    </div>
+                    <div class="stat-strip" role="list">
+                        <div class="stat" role="listitem"><strong>0.176</strong><span>Brier score (26.7% better than baseline)</span></div>
+                        <div class="stat" role="listitem"><strong>7.5×</strong><span>lower latency than LangChain (own agent loop)</span></div>
+                        <div class="stat" role="listitem"><strong>94%</strong><span>task completion, self-improving agent (Tau Bench)</span></div>
+                        <div class="stat" role="listitem"><strong>−44%</strong><span>RAG retrieval latency via embedding caching</span></div>
+                    </div>
+                </div>
+            </section>
 
         <!-- ============ THE LAB ============ -->
         <section id="lab" class="section">
@@ -614,7 +605,8 @@
                 </div>
             </div>
         </section>
-    </main>
+        </main>
+    </div>
 
     <footer class="site-footer mono">
         <p>© 2026 Ajeenckya Mahadik · Every chart on this page is generated in your browser from real outputs of models I built. No screenshots, no mockups.</p>
@@ -627,5 +619,25 @@
     <script src="js/demos.js"></script>
     <script src="js/live.js"></script>
     <script src="js/main.js"></script>
+    <script>
+    (function () {
+      const links = Array.from(document.querySelectorAll(".side-nav a"));
+      const sections = links
+        .map((l) => document.getElementById(l.getAttribute("href").slice(1)))
+        .filter(Boolean);
+      function onScroll() {
+        let current = null;
+        sections.forEach((s) => {
+          if (s.getBoundingClientRect().top <= 160) current = s.id;
+        });
+        links.forEach((l) =>
+          l.classList.toggle("active", l.getAttribute("href") === "#" + current)
+        );
+      }
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll, { passive: true });
+      onScroll();
+    })();
+    </script>
 </body>
 </html>
