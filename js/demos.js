@@ -1867,7 +1867,29 @@ function renderReality() {
   const group = results.filter((r) => r.r <= 3 && PRED_BY_PAIR[matchKey(r.h, r.a)]);
   const kos = results.filter((r) => r.r >= 4);
 
-  if (!group.length && !kos.length) {
+  // model's live knockout picks (current stage) from the tournament-sim block
+  const KO_PICK = {};
+  try {
+    const kb = (typeof LIVE_CUP !== "undefined" && LIVE_CUP.knockout) ? (LIVE_CUP.knockout.matches || []) : [];
+    kb.forEach((m) => {
+      const rec = { pick: m.pick, p: Math.max(m.p_home || 0, m.p_away || 0),
+        winner: m.actual_winner || null,
+        correct: (typeof m.correct === "boolean") ? m.correct : null };
+      KO_PICK[matchKey(m.home, m.away)] = rec;
+      KO_PICK[matchKey(m.away, m.home)] = rec;
+    });
+  } catch (e) {}
+
+  // a knockout result joins the graded set only when the model has a live pick for it
+  const koGraded = [], koUntracked = [];
+  kos.forEach((r) => {
+    const pk = KO_PICK[matchKey(r.h, r.a)];
+    const winner = r.hs > r.as ? r.h : r.hs < r.as ? r.a : (pk && pk.winner);
+    if (pk && pk.pick && (winner || pk.correct !== null)) koGraded.push({ r, pk, winner });
+    else koUntracked.push(r);
+  });
+
+  if (!group.length && !koGraded.length && !koUntracked.length) {
     statsEl.innerHTML = "";
     board.innerHTML = `<div class="sb-empty">⏳ No final scores published yet.<br/>
       <span class="mono" style="font-size:.72rem;color:#5b6880">${LIVE_RESULTS !== null
@@ -1877,19 +1899,16 @@ function renderReality() {
     return;
   }
 
-  let hits = 0, brierSum = 0;
+  let hits = 0, koHits = 0;
   const rows = group.map((r) => {
     const ref = PRED_BY_PAIR[matchKey(r.h, r.a)];
     const m = WC_MATCHES[ref.i];
     // ensemble probs in the orientation of the REAL result row
     const p = ref.flip ? [m.ens[2], m.ens[1], m.ens[0]] : m.ens.slice();
     const outcome = r.hs > r.as ? 0 : r.hs === r.as ? 1 : 2;
-    const y = [0, 0, 0]; y[outcome] = 1;
-    const brier = p.reduce((s, pi, k) => s + (pi - y[k]) ** 2, 0);
     const pickIdx = p.indexOf(Math.max(...p));
     const hit = pickIdx === outcome;
     if (hit) hits++;
-    brierSum += brier;
     const pickName = pickIdx === 0 ? r.h : pickIdx === 2 ? r.a : "Draw";
     return `<div class="sb-row ${hit ? "hit" : "miss"}">
       <span class="sb-date">${r.date ? r.date.slice(5) : ""}<br/>grp</span>
@@ -1899,21 +1918,41 @@ function renderReality() {
         <span class="sb-pred">picked ${pickName} @ ${pct(Math.max(...p), 0)}</span>
       </span>
       <span class="sb-team right"><span class="tname">${r.a}</span><span class="flag">${flag(r.a)}</span></span>
-      <span class="sb-verdict">${hit ? '<span class="v-hit">✓ HIT</span>' : '<span class="v-miss">✗ MISS</span>'}<span class="v-brier">brier ${brier.toFixed(3)}</span></span>
+      <span class="sb-verdict">${hit ? '<span class="v-hit">✓ HIT</span>' : '<span class="v-miss">✗ MISS</span>'}</span>
     </div>`;
   });
 
-  const n = group.length;
+  // knockout rows — graded on the model's LIVE pick (2-way advance), tagged so they
+  // are never confused with the locked, pre-tournament group-stage predictions
+  const koRows = koGraded.map(({ r, pk, winner }) => {
+    const hit = (pk.correct !== null) ? pk.correct : (pk.pick === winner);
+    if (hit) koHits++;
+    const drew = r.hs === r.as;
+    const tag = ROUND_LABEL[r.r] || "KO";
+    return `<div class="sb-row ko-row ${hit ? "hit" : "miss"}">
+      <span class="sb-date">${r.date ? r.date.slice(5) : ""}<br/>${tag.toLowerCase()}</span>
+      <span class="sb-team"><span class="flag">${flag(r.h)}</span><span class="tname">${r.h}</span></span>
+      <span class="sb-mid">
+        <span class="sb-score">${r.hs} – ${r.as}${drew ? " (pens/ET)" : ""}</span>
+        <span class="sb-pred">live pick ${pk.pick} @ ${pct(pk.p, 0)}</span>
+      </span>
+      <span class="sb-team right"><span class="tname">${r.a}</span><span class="flag">${flag(r.a)}</span></span>
+      <span class="sb-verdict">${hit ? '<span class="v-hit">✓ HIT</span>' : '<span class="v-miss">✗ MISS</span>'}</span>
+    </div>`;
+  });
+
+  const nGroup = group.length, nKo = koGraded.length, n = nGroup + nKo;
+  const totHits = hits + koHits;
   statsEl.innerHTML = n ? `
     <div class="rs-chip"><strong>${n}</strong><span>graded matches</span></div>
-    <div class="rs-chip ${hits / n >= 0.5 ? "good" : ""}"><strong>${pct(hits / n, 0)}</strong><span>pick accuracy (3-way)</span></div>
-    <div class="rs-chip ${brierSum / n < 0.667 ? "good" : ""}"><strong>${(brierSum / n).toFixed(3)}</strong><span>live Brier · 0.667 = guessing</span></div>
+    <div class="rs-chip ${totHits / n >= 0.5 ? "good" : ""}"><strong>${pct(totHits / n, 0)}</strong><span>pick accuracy</span></div>
+    ${nKo ? `<div class="rs-chip"><strong>${koHits}/${nKo}</strong><span>knockout picks (live)</span></div>` : ""}
     <div class="rs-chip"><strong>0.176</strong><span>backtest Brier (target)</span></div>` : "";
-  board.innerHTML = rows.join("");
+  board.innerHTML = rows.join("") + koRows.join("");
 
-  ko.innerHTML = kos.length ? `
-    <p class="ko-title">knockout tracker · outside the locked group-stage prediction set</p>
-    <div class="ko-list">${kos.map((r) =>
+  ko.innerHTML = koUntracked.length ? `
+    <p class="ko-title">knockout tracker · ties not in the graded set yet</p>
+    <div class="ko-list">${koUntracked.map((r) =>
       `<span class="ko-chip">${ROUND_LABEL[r.r] || "KO"} · ${flag(r.h)} ${r.hs}–${r.as} ${flag(r.a)} ${r.hs === r.as ? "(pens/ET)" : ""}</span>`).join("")}</div>` : "";
 }
 
