@@ -206,15 +206,15 @@
                         <p class="pane-explain">
                             The predictions on this page were locked in <strong>before the tournament</strong>.
                             From June 11, a GitHub Action pulls official results every 6 hours and this scoreboard
-                            grades every group-stage prediction automatically — accuracy, live Brier score, no excuses.
+                            grades every group-stage prediction automatically, and now scores the model's live knockout picks too — accuracy, no excuses.
                         </p>
                         <div class="reality-stats mono" id="realityStats"></div>
                         <div class="scoreboard" id="scoreboard"></div>
                         <div class="ko-tracker" id="koTracker"></div>
                         <p class="fine-print mono" id="realitySrc"></p>
                         <p class="fine-print">
-                            Brier score = mean squared error of the 3-way probabilities (lower is better; 0.667 = uniform guessing, my backtest = 0.176).
-                            Knockout fixtures aren't in the locked group-stage prediction set, so they're tracked as results only.
+                            Backtest Brier = 0.176 — mean squared error of the 3-way probabilities (lower is better; 0.667 = uniform guessing).
+                            Knockout ties are graded on the model's live tournament-sim pick (advance probability), shown separately from the locked, pre-tournament group-stage predictions.
                             Results source: fixturedownload.com, synced by .github/workflows/update-results.yml.
                         </p>
                     </div>
