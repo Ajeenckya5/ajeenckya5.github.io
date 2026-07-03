@@ -217,3 +217,4 @@ const LIVE_CUP = {"updated_at": "2026-07-03 13:49 UTC", "n_sims": 3000, "n_resul
   if (document.readyState !== "loading") _koInit();
   else document.addEventListener("DOMContentLoaded", _koInit);
 })();
+// redeploy nudge 2026-07-03 (recover stuck Pages deploy)
