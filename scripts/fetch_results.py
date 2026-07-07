@@ -8,9 +8,15 @@ Source: fixturedownload.com public JSON feed (no API key required).
 Usage:
     python scripts/fetch_results.py                 # fetch from the live feed
     python scripts/fetch_results.py --from-file f   # offline test with a saved feed
+
+NOTE: fixturedownload.com blocks plain urllib requests (HTTP 403), so the fetch
+uses curl (present on ubuntu-latest runners) and falls back to urllib with a
+browser User-Agent only if curl is unavailable.
 """
 
 import json
+import shutil
+import subprocess
 import sys
 import urllib.request
 from pathlib import Path
@@ -39,7 +45,26 @@ def norm(name: str) -> str:
 
 
 def fetch_feed() -> list:
-    req = urllib.request.Request(FEED_URL, headers={"User-Agent": "wc-results-bot/1.0"})
+    """Fetch the feed. curl first (fixturedownload 403s plain urllib), urllib fallback."""
+    if shutil.which("curl"):
+        try:
+            p = subprocess.run(
+                ["curl", "-sS", "--fail", "--max-time", "30",
+                 "-H", "User-Agent: Mozilla/5.0 (wc-results-bot)", FEED_URL],
+                capture_output=True, text=True, timeout=45,
+            )
+            if p.returncode == 0 and p.stdout.strip():
+                return json.loads(p.stdout)
+            sys.stderr.write(f"curl fetch failed (rc={p.returncode}): {p.stderr[:200]}\n")
+        except Exception as e:  # noqa: BLE001
+            sys.stderr.write(f"curl fetch error: {e}\n")
+    # Fallback: urllib with a browser User-Agent (bot/default UA gets 403).
+    req = urllib.request.Request(FEED_URL, headers={
+        "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                       "AppleWebKit/537.36 (KHTML, like Gecko) "
+                       "Chrome/120.0 Safari/537.36"),
+        "Accept": "application/json, text/plain, */*",
+    })
     with urllib.request.urlopen(req, timeout=30) as r:
         return json.loads(r.read().decode("utf-8"))
 
