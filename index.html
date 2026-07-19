@@ -198,14 +198,14 @@
                       </div>
 
                       <div style="margin-top:16px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel-2);padding:18px 20px">
-                        <p class="mono" style="margin:0 0 4px;font-size:.72rem;color:var(--accent)">HOW THE LOCKED PREDICTIONS SCORED</p>
-                        <p style="margin:0 0 16px;font-size:.82rem;color:var(--muted)">Every group-stage pick was locked before a ball was kicked, then graded automatically against official results.</p>
+                        <p class="mono" style="margin:0 0 4px;font-size:.72rem;color:var(--accent)">HOW THE PREDICTIONS SCORED &middot; GROUP + KNOCKOUT</p>
+                        <p style="margin:0 0 16px;font-size:.82rem;color:var(--muted)">Every pick graded against official results &mdash; the 72 group-stage calls locked before kickoff, plus 31 knockout calls the model made live as the bracket filled in.</p>
                         <div style="display:flex;flex-wrap:wrap;gap:12px">
-                          <div style="border:1px solid var(--line);border-radius:10px;padding:10px 16px;background:var(--panel);text-align:center;min-width:120px"><div class="mono" style="font-size:1.35rem;font-weight:700;color:var(--ink);line-height:1.1">72</div><div class="mono" style="font-size:.68rem;color:var(--dim);margin-top:3px">GROUP FIXTURES GRADED</div></div>
-                          <div style="border:1px solid var(--line);border-radius:10px;padding:10px 16px;background:var(--panel);text-align:center;min-width:120px"><div class="mono" style="font-size:1.35rem;font-weight:700;color:var(--green);line-height:1.1">54.2%</div><div class="mono" style="font-size:.68rem;color:var(--dim);margin-top:3px">PICK ACCURACY</div></div>
-                          <div style="border:1px solid var(--line);border-radius:10px;padding:10px 16px;background:var(--panel);text-align:center;min-width:120px"><div class="mono" style="font-size:1.35rem;font-weight:700;color:var(--ink);line-height:1.1">0.176</div><div class="mono" style="font-size:.68rem;color:var(--dim);margin-top:3px">BACKTEST BRIER</div></div>
+                          <div style="border:1px solid var(--line);border-radius:10px;padding:10px 16px;background:var(--panel);text-align:center;min-width:120px"><div class="mono" style="font-size:1.35rem;font-weight:700;color:var(--ink);line-height:1.1">103</div><div class="mono" style="font-size:.68rem;color:var(--dim);margin-top:3px">MATCHES GRADED</div></div>
+                          <div style="border:1px solid var(--line);border-radius:10px;padding:10px 16px;background:var(--panel);text-align:center;min-width:120px"><div class="mono" style="font-size:1.35rem;font-weight:700;color:var(--ink);line-height:1.1">63</div><div class="mono" style="font-size:.68rem;color:var(--dim);margin-top:3px">CORRECT PICKS</div></div>
+                          <div style="border:1px solid var(--line);border-radius:10px;padding:10px 16px;background:var(--panel);text-align:center;min-width:120px"><div class="mono" style="font-size:1.35rem;font-weight:700;color:var(--green);line-height:1.1">61%</div><div class="mono" style="font-size:.68rem;color:var(--dim);margin-top:3px">OVERALL ACCURACY</div></div>
                         </div>
-                        <p class="fine-print" style="margin-top:14px">Results source: fixturedownload.com. The pre-tournament group-stage picks landed <strong>54% correct across 72 fixtures</strong> &mdash; a 3-way home/draw/away call where chance is roughly 33%. The 0.176 figure is the cross-validated backtest Brier score (lower is better; 0.667 = uniform guessing).</p>
+                        <p class="fine-print" style="margin-top:14px"><strong>63 of 103 correct &mdash; 61% across the whole tournament</strong>: 39 of 72 in the group stage (54%) and 24 of 31 in the knockout bracket (77%), on a 3-way home/draw/away call where chance is roughly 33%. The 0.176 figure is the cross-validated backtest Brier score (lower is better; 0.667 = uniform guessing).</p>
                       </div>
 
                       <!-- ===== Knockout stage: the model's calls, graded ===== -->
