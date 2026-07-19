@@ -98,129 +98,116 @@
                         <div class="demo-tags mono"><span>PyTorch</span><span>Bayesian NN</span><span>XGBoost</span><span>Monte Carlo</span><span>FastAPI</span></div>
                     </div>
 
-                    <div class="tabs" role="tablist" aria-label="Forecaster demos">
-                        <button class="tab active" data-tab="cup" role="tab">🏆 Simulate the World Cup</button>
-                        <button class="tab" data-tab="match" role="tab">⚽ Match center</button>
-                        <button class="tab" data-tab="bnn" role="tab">🧠 Inside the model</button>
-                        <button class="tab" data-tab="reality" role="tab">📡 Model vs reality</button>
-                        <button class="tab" data-tab="live" role="tab">🔴 Live Cup</button>
-                    </div>
+                    <!-- ===== Season recap: the model's call, initial vs final ===== -->
+                    <div class="wc-recap">
 
-                    <!-- Tab: full World Cup simulation -->
-                    <div class="tab-pane active" id="pane-cup">
-                        <div class="cup-controls">
-                            <button class="btn primary" id="cupKickoffBtn">▶ Play the predicted World Cup</button>
-                            <button class="btn secondary" id="cupDetBtn">📊 The model's forecast</button>
-                            <button class="btn secondary" id="cupMcBtn">⚡ Run 5,000</button>
-                            <button class="btn ghost" id="cupResetBtn">Reset</button>
-                            <div class="cup-readout mono">
-                                <span><span class="readout-label">tournaments</span> <strong id="cupCount">0</strong></span>
-                                <span><span class="readout-label">last champion</span> <strong id="cupLast">—</strong></span>
-                            </div>
+                      <!-- verdict banner -->
+                      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:16px;padding:20px 22px;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(100deg,var(--accent-soft),transparent 72%)">
+                        <div style="flex:1;min-width:280px">
+                          <p class="mono" style="margin:0 0 8px;font-size:.7rem;letter-spacing:.06em;color:var(--dim)">WORLD CUP 2026 &middot; WHAT THE MODEL PREDICTED</p>
+                          <p style="margin:0;font-size:1.14rem;line-height:1.45;color:var(--ink);font-weight:600">
+                            The model opened the tournament backing <strong style="color:var(--muted)">&#127462;&#127479; Argentina</strong> as favourite &mdash; and ended it predicting <strong class="hl">&#127466;&#127480; Spain</strong> to lift the trophy.
+                          </p>
                         </div>
-                        <p class="pane-explain cup-note">
-                            Everything here is <strong>reproducible — same result on every click</strong>, because the model is fixed.
-                            <strong>▶ Play the predicted World Cup</strong> animates the model's representative tournament — groups, bracket,
-                            champion — from a fixed random seed, so it always ends the same way.
-                            <strong>📊 The model's forecast</strong> is the formal prediction: 5,000 seeded Monte Carlo futures aggregated into
-                            calibrated title probabilities, because a probabilistic model's answer is a <em>distribution</em>, not one name.
-                            <strong>⚡ Run 5,000</strong> re-runs everything with fresh dice — watch the numbers land on the official ◇ odds again.
-                        </p>
+                        <div style="text-align:center;font-family:var(--mono);white-space:nowrap">
+                          <div style="font-size:.66rem;color:var(--dim);letter-spacing:.05em">INITIAL &rarr; FINAL</div>
+                          <div style="font-size:1.35rem;font-weight:700;color:var(--ink);margin-top:2px">Argentina&nbsp;&rarr;&nbsp;<span style="color:var(--green)">Spain</span></div>
+                        </div>
+                      </div>
 
-                        <div class="wc-stage">
-                            <div class="wc-phase mono" id="wcPhase">group stage · 12 groups · 48 teams · fixtures from the real model</div>
-                            <div class="wc-groups" id="wcGroups"></div>
-                            <div class="wc-bracket-wrap" id="wcBracketWrap" hidden>
-                                <div class="wc-bracket" id="wcBracket"></div>
-                            </div>
-                            <div class="wc-champion" id="wcChampion" hidden></div>
+                      <!-- two-column: initial vs final -->
+                      <div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:16px">
+
+                        <div style="flex:1;min-width:300px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel-2);padding:18px 20px">
+                          <p class="mono" style="margin:0 0 4px;font-size:.72rem;color:var(--accent)">&#9312; INITIAL PREDICTION</p>
+                          <p style="margin:0 0 14px;font-size:.82rem;color:var(--muted)">Locked before kickoff &middot; 5,000 Monte&nbsp;Carlo tournament simulations &middot; June&nbsp;11</p>
+                          <p class="mono" style="margin:0 0 2px;font-size:.66rem;letter-spacing:.05em;color:var(--dim)">CHAMPION PROBABILITY &middot; TOP 5</p>
+                          <ol style="list-style:none;margin:0;padding:0;font-size:.9rem">
+                            <li style="display:flex;align-items:center;gap:9px;padding:5px 0;border-top:1px solid var(--line)">
+                              <span class="mono" style="color:var(--dim);font-size:.72rem;width:14px">1</span>
+                              <span style="width:20px;text-align:center">🇦🇷</span>
+                              <span style="min-width:78px;font-weight:500;color:var(--muted)">Argentina</span>
+                              <span style="flex:1;height:9px;border-radius:5px;background:#e7ecf2;overflow:hidden"><span style="display:block;width:100%;height:100%;background:var(--dim)"></span></span>
+                              <span class="mono" style="min-width:44px;text-align:right;color:var(--muted)">12.9%</span>
+                            </li>
+                            <li style="display:flex;align-items:center;gap:9px;padding:5px 0;border-top:1px solid var(--line)">
+                              <span class="mono" style="color:var(--dim);font-size:.72rem;width:14px">2</span>
+                              <span style="width:20px;text-align:center">🇵🇹</span>
+                              <span style="min-width:78px;font-weight:500;color:var(--muted)">Portugal</span>
+                              <span style="flex:1;height:9px;border-radius:5px;background:#e7ecf2;overflow:hidden"><span style="display:block;width:78%;height:100%;background:var(--dim)"></span></span>
+                              <span class="mono" style="min-width:44px;text-align:right;color:var(--muted)">10.0%</span>
+                            </li>
+                            <li style="display:flex;align-items:center;gap:9px;padding:5px 0;border-top:1px solid var(--line)">
+                              <span class="mono" style="color:var(--dim);font-size:.72rem;width:14px">3</span>
+                              <span style="width:20px;text-align:center">🇧🇷</span>
+                              <span style="min-width:78px;font-weight:500;color:var(--muted)">Brazil</span>
+                              <span style="flex:1;height:9px;border-radius:5px;background:#e7ecf2;overflow:hidden"><span style="display:block;width:75%;height:100%;background:var(--dim)"></span></span>
+                              <span class="mono" style="min-width:44px;text-align:right;color:var(--muted)">9.7%</span>
+                            </li>
+                            <li style="display:flex;align-items:center;gap:9px;padding:5px 0;border-top:1px solid var(--line)">
+                              <span class="mono" style="color:var(--dim);font-size:.72rem;width:14px">4</span>
+                              <span style="width:20px;text-align:center">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span>
+                              <span style="min-width:78px;font-weight:500;color:var(--muted)">England</span>
+                              <span style="flex:1;height:9px;border-radius:5px;background:#e7ecf2;overflow:hidden"><span style="display:block;width:68%;height:100%;background:var(--dim)"></span></span>
+                              <span class="mono" style="min-width:44px;text-align:right;color:var(--muted)">8.8%</span>
+                            </li>
+                            <li style="display:flex;align-items:center;gap:9px;padding:5px 0;border-top:1px solid var(--line)">
+                              <span class="mono" style="color:var(--dim);font-size:.72rem;width:14px">5</span>
+                              <span style="width:20px;text-align:center">🇪🇸</span>
+                              <span style="min-width:78px;font-weight:700;color:var(--ink)">Spain <span class="mono" style="font-size:.62rem;color:var(--green);border:1px solid var(--green);border-radius:5px;padding:0 5px;margin-left:6px">FINAL PICK</span></span>
+                              <span style="flex:1;height:9px;border-radius:5px;background:#e7ecf2;overflow:hidden"><span style="display:block;width:67%;height:100%;background:var(--green)"></span></span>
+                              <span class="mono" style="min-width:44px;text-align:right;color:var(--green);font-weight:700">8.6%</span>
+                            </li>
+                          </ol>
+                          <p style="margin:14px 0 0;font-size:.84rem;color:var(--muted)">Argentina led the field. <strong style="color:var(--ink)">Spain sat fifth</strong>, at 8.6%.</p>
                         </div>
 
-                        <div class="champ-board-wrap">
-                            <p class="mono bench-title">world champion probability · <span class="board-live">▮ live simulation</span> vs ◇ official 5,000-run distribution</p>
-                            <div id="champBoard" class="champ-board"></div>
+                        <div style="flex:1;min-width:300px;border:1px solid var(--green);border-radius:var(--radius);background:var(--green-soft);padding:18px 20px">
+                          <p class="mono" style="margin:0 0 4px;font-size:.72rem;color:var(--green)">&#9313; FINAL PREDICTION</p>
+                          <p style="margin:0 0 14px;font-size:.82rem;color:var(--muted)">After 103 real results fed back through the model &middot; July&nbsp;19</p>
+                          <p class="mono" style="margin:0 0 8px;font-size:.66rem;letter-spacing:.05em;color:var(--dim)">THE FINAL &middot; SPAIN vs ARGENTINA</p>
+                          <div style="display:flex;align-items:center;gap:10px;margin-bottom:7px">
+                            <span style="min-width:96px;font-weight:700;color:var(--ink)">&#127466;&#127480; Spain</span>
+                            <span style="flex:1;height:12px;border-radius:6px;background:#e7ecf2;overflow:hidden"><span style="display:block;width:81%;height:100%;background:var(--green)"></span></span>
+                            <span class="mono hl" style="min-width:46px;text-align:right">81%</span>
+                          </div>
+                          <div style="display:flex;align-items:center;gap:10px">
+                            <span style="min-width:96px;font-weight:600;color:var(--muted)">&#127462;&#127479; Argentina</span>
+                            <span style="flex:1;height:12px;border-radius:6px;background:#e7ecf2;overflow:hidden"><span style="display:block;width:19%;height:100%;background:var(--dim)"></span></span>
+                            <span class="mono" style="min-width:46px;text-align:right;color:var(--muted)">19%</span>
+                          </div>
+                          <p style="margin:14px 0 0;font-size:.84rem;color:var(--muted)">Most likely score <strong style="color:var(--ink)">1&ndash;0</strong>. Re-simulating the cup from the real results, <strong class="hl">Spain now leads the title race at 43.6%</strong>.</p>
                         </div>
-                        <p class="fine-print">Group results sample directly from the calibrated ensemble's real per-match probabilities. Knockout matchups use team strengths fitted to my official Monte Carlo run (◇); bracket pairings are approximated.</p>
-                    </div>
+                      </div>
 
-                    <!-- Tab: match center -->
-                    <div class="tab-pane" id="pane-match">
-                        <div class="pane-grid">
-                            <div class="pane-controls">
-                                <p class="pane-explain">
-                                    A broadcast-style match center for all 72 group fixtures — except the win probabilities
-                                    are the <strong>exact outputs</strong> of the three model variants: the standard network (SNN),
-                                    the Bayesian head (BNN), and the calibrated ensemble that blends them with XGBoost weather features.
-                                </p>
-                                <label class="mono select-label" for="matchSelect">fixture</label>
-                                <select id="matchSelect" class="match-select mono"></select>
-                                <label class="toggle">
-                                    <input type="checkbox" id="weatherToggle" checked />
-                                    <span class="toggle-track"></span>
-                                    <span class="toggle-label">XGBoost weather sub-model <strong id="weatherState">ON</strong></span>
-                                </label>
-                                <p class="fine-print" id="weatherNote"></p>
-                            </div>
-                            <div class="pane-viz match-viz">
-                                <div class="match-card" id="matchCard"></div>
-                                <div id="matchBars"></div>
-                                <div class="uncertainty-row" id="uncertaintyRow"></div>
-                            </div>
+                      <div style="margin-top:16px;border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px">
+                        <p class="mono" style="margin:0 0 12px;font-size:.66rem;letter-spacing:.05em;color:var(--dim)">HOW THE CALL MOVED</p>
+                        <div style="display:flex;flex-wrap:wrap;gap:14px">
+                          <div style="flex:1;min-width:210px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                            <span style="font-weight:700;color:var(--ink)">&#127466;&#127480; Spain</span>
+                            <span class="mono" style="color:var(--muted);font-size:.85rem">8.6% &rarr; 43.6%</span>
+                            <span class="mono hl" style="font-size:.85rem">&#9650; +35 pts</span>
+                          </div>
+                          <div style="flex:1;min-width:210px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                            <span style="font-weight:700;color:var(--ink)">&#127462;&#127479; Argentina</span>
+                            <span class="mono" style="color:var(--muted);font-size:.85rem">12.9% &rarr; 8.0%</span>
+                            <span class="mono" style="color:var(--red);font-size:.85rem">&#9660; &minus;5 pts</span>
+                          </div>
                         </div>
-                    </div>
+                        <p style="margin:12px 0 0;font-size:.84rem;color:var(--muted)">Both finalists came from the model's original top five &mdash; but as results landed and fed back through the network, it flipped which one it trusted to win it all.</p>
+                      </div>
 
-                    <!-- Tab: BNN / calibration -->
-                    <div class="tab-pane" id="pane-bnn">
-                        <div class="pane-grid">
-                            <div class="pane-controls">
-                                <p class="pane-explain">
-                                    A Bayesian neural network doesn't have fixed weights — it has <strong>distributions over weights</strong>.
-                                    Each forward pass samples a slightly different network. Hundreds of passes produce a <em>spread</em> of predictions:
-                                    that spread is the model telling you how much to trust it.
-                                </p>
-                                <label class="mono select-label" for="bnnSelect">fixture</label>
-                                <select id="bnnSelect" class="match-select mono"></select>
-                                <div class="control-row">
-                                    <button class="btn primary" id="bnnSampleBtn">▶ Sample 300 networks</button>
-                                </div>
-                                <div class="sim-readout mono">
-                                    <div><span class="readout-label">samples drawn</span><strong id="bnnCount">0</strong></div>
-                                    <div><span class="readout-label">mean P(win)</span><strong id="bnnMean">—</strong></div>
-                                    <div><span class="readout-label">±2σ interval</span><strong id="bnnCI">—</strong></div>
-                                </div>
-                                <p class="pane-explain small">
-                                    Calibration means: when the model says 70%, it should be right ~70% of the time.
-                                    Temperature scaling + the BNN head moved the Brier score from
-                                    <span class="mono">0.24</span> to <span class="mono hl">0.176</span> and recall to <span class="mono hl">84%</span>,
-                                    validated with k-fold CV and McNemar tests, with diagnostics logged to PostgreSQL.
-                                </p>
-                            </div>
-                            <div class="pane-viz">
-                                <canvas id="bnnChart" height="420"></canvas>
-                            </div>
+                      <div style="margin-top:16px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel-2);padding:18px 20px">
+                        <p class="mono" style="margin:0 0 4px;font-size:.72rem;color:var(--accent)">HOW THE LOCKED PREDICTIONS SCORED</p>
+                        <p style="margin:0 0 16px;font-size:.82rem;color:var(--muted)">Every group-stage pick was locked before a ball was kicked, then graded automatically against official results.</p>
+                        <div style="display:flex;flex-wrap:wrap;gap:12px">
+                          <div style="border:1px solid var(--line);border-radius:10px;padding:10px 16px;background:var(--panel);text-align:center;min-width:120px"><div class="mono" style="font-size:1.35rem;font-weight:700;color:var(--ink);line-height:1.1">72</div><div class="mono" style="font-size:.68rem;color:var(--dim);margin-top:3px">GROUP FIXTURES GRADED</div></div>
+                          <div style="border:1px solid var(--line);border-radius:10px;padding:10px 16px;background:var(--panel);text-align:center;min-width:120px"><div class="mono" style="font-size:1.35rem;font-weight:700;color:var(--green);line-height:1.1">54.2%</div><div class="mono" style="font-size:.68rem;color:var(--dim);margin-top:3px">PICK ACCURACY</div></div>
+                          <div style="border:1px solid var(--line);border-radius:10px;padding:10px 16px;background:var(--panel);text-align:center;min-width:120px"><div class="mono" style="font-size:1.35rem;font-weight:700;color:var(--ink);line-height:1.1">0.176</div><div class="mono" style="font-size:.68rem;color:var(--dim);margin-top:3px">BACKTEST BRIER</div></div>
                         </div>
-                    </div>
+                        <p class="fine-print" style="margin-top:14px">Results source: fixturedownload.com. The pre-tournament group-stage picks landed <strong>54% correct across 72 fixtures</strong> &mdash; a 3-way home/draw/away call where chance is roughly 33%. The 0.176 figure is the cross-validated backtest Brier score (lower is better; 0.667 = uniform guessing).</p>
+                      </div>
 
-                    <!-- Tab: model vs reality -->
-                    <div class="tab-pane" id="pane-reality">
-                        <p class="pane-explain">
-                            The predictions on this page were locked in <strong>before the tournament</strong>.
-                            From June 11, a GitHub Action pulls official results every 6 hours and this scoreboard
-                            grades every group-stage prediction automatically, and now scores the model's live knockout picks too — accuracy, no excuses.
-                        </p>
-                        <div class="reality-stats mono" id="realityStats"></div>
-                        <div class="scoreboard" id="scoreboard"></div>
-                        <div class="ko-tracker" id="koTracker"></div>
-                        <p class="fine-print mono" id="realitySrc"></p>
-                        <p class="fine-print">
-                            Backtest Brier = 0.176 — mean squared error of the 3-way probabilities (lower is better; 0.667 = uniform guessing).
-                            Knockout ties are graded on the model's live tournament-sim pick (advance probability), shown separately from the locked, pre-tournament group-stage predictions.
-                            Results source: fixturedownload.com, synced by .github/workflows/update-results.yml.
-                        </p>
-                    </div>
-
-                    <div class="tab-pane" id="pane-live">
-                        <div id="liveCupRoot"><p class="pane-explain">Loading live tournament data…</p></div>
                     </div>
 
                     <div class="domain-wrap">
@@ -242,16 +229,16 @@
                             <p>Football outcomes are low-count, high-variance events: a 3-way classification (home / draw / away) where even the best team loses often. The interesting challenge isn't predicting a winner — it's producing an <em>honest probability</em>, one you could bet on, plan inventory around, or price risk with. That's why the whole system is built around calibration rather than raw accuracy.</p>
 
                             <h4>Features</h4>
-                            <p>Each fixture is described by engineered team-pair features: rolling form and attack/defense rates with time-decay weighting (the same idea as EWMA in volatility modeling), ranking deltas, rest and travel context, and host advantage. On top of that sit two live signals: an NLP pipeline that pulls RSS news, scores sentiment per team and per key player, and folds it into the features — and a weather block (temperature, humidity, precipitation, wind, cloud cover, pressure) for the actual stadium and kickoff window, which you can toggle in the Match center to see its real effect per fixture.</p>
+                            <p>Each fixture is described by engineered team-pair features: rolling form and attack/defense rates with time-decay weighting (the same idea as EWMA in volatility modeling), ranking deltas, rest and travel context, and host advantage. On top of that sit two live signals: an NLP pipeline that pulls RSS news, scores sentiment per team and per key player, and folds it into the features — and a weather block (temperature, humidity, precipitation, wind, cloud cover, pressure) for the actual stadium and kickoff window, which measurably shifts the outcome probabilities per fixture.</p>
 
                             <h4>Architecture — three models, one ensemble</h4>
-                            <p><strong>SNN</strong>: a PyTorch policy-gradient neural network over the engineered features, trained with a policy-gradient objective and emitting a 3-way softmax. It's the fast, deterministic baseline — one forward pass, one answer. <strong>BNN</strong>: the same backbone extended with a Bayesian output head. Instead of fixed weights, the head learns weight <em>distributions</em>; at inference I draw hundreds of Monte Carlo weight samples, each producing a slightly different network and prediction. The spread of those predictions decomposes into total uncertainty (predictive entropy), epistemic uncertainty (mutual information — what the model doesn't know because it hasn't seen enough data) and the win-probability standard deviation you can watch being sampled in the "Inside the model" tab. <strong>XGBoost weather sub-model</strong>: a gradient-boosted tree model that learns how weather shifts outcomes, feeding the ensemble. The final <strong>calibrated ensemble</strong> blends SNN and BNN with the weather signal and applies temperature scaling so that "70%" means 70%. On top sits a <strong>Poisson scoreline layer</strong>: it inverts the calibrated win/draw/loss probabilities into goal rates (λ<sub>home</sub>, λ<sub>away</sub>) and reports the most likely scoreline consistent with the pick — score predictions are a pure function of the same probabilities, not a separate guess.</p>
+                            <p><strong>SNN</strong>: a PyTorch policy-gradient neural network over the engineered features, trained with a policy-gradient objective and emitting a 3-way softmax. It's the fast, deterministic baseline — one forward pass, one answer. <strong>BNN</strong>: the same backbone extended with a Bayesian output head. Instead of fixed weights, the head learns weight <em>distributions</em>; at inference I draw hundreds of Monte Carlo weight samples, each producing a slightly different network and prediction. The spread of those predictions decomposes into total uncertainty (predictive entropy), epistemic uncertainty (mutual information — what the model doesn't know because it hasn't seen enough data) and and the win-probability standard deviation produced by the Bayesian head. <strong>XGBoost weather sub-model</strong>: a gradient-boosted tree model that learns how weather shifts outcomes, feeding the ensemble. The final <strong>calibrated ensemble</strong> blends SNN and BNN with the weather signal and applies temperature scaling so that "70%" means 70%. On top sits a <strong>Poisson scoreline layer</strong>: it inverts the calibrated win/draw/loss probabilities into goal rates (λ<sub>home</sub>, λ<sub>away</sub>) and reports the most likely scoreline consistent with the pick — score predictions are a pure function of the same probabilities, not a separate guess.</p>
 
                             <h4>Training &amp; validation</h4>
                             <p>Validated with 5-fold cross-validation and historical backtests; every variant comparison (e.g. weather on vs off) goes through McNemar tests in an A/B framework, so a feature only survives if it helps beyond noise. Calibration diagnostics — reliability diagrams, expected calibration error, Brier decomposition — plus experiment metadata are logged to PostgreSQL. Results: Brier score 0.24 → <strong>0.176</strong> (−26.7% vs baseline), recall 84%, scenario variance −17%.</p>
 
                             <h4>The Monte Carlo tournament layer</h4>
-                            <p>Match probabilities become title odds by simulation: sample all 72 group fixtures from the ensemble's distributions, resolve standings (including the 8 best third-placed teams in the 48-team format), play the bracket to the final, repeat 5,000 times, and count champions. Uncertainty propagates from single matches all the way to the trophy — exactly what the simulator tab does in your browser with the same numbers.</p>
+                            <p>Match probabilities become title odds by simulation: sample all 72 group fixtures from the ensemble's distributions, resolve standings (including the 8 best third-placed teams in the 48-team format), play the bracket to the final, repeat 5,000 times, and count champions. Uncertainty propagates from single matches all the way to the trophy — exactly the machinery behind the title odds above.</p>
 
                             <h4>Serving &amp; feedback</h4>
                             <p>The real system runs behind FastAPI: REST endpoints for predictions, team data and result uploads, a post-match feedback loop that updates the model as results land, and the news pipeline refreshing sentiment features continuously. It's deployable software, not a notebook.</p>
@@ -617,7 +604,6 @@
     <script src="js/emails.js"></script>
     <script src="js/llm.js"></script>
     <script src="js/demos.js"></script>
-    <script src="js/live.js"></script>
     <script src="js/main.js"></script>
     <script>
     (function () {
